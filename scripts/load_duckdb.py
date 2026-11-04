@@ -394,6 +394,9 @@ def build_viewership(matcher: Matcher) -> tuple[list[dict], list[dict], list[dic
                 "viewers_within_network": (v["viewers_total"] if basis == "total"
                                            else v["viewers_main"]),
                 "viewers_basis": basis,
+                # A plain number with a simulcast listed: it may or may not include truTV.
+                "total_uncertain": (v["viewers_total"] is not None
+                                    and v["viewers_main"] is None),
                 "audience_scope": ("streaming_only" if network == "Netflix"
                                    else "tv_excl_streaming_addons"),
                 "listed_time_et": listed, "additional_networks": row["additional"] or None,
@@ -476,7 +479,8 @@ BROADCAST_TYPES = {
     "season": "INTEGER", "network": "VARCHAR", "listed_date": "DATE",
     "listed_time_et": "TIME", "additional_networks": "VARCHAR", "viewers_total": "INTEGER",
     "viewers_main": "INTEGER", "viewers_addon": "INTEGER", "addon_missing": "BOOLEAN",
-    "viewers_within_network": "INTEGER", "viewers_basis": "VARCHAR", "audience_scope": "VARCHAR",
+    "viewers_within_network": "INTEGER", "viewers_basis": "VARCHAR", "total_uncertain": "BOOLEAN",
+    "audience_scope": "VARCHAR",
     "measurement": "VARCHAR", "date_raw": "VARCHAR", "time_raw": "VARCHAR",
     "matchup_raw": "VARCHAR", "viewers_raw": "VARCHAR",
 }
@@ -514,6 +518,9 @@ VIEWER_COMMENTS = {
                               "only for comparisons within one network, and say when a value "
                               "is main_only. Never compare across networks.",
     "viewers_basis": "total or main_only: which number viewers_within_network holds.",
+    "total_uncertain": "TRUE when the source gives one number with no split, so it may not "
+                       "include the simulcast. Say the total is uncertain whenever using "
+                       "this row.",
     "audience_scope": "tv_excl_streaming_addons, or streaming_only for Netflix.",
     "measurement": "panel before 2025-09-01, then big_data_panel. Not like-for-like.",
 }
