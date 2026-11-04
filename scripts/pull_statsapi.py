@@ -5,6 +5,8 @@ Writes, per season:
   teams_{season}.json        team id, names, league, division
   attendance_{season}.json   the API's own season totals, one record per team
 
+For 2023 only teams and attendance are pulled: the team model uses it as prior-year crowd.
+
 Safe to re-run: games already in the jsonl file are skipped.
 
 Usage: uv run python scripts/pull_statsapi.py [--seasons 2024 2025 2026]
@@ -22,6 +24,7 @@ import httpx
 BASE = "https://statsapi.mlb.com"
 OUT = Path(__file__).resolve().parent.parent / "data" / "raw" / "statsapi"
 WORKERS = 8
+PRIOR_SEASON = 2023
 
 # Status values that mean the game was actually played. Do not use abstractGameState:
 # it reads "Final" for postponed and cancelled games too.
@@ -136,6 +139,7 @@ def main() -> None:
     limits = httpx.Limits(max_connections=WORKERS)
     headers = {"User-Agent": "mlb-deep-research-class-project"}
     with httpx.Client(timeout=30, limits=limits, headers=headers) as client:
+        pull_attendance(client, PRIOR_SEASON, pull_teams(client, PRIOR_SEASON))
         for season in args.seasons:
             teams = pull_teams(client, season)
             pull_attendance(client, season, teams)

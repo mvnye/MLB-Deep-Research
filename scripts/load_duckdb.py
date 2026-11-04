@@ -63,6 +63,9 @@ SPECIAL_VENUES = {
     "Field of Dreams": "Field of Dreams",
     "Las Vegas Ballpark": "Athletics in Las Vegas",
 }
+# The A's final homestand before leaving Oakland, 9/20 to 9/26/2024.
+FAREWELL_GAMES = {pk: "Athletics farewell to Oakland"
+                  for pk in (745606, 745610, 745608, 745605, 745607, 745609)}
 TEMPORARY_PARKS = {"George M. Steinbrenner Field", "Sutter Health Park"}
 RAYS_ID = 139
 CAPACITY_OVERRIDES = ROOT / "data" / "capacity_overrides.csv"
@@ -78,7 +81,9 @@ def load_jsonl(season: int) -> list[dict]:
         return [json.loads(line) for line in f]
 
 
-def special_event(venue: str, home_id: int) -> str | None:
+def special_event(game_pk: int, venue: str, home_id: int) -> str | None:
+    if game_pk in FAREWELL_GAMES:
+        return FAREWELL_GAMES[game_pk]
     if venue == "Tropicana Field" and home_id != RAYS_ID:
         return "Neutral site at Tropicana Field"
     return SPECIAL_VENUES.get(venue)
@@ -145,7 +150,7 @@ def game_row(raw: dict) -> dict:
         "resumed_from": s.get("resumedFromDate"),
         "series_game_number": s.get("seriesGameNumber"),
         "games_in_series": s.get("gamesInSeries"),
-        "special_event": special_event(s["venue"]["name"], home["team"]["id"]),
+        "special_event": special_event(s["gamePk"], s["venue"]["name"], home["team"]["id"]),
         "temporary_park": s["venue"]["name"] in TEMPORARY_PARKS,
     }
 
@@ -168,6 +173,19 @@ def add_pregame_records(games: list[dict]) -> None:
             if rec != [g[f"{side}_wins_after"], g[f"{side}_losses_after"]]:
                 mismatches += 1
     print(f"pre-game records: {mismatches} team-games differ from the API's post-game record")
+
+
+def add_home_openers(games: list[dict]) -> None:
+    """Flag each team's first home game of the season, skipping special events.
+
+    Uses the schedule, not the description text, which misses some openers.
+    """
+    seen = set()
+    for g in sorted(games, key=lambda g: (g["official_date"], g["game_number"])):
+        key = (g["season"], g["home_team_id"])
+        g["home_opener"] = g["special_event"] is None and key not in seen
+        if g["home_opener"]:
+            seen.add(key)
 
 
 def add_shared_gates(games: list[dict]) -> None:
@@ -473,7 +491,7 @@ GAME_TYPES = {
     "home_probable_pitcher": "VARCHAR", "away_probable_pitcher": "VARCHAR",
     "description": "VARCHAR", "rescheduled_from": "DATE", "resumed_from": "DATE",
     "series_game_number": "INTEGER", "games_in_series": "INTEGER",
-    "special_event": "VARCHAR", "temporary_park": "BOOLEAN",
+    "special_event": "VARCHAR", "temporary_park": "BOOLEAN", "home_opener": "BOOLEAN",
 }
 BROADCAST_TYPES = {
     "season": "INTEGER", "network": "VARCHAR", "listed_date": "DATE",
@@ -561,6 +579,7 @@ def main() -> None:
 
     override_rows, overrides = read_capacity_overrides()
     add_pregame_records(games)
+    add_home_openers(games)
     add_shared_gates(games)
     add_fill_rates(games, overrides)
 

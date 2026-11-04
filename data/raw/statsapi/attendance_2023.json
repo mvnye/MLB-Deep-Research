@@ -1,0 +1,1442 @@
+[
+ {
+  "team_id": 133,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 26712,
+  "attendanceAverageHome": 10276,
+  "attendanceAverageYtd": 18494,
+  "attendanceHigh": 37553,
+  "attendanceHighDate": "2023-08-05T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717117,
+   "link": "/api/v1.1/game/717117/feed/live",
+   "content": {
+    "link": "/api/v1/game/717117/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2064,
+  "attendanceLowDate": "2023-05-15T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718160,
+   "link": "/api/v1.1/game/718160/feed/live",
+   "content": {
+    "link": "/api/v1/game/718160/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 10276,
+  "attendanceTotal": 2996019,
+  "attendanceTotalAway": 2163667,
+  "attendanceTotalHome": 832352,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 133,
+   "name": "Oakland Athletics",
+   "link": "/api/v1/teams/133"
+  }
+ },
+ {
+  "team_id": 134,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 29919,
+  "attendanceAverageHome": 20131,
+  "attendanceAverageYtd": 25025,
+  "attendanceHigh": 39167,
+  "attendanceHighDate": "2023-04-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718679,
+   "link": "/api/v1.1/game/718679/feed/live",
+   "content": {
+    "link": "/api/v1/game/718679/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8594,
+  "attendanceLowDate": "2023-09-06T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716697,
+   "link": "/api/v1.1/game/716697/feed/live",
+   "content": {
+    "link": "/api/v1/game/716697/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 20131,
+  "attendanceTotal": 4054098,
+  "attendanceTotalAway": 2423474,
+  "attendanceTotalHome": 1630624,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 134,
+   "name": "Pittsburgh Pirates",
+   "link": "/api/v1/teams/134"
+  }
+ },
+ {
+  "team_id": 135,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 31552,
+  "attendanceAverageHome": 40390,
+  "attendanceAverageYtd": 35971,
+  "attendanceHigh": 45116,
+  "attendanceHighDate": "2023-05-05T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718295,
+   "link": "/api/v1.1/game/718295/feed/live",
+   "content": {
+    "link": "/api/v1/game/718295/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 19611,
+  "attendanceLowDate": "2023-04-29T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718384,
+   "link": "/api/v1.1/game/718384/feed/live",
+   "content": {
+    "link": "/api/v1/game/718384/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 40390,
+  "attendanceTotal": 5827298,
+  "attendanceTotalAway": 2555744,
+  "attendanceTotalHome": 3271554,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 135,
+   "name": "San Diego Padres",
+   "link": "/api/v1/teams/135"
+  }
+ },
+ {
+  "team_id": 136,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 28250,
+  "attendanceAverageHome": 33215,
+  "attendanceAverageYtd": 30733,
+  "attendanceHigh": 45823,
+  "attendanceHighDate": "2023-08-12T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717018,
+   "link": "/api/v1.1/game/717018/feed/live",
+   "content": {
+    "link": "/api/v1/game/717018/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 14276,
+  "attendanceLowDate": "2023-04-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718534,
+   "link": "/api/v1.1/game/718534/feed/live",
+   "content": {
+    "link": "/api/v1/game/718534/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 33215,
+  "attendanceTotal": 4978691,
+  "attendanceTotalAway": 2288273,
+  "attendanceTotalHome": 2690418,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 136,
+   "name": "Seattle Mariners",
+   "link": "/api/v1/teams/136"
+  }
+ },
+ {
+  "team_id": 137,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 31363,
+  "attendanceAverageHome": 30866,
+  "attendanceAverageYtd": 31114,
+  "attendanceHigh": 40711,
+  "attendanceHighDate": "2023-04-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718680,
+   "link": "/api/v1.1/game/718680/feed/live",
+   "content": {
+    "link": "/api/v1/game/718680/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20203,
+  "attendanceLowDate": "2023-04-24T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718446,
+   "link": "/api/v1.1/game/718446/feed/live",
+   "content": {
+    "link": "/api/v1/game/718446/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 30866,
+  "attendanceTotal": 5040535,
+  "attendanceTotalAway": 2540382,
+  "attendanceTotalHome": 2500153,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 137,
+   "name": "San Francisco Giants",
+   "link": "/api/v1/teams/137"
+  }
+ },
+ {
+  "team_id": 138,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 83,
+  "year": "2023",
+  "attendanceAverageAway": 28139,
+  "attendanceAverageHome": 40013,
+  "attendanceAverageYtd": 34076,
+  "attendanceHigh": 55565,
+  "attendanceHighDate": "2023-06-25T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717623,
+   "link": "/api/v1.1/game/717623/feed/live",
+   "content": {
+    "link": "/api/v1/game/717623/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 32528,
+  "attendanceLowDate": "2023-08-15T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716984,
+   "link": "/api/v1.1/game/716984/feed/live",
+   "content": {
+    "link": "/api/v1/game/716984/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 40013,
+  "attendanceTotal": 5520330,
+  "attendanceTotalAway": 2279239,
+  "attendanceTotalHome": 3241091,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 138,
+   "name": "St. Louis Cardinals",
+   "link": "/api/v1/teams/138"
+  }
+ },
+ {
+  "team_id": 139,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 28076,
+  "attendanceAverageHome": 17781,
+  "attendanceAverageYtd": 22929,
+  "attendanceHigh": 32142,
+  "attendanceHighDate": "2023-05-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718271,
+   "link": "/api/v1.1/game/718271/feed/live",
+   "content": {
+    "link": "/api/v1/game/718271/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8699,
+  "attendanceLowDate": "2023-05-24T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718044,
+   "link": "/api/v1.1/game/718044/feed/live",
+   "content": {
+    "link": "/api/v1/game/718044/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 17781,
+  "attendanceTotal": 3714445,
+  "attendanceTotalAway": 2274144,
+  "attendanceTotalHome": 1440301,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 139,
+   "name": "Tampa Bay Rays",
+   "link": "/api/v1/teams/139"
+  }
+ },
+ {
+  "team_id": 140,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 25922,
+  "attendanceAverageHome": 31272,
+  "attendanceAverageYtd": 28597,
+  "attendanceHigh": 40738,
+  "attendanceHighDate": "2023-07-22T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717305,
+   "link": "/api/v1.1/game/717305/feed/live",
+   "content": {
+    "link": "/api/v1/game/717305/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15867,
+  "attendanceLowDate": "2023-04-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718726,
+   "link": "/api/v1.1/game/718726/feed/live",
+   "content": {
+    "link": "/api/v1/game/718726/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31272,
+  "attendanceTotal": 4632764,
+  "attendanceTotalAway": 2099720,
+  "attendanceTotalHome": 2533044,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 140,
+   "name": "Texas Rangers",
+   "link": "/api/v1/teams/140"
+  }
+ },
+ {
+  "team_id": 141,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 28851,
+  "attendanceAverageHome": 37307,
+  "attendanceAverageYtd": 33106,
+  "attendanceHigh": 43196,
+  "attendanceHighDate": "2023-07-20T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717331,
+   "link": "/api/v1.1/game/717331/feed/live",
+   "content": {
+    "link": "/api/v1/game/717331/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 23451,
+  "attendanceLowDate": "2023-09-11T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716630,
+   "link": "/api/v1.1/game/716630/feed/live",
+   "content": {
+    "link": "/api/v1/game/716630/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 37307,
+  "attendanceTotal": 5329988,
+  "attendanceTotalAway": 2308084,
+  "attendanceTotalHome": 3021904,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 141,
+   "name": "Toronto Blue Jays",
+   "link": "/api/v1/teams/141"
+  }
+ },
+ {
+  "team_id": 142,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 27249,
+  "attendanceAverageHome": 24372,
+  "attendanceAverageYtd": 25810,
+  "attendanceHigh": 38465,
+  "attendanceHighDate": "2023-04-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718684,
+   "link": "/api/v1.1/game/718684/feed/live",
+   "content": {
+    "link": "/api/v1/game/718684/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11754,
+  "attendanceLowDate": "2023-04-28T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718387,
+   "link": "/api/v1.1/game/718387/feed/live",
+   "content": {
+    "link": "/api/v1/game/718387/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24372,
+  "attendanceTotal": 4181300,
+  "attendanceTotalAway": 2207176,
+  "attendanceTotalHome": 1974124,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 142,
+   "name": "Minnesota Twins",
+   "link": "/api/v1/teams/142"
+  }
+ },
+ {
+  "team_id": 143,
+  "season": 2023,
+  "openingsTotal": 159,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 168,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 85,
+  "year": "2023",
+  "attendanceAverageAway": 30349,
+  "attendanceAverageHome": 38158,
+  "attendanceAverageYtd": 34278,
+  "attendanceHigh": 44669,
+  "attendanceHighDate": "2023-05-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718270,
+   "link": "/api/v1.1/game/718270/feed/live",
+   "content": {
+    "link": "/api/v1/game/718270/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 27025,
+  "attendanceLowDate": "2023-08-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 717082,
+   "link": "/api/v1.1/game/717082/feed/live",
+   "content": {
+    "link": "/api/v1/game/717082/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 37654,
+  "attendanceTotal": 5450147,
+  "attendanceTotalAway": 2397542,
+  "attendanceTotalHome": 3052605,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 143,
+   "name": "Philadelphia Phillies",
+   "link": "/api/v1/teams/143"
+  }
+ },
+ {
+  "team_id": 144,
+  "season": 2023,
+  "openingsTotal": 160,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 86,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 29991,
+  "attendanceAverageHome": 39401,
+  "attendanceAverageYtd": 34755,
+  "attendanceHigh": 43344,
+  "attendanceHighDate": "2023-07-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717395,
+   "link": "/api/v1.1/game/717395/feed/live",
+   "content": {
+    "link": "/api/v1/game/717395/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 28241,
+  "attendanceLowDate": "2023-04-24T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718443,
+   "link": "/api/v1.1/game/718443/feed/live",
+   "content": {
+    "link": "/api/v1/game/718443/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 39401,
+  "attendanceTotal": 5560785,
+  "attendanceTotalAway": 2369280,
+  "attendanceTotalHome": 3191505,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 144,
+   "name": "Atlanta Braves",
+   "link": "/api/v1/teams/144"
+  }
+ },
+ {
+  "team_id": 145,
+  "season": 2023,
+  "openingsTotal": 158,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 78,
+  "openingsTotalLost": 3,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 85,
+  "year": "2023",
+  "attendanceAverageAway": 27598,
+  "attendanceAverageHome": 21405,
+  "attendanceAverageYtd": 24541,
+  "attendanceHigh": 37214,
+  "attendanceHighDate": "2023-07-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717240,
+   "link": "/api/v1.1/game/717240/feed/live",
+   "content": {
+    "link": "/api/v1/game/717240/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10149,
+  "attendanceLowDate": "2023-04-18T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718525,
+   "link": "/api/v1.1/game/718525/feed/live",
+   "content": {
+    "link": "/api/v1/game/718525/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 20795,
+  "attendanceTotal": 3877486,
+  "attendanceTotalAway": 2207858,
+  "attendanceTotalHome": 1669628,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 145,
+   "name": "Chicago White Sox",
+   "link": "/api/v1/teams/145"
+  }
+ },
+ {
+  "team_id": 146,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 85,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 29162,
+  "attendanceAverageHome": 14356,
+  "attendanceAverageYtd": 21713,
+  "attendanceHigh": 35043,
+  "attendanceHighDate": "2023-08-13T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717011,
+   "link": "/api/v1.1/game/717011/feed/live",
+   "content": {
+    "link": "/api/v1/game/717011/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 7232,
+  "attendanceLowDate": "2023-06-05T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 717887,
+   "link": "/api/v1.1/game/717887/feed/live",
+   "content": {
+    "link": "/api/v1/game/717887/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 14356,
+  "attendanceTotal": 3495753,
+  "attendanceTotalAway": 2332934,
+  "attendanceTotalHome": 1162819,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 146,
+   "name": "Miami Marlins",
+   "link": "/api/v1/teams/146"
+  }
+ },
+ {
+  "team_id": 147,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 169,
+  "gamesAwayTotal": 86,
+  "gamesHomeTotal": 83,
+  "year": "2023",
+  "attendanceAverageAway": 32573,
+  "attendanceAverageHome": 40863,
+  "attendanceAverageYtd": 36692,
+  "attendanceHigh": 47295,
+  "attendanceHighDate": "2023-05-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717995,
+   "link": "/api/v1.1/game/717995/feed/live",
+   "content": {
+    "link": "/api/v1/game/717995/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 30673,
+  "attendanceLowDate": "2023-06-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 717848,
+   "link": "/api/v1.1/game/717848/feed/live",
+   "content": {
+    "link": "/api/v1/game/717848/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 40354,
+  "attendanceTotal": 5907448,
+  "attendanceTotalAway": 2638432,
+  "attendanceTotalHome": 3269016,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 147,
+   "name": "New York Yankees",
+   "link": "/api/v1/teams/147"
+  }
+ },
+ {
+  "team_id": 158,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 30340,
+  "attendanceAverageHome": 31498,
+  "attendanceAverageYtd": 30919,
+  "attendanceHigh": 43209,
+  "attendanceHighDate": "2023-07-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717511,
+   "link": "/api/v1.1/game/717511/feed/live",
+   "content": {
+    "link": "/api/v1/game/717511/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18387,
+  "attendanceLowDate": "2023-04-05T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718698,
+   "link": "/api/v1.1/game/718698/feed/live",
+   "content": {
+    "link": "/api/v1/game/718698/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31498,
+  "attendanceTotal": 5008927,
+  "attendanceTotalAway": 2457580,
+  "attendanceTotalHome": 2551347,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 158,
+   "name": "Milwaukee Brewers",
+   "link": "/api/v1/teams/158"
+  }
+ },
+ {
+  "team_id": 108,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 31402,
+  "attendanceAverageHome": 32600,
+  "attendanceAverageYtd": 32005,
+  "attendanceHigh": 44760,
+  "attendanceHighDate": "2023-06-21T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717662,
+   "link": "/api/v1.1/game/717662/feed/live",
+   "content": {
+    "link": "/api/v1/game/717662/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 17780,
+  "attendanceLowDate": "2023-04-12T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718602,
+   "link": "/api/v1.1/game/718602/feed/live",
+   "content": {
+    "link": "/api/v1/game/718602/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32600,
+  "attendanceTotal": 5152769,
+  "attendanceTotalAway": 2512194,
+  "attendanceTotalHome": 2640575,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 108,
+   "name": "Los Angeles Angels",
+   "link": "/api/v1/teams/108"
+  }
+ },
+ {
+  "team_id": 109,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 30561,
+  "attendanceAverageHome": 24212,
+  "attendanceAverageYtd": 27386,
+  "attendanceHigh": 48034,
+  "attendanceHighDate": "2023-04-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718683,
+   "link": "/api/v1.1/game/718683/feed/live",
+   "content": {
+    "link": "/api/v1/game/718683/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9071,
+  "attendanceLowDate": "2023-05-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718249,
+   "link": "/api/v1.1/game/718249/feed/live",
+   "content": {
+    "link": "/api/v1/game/718249/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24212,
+  "attendanceTotal": 4436610,
+  "attendanceTotalAway": 2475428,
+  "attendanceTotalHome": 1961182,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 109,
+   "name": "Arizona Diamondbacks",
+   "link": "/api/v1/teams/109"
+  }
+ },
+ {
+  "team_id": 110,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 29420,
+  "attendanceAverageHome": 23911,
+  "attendanceAverageYtd": 26666,
+  "attendanceHigh": 45017,
+  "attendanceHighDate": "2023-04-07T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718688,
+   "link": "/api/v1.1/game/718688/feed/live",
+   "content": {
+    "link": "/api/v1/game/718688/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9322,
+  "attendanceLowDate": "2023-04-10T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718635,
+   "link": "/api/v1.1/game/718635/feed/live",
+   "content": {
+    "link": "/api/v1/game/718635/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 23911,
+  "attendanceTotal": 4319840,
+  "attendanceTotalAway": 2383042,
+  "attendanceTotalHome": 1936798,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 110,
+   "name": "Baltimore Orioles",
+   "link": "/api/v1/teams/110"
+  }
+ },
+ {
+  "team_id": 111,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 86,
+  "year": "2023",
+  "attendanceAverageAway": 29547,
+  "attendanceAverageHome": 32989,
+  "attendanceAverageYtd": 31268,
+  "attendanceHigh": 37457,
+  "attendanceHighDate": "2023-07-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717242,
+   "link": "/api/v1.1/game/717242/feed/live",
+   "content": {
+    "link": "/api/v1/game/717242/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 24477,
+  "attendanceLowDate": "2023-04-05T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718702,
+   "link": "/api/v1.1/game/718702/feed/live",
+   "content": {
+    "link": "/api/v1/game/718702/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32989,
+  "attendanceTotal": 5065408,
+  "attendanceTotalAway": 2393278,
+  "attendanceTotalHome": 2672130,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 111,
+   "name": "Boston Red Sox",
+   "link": "/api/v1/teams/111"
+  }
+ },
+ {
+  "team_id": 112,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 32723,
+  "attendanceAverageHome": 34261,
+  "attendanceAverageYtd": 33492,
+  "attendanceHigh": 40869,
+  "attendanceHighDate": "2023-08-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 716968,
+   "link": "/api/v1.1/game/716968/feed/live",
+   "content": {
+    "link": "/api/v1/game/716968/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 26588,
+  "attendanceLowDate": "2023-04-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718406,
+   "link": "/api/v1.1/game/718406/feed/live",
+   "content": {
+    "link": "/api/v1/game/718406/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 34261,
+  "attendanceTotal": 5425714,
+  "attendanceTotalAway": 2650565,
+  "attendanceTotalHome": 2775149,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 112,
+   "name": "Chicago Cubs",
+   "link": "/api/v1/teams/112"
+  }
+ },
+ {
+  "team_id": 113,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 83,
+  "year": "2023",
+  "attendanceAverageAway": 28641,
+  "attendanceAverageHome": 25164,
+  "attendanceAverageYtd": 26903,
+  "attendanceHigh": 44073,
+  "attendanceHighDate": "2023-06-02T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717931,
+   "link": "/api/v1.1/game/717931/feed/live",
+   "content": {
+    "link": "/api/v1/game/717931/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 7375,
+  "attendanceLowDate": "2023-04-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718542,
+   "link": "/api/v1.1/game/718542/feed/live",
+   "content": {
+    "link": "/api/v1/game/718542/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 25164,
+  "attendanceTotal": 4358227,
+  "attendanceTotalAway": 2319925,
+  "attendanceTotalHome": 2038302,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 113,
+   "name": "Cincinnati Reds",
+   "link": "/api/v1/teams/113"
+  }
+ },
+ {
+  "team_id": 114,
+  "season": 2023,
+  "openingsTotal": 158,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 78,
+  "openingsTotalLost": 3,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 84,
+  "year": "2023",
+  "attendanceAverageAway": 26438,
+  "attendanceAverageHome": 23514,
+  "attendanceAverageYtd": 24995,
+  "attendanceHigh": 38260,
+  "attendanceHighDate": "2023-07-21T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717315,
+   "link": "/api/v1.1/game/717315/feed/live",
+   "content": {
+    "link": "/api/v1/game/717315/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9258,
+  "attendanceLowDate": "2023-04-22T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718473,
+   "link": "/api/v1.1/game/718473/feed/live",
+   "content": {
+    "link": "/api/v1/game/718473/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 22924,
+  "attendanceTotal": 3949144,
+  "attendanceTotalAway": 2115076,
+  "attendanceTotalHome": 1834068,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 114,
+   "name": "Cleveland Guardians",
+   "link": "/api/v1/teams/114"
+  }
+ },
+ {
+  "team_id": 115,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 29608,
+  "attendanceAverageHome": 32197,
+  "attendanceAverageYtd": 30902,
+  "attendanceHigh": 48632,
+  "attendanceHighDate": "2023-07-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717394,
+   "link": "/api/v1.1/game/717394/feed/live",
+   "content": {
+    "link": "/api/v1/game/717394/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18511,
+  "attendanceLowDate": "2023-04-19T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718509,
+   "link": "/api/v1.1/game/718509/feed/live",
+   "content": {
+    "link": "/api/v1/game/718509/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32197,
+  "attendanceTotal": 5006200,
+  "attendanceTotalAway": 2398265,
+  "attendanceTotalHome": 2607935,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 115,
+   "name": "Colorado Rockies",
+   "link": "/api/v1/teams/115"
+  }
+ },
+ {
+  "team_id": 116,
+  "season": 2023,
+  "openingsTotal": 157,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 77,
+  "openingsTotalLost": 4,
+  "gamesTotal": 171,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 88,
+  "year": "2023",
+  "attendanceAverageAway": 26846,
+  "attendanceAverageHome": 20946,
+  "attendanceAverageYtd": 23953,
+  "attendanceHigh": 44650,
+  "attendanceHighDate": "2023-04-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718690,
+   "link": "/api/v1.1/game/718690/feed/live",
+   "content": {
+    "link": "/api/v1/game/718690/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10099,
+  "attendanceLowDate": "2023-07-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 717243,
+   "link": "/api/v1.1/game/717243/feed/live",
+   "content": {
+    "link": "/api/v1/game/717243/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 20108,
+  "attendanceTotal": 3760546,
+  "attendanceTotalAway": 2147670,
+  "attendanceTotalHome": 1612876,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 116,
+   "name": "Detroit Tigers",
+   "link": "/api/v1/teams/116"
+  }
+ },
+ {
+  "team_id": 117,
+  "season": 2023,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 28780,
+  "attendanceAverageHome": 37683,
+  "attendanceAverageYtd": 33232,
+  "attendanceHigh": 43032,
+  "attendanceHighDate": "2023-03-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718768,
+   "link": "/api/v1.1/game/718768/feed/live",
+   "content": {
+    "link": "/api/v1/game/718768/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 29272,
+  "attendanceLowDate": "2023-04-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718723,
+   "link": "/api/v1.1/game/718723/feed/live",
+   "content": {
+    "link": "/api/v1/game/718723/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 37683,
+  "attendanceTotal": 5383540,
+  "attendanceTotalAway": 2331193,
+  "attendanceTotalHome": 3052347,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 117,
+   "name": "Houston Astros",
+   "link": "/api/v1/teams/117"
+  }
+ },
+ {
+  "team_id": 118,
+  "season": 2023,
+  "openingsTotal": 160,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 82,
+  "year": "2023",
+  "attendanceAverageAway": 27053,
+  "attendanceAverageHome": 16136,
+  "attendanceAverageYtd": 21526,
+  "attendanceHigh": 38351,
+  "attendanceHighDate": "2023-03-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 718775,
+   "link": "/api/v1.1/game/718775/feed/live",
+   "content": {
+    "link": "/api/v1/game/718775/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9736,
+  "attendanceLowDate": "2023-09-18T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716529,
+   "link": "/api/v1.1/game/716529/feed/live",
+   "content": {
+    "link": "/api/v1/game/716529/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 16136,
+  "attendanceTotal": 3444208,
+  "attendanceTotalAway": 2137156,
+  "attendanceTotalHome": 1307052,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 118,
+   "name": "Kansas City Royals",
+   "link": "/api/v1/teams/118"
+  }
+ },
+ {
+  "team_id": 119,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2023",
+  "attendanceAverageAway": 32292,
+  "attendanceAverageHome": 47371,
+  "attendanceAverageYtd": 39878,
+  "attendanceHigh": 53057,
+  "attendanceHighDate": "2023-07-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717437,
+   "link": "/api/v1.1/game/717437/feed/live",
+   "content": {
+    "link": "/api/v1/game/717437/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 36434,
+  "attendanceLowDate": "2023-05-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 718136,
+   "link": "/api/v1.1/game/718136/feed/live",
+   "content": {
+    "link": "/api/v1/game/718136/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 47371,
+  "attendanceTotal": 6420414,
+  "attendanceTotalAway": 2583335,
+  "attendanceTotalHome": 3837079,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 119,
+   "name": "Los Angeles Dodgers",
+   "link": "/api/v1/teams/119"
+  }
+ },
+ {
+  "team_id": 120,
+  "season": 2023,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 168,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 85,
+  "year": "2023",
+  "attendanceAverageAway": 29230,
+  "attendanceAverageHome": 23035,
+  "attendanceAverageYtd": 26113,
+  "attendanceHigh": 38853,
+  "attendanceHighDate": "2023-08-19T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 716941,
+   "link": "/api/v1.1/game/716941/feed/live",
+   "content": {
+    "link": "/api/v1/game/716941/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2473,
+  "attendanceLowDate": "2023-08-20T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716929,
+   "link": "/api/v1.1/game/716929/feed/live",
+   "content": {
+    "link": "/api/v1/game/716929/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 23035,
+  "attendanceTotal": 4204232,
+  "attendanceTotalAway": 2338400,
+  "attendanceTotalHome": 1865832,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 120,
+   "name": "Washington Nationals",
+   "link": "/api/v1/teams/120"
+  }
+ },
+ {
+  "team_id": 121,
+  "season": 2023,
+  "openingsTotal": 160,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 79,
+  "openingsTotalLost": 2,
+  "gamesTotal": 172,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 88,
+  "year": "2023",
+  "attendanceAverageAway": 29856,
+  "attendanceAverageHome": 32577,
+  "attendanceAverageYtd": 31199,
+  "attendanceHigh": 44121,
+  "attendanceHighDate": "2023-06-14T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 717766,
+   "link": "/api/v1.1/game/717766/feed/live",
+   "content": {
+    "link": "/api/v1/game/717766/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20191,
+  "attendanceLowDate": "2023-09-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 716411,
+   "link": "/api/v1.1/game/716411/feed/live",
+   "content": {
+    "link": "/api/v1/game/716411/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31707,
+  "attendanceTotal": 4991864,
+  "attendanceTotalAway": 2418309,
+  "attendanceTotalHome": 2573555,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 121,
+   "name": "New York Mets",
+   "link": "/api/v1/teams/121"
+  }
+ }
+]
