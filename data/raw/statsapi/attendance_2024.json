@@ -1,0 +1,1442 @@
+[
+ {
+  "team_id": 133,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 30228,
+  "attendanceAverageHome": 11529,
+  "attendanceAverageYtd": 20937,
+  "attendanceHigh": 46889,
+  "attendanceHighDate": "2024-09-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745609,
+   "link": "/api/v1.1/game/745609/feed/live",
+   "content": {
+    "link": "/api/v1/game/745609/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2895,
+  "attendanceLowDate": "2024-05-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745664,
+   "link": "/api/v1.1/game/745664/feed/live",
+   "content": {
+    "link": "/api/v1/game/745664/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 11426,
+  "attendanceTotal": 3370789,
+  "attendanceTotalAway": 2448503,
+  "attendanceTotalHome": 922286,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 133,
+   "name": "Oakland Athletics",
+   "link": "/api/v1/teams/133"
+  }
+ },
+ {
+  "team_id": 134,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 31058,
+  "attendanceAverageHome": 21239,
+  "attendanceAverageYtd": 26118,
+  "attendanceHigh": 39530,
+  "attendanceHighDate": "2024-07-19T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745481,
+   "link": "/api/v1.1/game/745481/feed/live",
+   "content": {
+    "link": "/api/v1/game/745481/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8461,
+  "attendanceLowDate": "2024-04-22T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745519,
+   "link": "/api/v1.1/game/745519/feed/live",
+   "content": {
+    "link": "/api/v1/game/745519/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 21239,
+  "attendanceTotal": 4204963,
+  "attendanceTotalAway": 2484602,
+  "attendanceTotalHome": 1720361,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 134,
+   "name": "Pittsburgh Pirates",
+   "link": "/api/v1/teams/134"
+  }
+ },
+ {
+  "team_id": 135,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 31243,
+  "attendanceAverageHome": 41118,
+  "attendanceAverageYtd": 36181,
+  "attendanceHigh": 47559,
+  "attendanceHighDate": "2024-07-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745389,
+   "link": "/api/v1.1/game/745389/feed/live",
+   "content": {
+    "link": "/api/v1/game/745389/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15952,
+  "attendanceLowDate": "2024-03-20T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745444,
+   "link": "/api/v1.1/game/745444/feed/live",
+   "content": {
+    "link": "/api/v1/game/745444/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 41118,
+  "attendanceTotal": 5861257,
+  "attendanceTotalAway": 2530712,
+  "attendanceTotalHome": 3330545,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 135,
+   "name": "San Diego Padres",
+   "link": "/api/v1/teams/135"
+  }
+ },
+ {
+  "team_id": 136,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 27259,
+  "attendanceAverageHome": 31553,
+  "attendanceAverageYtd": 29406,
+  "attendanceHigh": 45584,
+  "attendanceHighDate": "2024-06-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745242,
+   "link": "/api/v1.1/game/745242/feed/live",
+   "content": {
+    "link": "/api/v1/game/745242/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 14984,
+  "attendanceLowDate": "2024-05-13T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745256,
+   "link": "/api/v1.1/game/745256/feed/live",
+   "content": {
+    "link": "/api/v1/game/745256/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31553,
+  "attendanceTotal": 4763816,
+  "attendanceTotalAway": 2208003,
+  "attendanceTotalHome": 2555813,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 136,
+   "name": "Seattle Mariners",
+   "link": "/api/v1/teams/136"
+  }
+ },
+ {
+  "team_id": 137,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 31052,
+  "attendanceAverageHome": 33097,
+  "attendanceAverageYtd": 32068,
+  "attendanceHigh": 41187,
+  "attendanceHighDate": "2024-09-01T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745292,
+   "link": "/api/v1.1/game/745292/feed/live",
+   "content": {
+    "link": "/api/v1/game/745292/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 22042,
+  "attendanceLowDate": "2024-07-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745307,
+   "link": "/api/v1.1/game/745307/feed/live",
+   "content": {
+    "link": "/api/v1/game/745307/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32665,
+  "attendanceTotal": 5162934,
+  "attendanceTotalAway": 2515198,
+  "attendanceTotalHome": 2647736,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 137,
+   "name": "San Francisco Giants",
+   "link": "/api/v1/teams/137"
+  }
+ },
+ {
+  "team_id": 138,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 169,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 86,
+  "year": "2024",
+  "attendanceAverageAway": 29510,
+  "attendanceAverageHome": 35532,
+  "attendanceAverageYtd": 32540,
+  "attendanceHigh": 47273,
+  "attendanceHighDate": "2024-04-04T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745200,
+   "link": "/api/v1.1/game/745200/feed/live",
+   "content": {
+    "link": "/api/v1/game/745200/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8332,
+  "attendanceLowDate": "2024-06-20T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745164,
+   "link": "/api/v1.1/game/745164/feed/live",
+   "content": {
+    "link": "/api/v1/game/745164/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 35532,
+  "attendanceTotal": 5238884,
+  "attendanceTotalAway": 2360769,
+  "attendanceTotalHome": 2878115,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 138,
+   "name": "St. Louis Cardinals",
+   "link": "/api/v1/teams/138"
+  }
+ },
+ {
+  "team_id": 139,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 29892,
+  "attendanceAverageHome": 16515,
+  "attendanceAverageYtd": 23204,
+  "attendanceHigh": 25025,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745116,
+   "link": "/api/v1.1/game/745116/feed/live",
+   "content": {
+    "link": "/api/v1/game/745116/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10531,
+  "attendanceLowDate": "2024-09-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745047,
+   "link": "/api/v1.1/game/745047/feed/live",
+   "content": {
+    "link": "/api/v1/game/745047/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 16515,
+  "attendanceTotal": 3758974,
+  "attendanceTotalAway": 2421235,
+  "attendanceTotalHome": 1337739,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 139,
+   "name": "Tampa Bay Rays",
+   "link": "/api/v1/teams/139"
+  }
+ },
+ {
+  "team_id": 140,
+  "season": 2024,
+  "openingsTotal": 159,
+  "openingsTotalAway": 78,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 30501,
+  "attendanceAverageHome": 32735,
+  "attendanceAverageYtd": 31639,
+  "attendanceHigh": 42130,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745039,
+   "link": "/api/v1.1/game/745039/feed/live",
+   "content": {
+    "link": "/api/v1/game/745039/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18714,
+  "attendanceLowDate": "2024-04-09T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745030,
+   "link": "/api/v1.1/game/745030/feed/live",
+   "content": {
+    "link": "/api/v1/game/745030/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32735,
+  "attendanceTotal": 5030651,
+  "attendanceTotalAway": 2379098,
+  "attendanceTotalHome": 2651553,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 140,
+   "name": "Texas Rangers",
+   "link": "/api/v1/teams/140"
+  }
+ },
+ {
+  "team_id": 141,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 28303,
+  "attendanceAverageHome": 33102,
+  "attendanceAverageYtd": 30702,
+  "attendanceHigh": 41148,
+  "attendanceHighDate": "2024-07-25T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 744907,
+   "link": "/api/v1.1/game/744907/feed/live",
+   "content": {
+    "link": "/api/v1/game/744907/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 22254,
+  "attendanceLowDate": "2024-09-23T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 744885,
+   "link": "/api/v1.1/game/744885/feed/live",
+   "content": {
+    "link": "/api/v1/game/744885/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 33102,
+  "attendanceTotal": 4973787,
+  "attendanceTotalAway": 2292551,
+  "attendanceTotalHome": 2681236,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 141,
+   "name": "Toronto Blue Jays",
+   "link": "/api/v1/teams/141"
+  }
+ },
+ {
+  "team_id": 142,
+  "season": 2024,
+  "openingsTotal": 160,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 83,
+  "year": "2024",
+  "attendanceAverageAway": 26344,
+  "attendanceAverageHome": 24094,
+  "attendanceAverageYtd": 25205,
+  "attendanceHigh": 41679,
+  "attendanceHighDate": "2024-07-20T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745880,
+   "link": "/api/v1.1/game/745880/feed/live",
+   "content": {
+    "link": "/api/v1/game/745880/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11223,
+  "attendanceLowDate": "2024-04-23T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745917,
+   "link": "/api/v1.1/game/745917/feed/live",
+   "content": {
+    "link": "/api/v1/game/745917/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24094,
+  "attendanceTotal": 4032781,
+  "attendanceTotalAway": 2081165,
+  "attendanceTotalHome": 1951616,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 142,
+   "name": "Minnesota Twins",
+   "link": "/api/v1/teams/142"
+  }
+ },
+ {
+  "team_id": 143,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 31911,
+  "attendanceAverageHome": 41527,
+  "attendanceAverageYtd": 36719,
+  "attendanceHigh": 55074,
+  "attendanceHighDate": "2024-06-09T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745571,
+   "link": "/api/v1.1/game/745571/feed/live",
+   "content": {
+    "link": "/api/v1/game/745571/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 28077,
+  "attendanceLowDate": "2024-04-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745603,
+   "link": "/api/v1.1/game/745603/feed/live",
+   "content": {
+    "link": "/api/v1/game/745603/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 41527,
+  "attendanceTotal": 5948541,
+  "attendanceTotalAway": 2584829,
+  "attendanceTotalHome": 3363712,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 143,
+   "name": "Philadelphia Phillies",
+   "link": "/api/v1/teams/143"
+  }
+ },
+ {
+  "team_id": 144,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 172,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 88,
+  "year": "2024",
+  "attendanceAverageAway": 31197,
+  "attendanceAverageHome": 37647,
+  "attendanceAverageYtd": 34402,
+  "attendanceHigh": 42732,
+  "attendanceHighDate": "2024-09-14T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 747070,
+   "link": "/api/v1.1/game/747070/feed/live",
+   "content": {
+    "link": "/api/v1/game/747070/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 29935,
+  "attendanceLowDate": "2024-09-30T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 747139,
+   "link": "/api/v1.1/game/747139/feed/live",
+   "content": {
+    "link": "/api/v1/game/747139/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 37127,
+  "attendanceTotal": 5538683,
+  "attendanceTotalAway": 2526928,
+  "attendanceTotalHome": 3011755,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 144,
+   "name": "Atlanta Braves",
+   "link": "/api/v1/teams/144"
+  }
+ },
+ {
+  "team_id": 145,
+  "season": 2024,
+  "openingsTotal": 158,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 77,
+  "openingsTotalLost": 3,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 86,
+  "year": "2024",
+  "attendanceAverageAway": 28360,
+  "attendanceAverageHome": 17932,
+  "attendanceAverageYtd": 23278,
+  "attendanceHigh": 38341,
+  "attendanceHighDate": "2024-08-10T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746761,
+   "link": "/api/v1.1/game/746761/feed/live",
+   "content": {
+    "link": "/api/v1/game/746761/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10323,
+  "attendanceLowDate": "2024-04-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746807,
+   "link": "/api/v1.1/game/746807/feed/live",
+   "content": {
+    "link": "/api/v1/game/746807/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 17475,
+  "attendanceTotal": 3677903,
+  "attendanceTotalAway": 2297170,
+  "attendanceTotalHome": 1380733,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 145,
+   "name": "Chicago White Sox",
+   "link": "/api/v1/teams/145"
+  }
+ },
+ {
+  "team_id": 146,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 29028,
+  "attendanceAverageHome": 13425,
+  "attendanceAverageYtd": 21227,
+  "attendanceHigh": 32564,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746089,
+   "link": "/api/v1.1/game/746089/feed/live",
+   "content": {
+    "link": "/api/v1/game/746089/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 6156,
+  "attendanceLowDate": "2024-09-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746019,
+   "link": "/api/v1.1/game/746019/feed/live",
+   "content": {
+    "link": "/api/v1/game/746019/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 13425,
+  "attendanceTotal": 3438714,
+  "attendanceTotalAway": 2351259,
+  "attendanceTotalHome": 1087455,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 146,
+   "name": "Miami Marlins",
+   "link": "/api/v1/teams/146"
+  }
+ },
+ {
+  "team_id": 147,
+  "season": 2024,
+  "openingsTotal": 160,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 79,
+  "openingsTotalLost": 2,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 83,
+  "year": "2024",
+  "attendanceAverageAway": 32569,
+  "attendanceAverageHome": 41897,
+  "attendanceAverageYtd": 37175,
+  "attendanceHigh": 48760,
+  "attendanceHighDate": "2024-07-24T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745716,
+   "link": "/api/v1.1/game/745716/feed/live",
+   "content": {
+    "link": "/api/v1/game/745716/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 30060,
+  "attendanceLowDate": "2024-08-10T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745712,
+   "link": "/api/v1.1/game/745712/feed/live",
+   "content": {
+    "link": "/api/v1/game/745712/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 40849,
+  "attendanceTotal": 5947960,
+  "attendanceTotalAway": 2638122,
+  "attendanceTotalHome": 3309838,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 147,
+   "name": "New York Yankees",
+   "link": "/api/v1/teams/147"
+  }
+ },
+ {
+  "team_id": 158,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 28471,
+  "attendanceAverageHome": 31323,
+  "attendanceAverageYtd": 29897,
+  "attendanceHigh": 42658,
+  "attendanceHighDate": "2024-06-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745971,
+   "link": "/api/v1.1/game/745971/feed/live",
+   "content": {
+    "link": "/api/v1/game/745971/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 17854,
+  "attendanceLowDate": "2024-04-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746008,
+   "link": "/api/v1.1/game/746008/feed/live",
+   "content": {
+    "link": "/api/v1/game/746008/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31323,
+  "attendanceTotal": 4843333,
+  "attendanceTotalAway": 2306131,
+  "attendanceTotalHome": 2537202,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 158,
+   "name": "Milwaukee Brewers",
+   "link": "/api/v1/teams/158"
+  }
+ },
+ {
+  "team_id": 108,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 25368,
+  "attendanceAverageHome": 31822,
+  "attendanceAverageYtd": 28615,
+  "attendanceHigh": 44822,
+  "attendanceHighDate": "2024-09-04T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746178,
+   "link": "/api/v1.1/game/746178/feed/live",
+   "content": {
+    "link": "/api/v1/game/746178/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 16600,
+  "attendanceLowDate": "2024-04-10T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746247,
+   "link": "/api/v1.1/game/746247/feed/live",
+   "content": {
+    "link": "/api/v1/game/746247/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31822,
+  "attendanceTotal": 4607017,
+  "attendanceTotalAway": 2029420,
+  "attendanceTotalHome": 2577597,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 108,
+   "name": "Los Angeles Angels",
+   "link": "/api/v1/teams/108"
+  }
+ },
+ {
+  "team_id": 109,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 30656,
+  "attendanceAverageHome": 28912,
+  "attendanceAverageYtd": 29784,
+  "attendanceHigh": 50041,
+  "attendanceHighDate": "2024-08-31T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 747158,
+   "link": "/api/v1.1/game/747158/feed/live",
+   "content": {
+    "link": "/api/v1/game/747158/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15525,
+  "attendanceLowDate": "2024-08-12T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 747165,
+   "link": "/api/v1.1/game/747165/feed/live",
+   "content": {
+    "link": "/api/v1/game/747165/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28912,
+  "attendanceTotal": 4825035,
+  "attendanceTotalAway": 2483159,
+  "attendanceTotalHome": 2341876,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 109,
+   "name": "Arizona Diamondbacks",
+   "link": "/api/v1/teams/109"
+  }
+ },
+ {
+  "team_id": 110,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 29491,
+  "attendanceAverageHome": 28162,
+  "attendanceAverageYtd": 28827,
+  "attendanceHigh": 45029,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 747060,
+   "link": "/api/v1.1/game/747060/feed/live",
+   "content": {
+    "link": "/api/v1/game/747060/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9404,
+  "attendanceLowDate": "2024-07-29T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 747007,
+   "link": "/api/v1.1/game/747007/feed/live",
+   "content": {
+    "link": "/api/v1/game/747007/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28162,
+  "attendanceTotal": 4669901,
+  "attendanceTotalAway": 2388772,
+  "attendanceTotalHome": 2281129,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 110,
+   "name": "Baltimore Orioles",
+   "link": "/api/v1/teams/110"
+  }
+ },
+ {
+  "team_id": 111,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 83,
+  "year": "2024",
+  "attendanceAverageAway": 29448,
+  "attendanceAverageHome": 32839,
+  "attendanceAverageYtd": 31143,
+  "attendanceHigh": 36718,
+  "attendanceHighDate": "2024-06-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746945,
+   "link": "/api/v1.1/game/746945/feed/live",
+   "content": {
+    "link": "/api/v1/game/746945/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 26106,
+  "attendanceLowDate": "2024-04-12T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746978,
+   "link": "/api/v1.1/game/746978/feed/live",
+   "content": {
+    "link": "/api/v1/game/746978/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32839,
+  "attendanceTotal": 5045240,
+  "attendanceTotalAway": 2385291,
+  "attendanceTotalHome": 2659949,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 111,
+   "name": "Boston Red Sox",
+   "link": "/api/v1/teams/111"
+  }
+ },
+ {
+  "team_id": 112,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 31646,
+  "attendanceAverageHome": 35923,
+  "attendanceAverageYtd": 33785,
+  "attendanceHigh": 41040,
+  "attendanceHighDate": "2024-04-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746896,
+   "link": "/api/v1.1/game/746896/feed/live",
+   "content": {
+    "link": "/api/v1/game/746896/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 25900,
+  "attendanceLowDate": "2024-04-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746900,
+   "link": "/api/v1.1/game/746900/feed/live",
+   "content": {
+    "link": "/api/v1/game/746900/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 35923,
+  "attendanceTotal": 5473126,
+  "attendanceTotalAway": 2563332,
+  "attendanceTotalHome": 2909794,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 112,
+   "name": "Chicago Cubs",
+   "link": "/api/v1/teams/112"
+  }
+ },
+ {
+  "team_id": 113,
+  "season": 2024,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 29863,
+  "attendanceAverageHome": 24990,
+  "attendanceAverageYtd": 27426,
+  "attendanceHigh": 44030,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746737,
+   "link": "/api/v1.1/game/746737/feed/live",
+   "content": {
+    "link": "/api/v1/game/746737/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10382,
+  "attendanceLowDate": "2024-04-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746735,
+   "link": "/api/v1.1/game/746735/feed/live",
+   "content": {
+    "link": "/api/v1/game/746735/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24990,
+  "attendanceTotal": 4443051,
+  "attendanceTotalAway": 2418865,
+  "attendanceTotalHome": 2024186,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 113,
+   "name": "Cincinnati Reds",
+   "link": "/api/v1/teams/113"
+  }
+ },
+ {
+  "team_id": 114,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 84,
+  "year": "2024",
+  "attendanceAverageAway": 27311,
+  "attendanceAverageHome": 25703,
+  "attendanceAverageYtd": 26512,
+  "attendanceHigh": 37485,
+  "attendanceHighDate": "2024-07-20T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746613,
+   "link": "/api/v1.1/game/746613/feed/live",
+   "content": {
+    "link": "/api/v1/game/746613/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 12405,
+  "attendanceLowDate": "2024-08-07T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746604,
+   "link": "/api/v1.1/game/746604/feed/live",
+   "content": {
+    "link": "/api/v1/game/746604/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 25703,
+  "attendanceTotal": 4268448,
+  "attendanceTotalAway": 2212184,
+  "attendanceTotalHome": 2056264,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 114,
+   "name": "Cleveland Guardians",
+   "link": "/api/v1/teams/114"
+  }
+ },
+ {
+  "team_id": 115,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2024",
+  "attendanceAverageAway": 28878,
+  "attendanceAverageHome": 31360,
+  "attendanceAverageYtd": 30127,
+  "attendanceHigh": 48750,
+  "attendanceHighDate": "2024-09-27T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746494,
+   "link": "/api/v1.1/game/746494/feed/live",
+   "content": {
+    "link": "/api/v1/game/746494/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18311,
+  "attendanceLowDate": "2024-04-10T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746573,
+   "link": "/api/v1.1/game/746573/feed/live",
+   "content": {
+    "link": "/api/v1/game/746573/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31360,
+  "attendanceTotal": 4850437,
+  "attendanceTotalAway": 2310242,
+  "attendanceTotalHome": 2540195,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 115,
+   "name": "Colorado Rockies",
+   "link": "/api/v1/teams/115"
+  }
+ },
+ {
+  "team_id": 116,
+  "season": 2024,
+  "openingsTotal": 158,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 78,
+  "openingsTotalLost": 3,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 84,
+  "year": "2024",
+  "attendanceAverageAway": 27497,
+  "attendanceAverageHome": 23824,
+  "attendanceAverageYtd": 25684,
+  "attendanceHigh": 44711,
+  "attendanceHighDate": "2024-04-05T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746497,
+   "link": "/api/v1.1/game/746497/feed/live",
+   "content": {
+    "link": "/api/v1/game/746497/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2532,
+  "attendanceLowDate": "2024-05-29T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746467,
+   "link": "/api/v1.1/game/746467/feed/live",
+   "content": {
+    "link": "/api/v1/game/746467/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 23026,
+  "attendanceTotal": 4058067,
+  "attendanceTotalAway": 2199772,
+  "attendanceTotalHome": 1858295,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 116,
+   "name": "Detroit Tigers",
+   "link": "/api/v1/teams/116"
+  }
+ },
+ {
+  "team_id": 117,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 28240,
+  "attendanceAverageHome": 35003,
+  "attendanceAverageYtd": 31643,
+  "attendanceHigh": 42642,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746418,
+   "link": "/api/v1.1/game/746418/feed/live",
+   "content": {
+    "link": "/api/v1/game/746418/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 25733,
+  "attendanceLowDate": "2024-05-01T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746399,
+   "link": "/api/v1.1/game/746399/feed/live",
+   "content": {
+    "link": "/api/v1/game/746399/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 35003,
+  "attendanceTotal": 5094463,
+  "attendanceTotalAway": 2259229,
+  "attendanceTotalHome": 2835234,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 117,
+   "name": "Houston Astros",
+   "link": "/api/v1/teams/117"
+  }
+ },
+ {
+  "team_id": 118,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 25830,
+  "attendanceAverageHome": 20473,
+  "attendanceAverageYtd": 23135,
+  "attendanceHigh": 38775,
+  "attendanceHighDate": "2024-03-28T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746335,
+   "link": "/api/v1.1/game/746335/feed/live",
+   "content": {
+    "link": "/api/v1/game/746335/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9740,
+  "attendanceLowDate": "2024-04-25T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746320,
+   "link": "/api/v1.1/game/746320/feed/live",
+   "content": {
+    "link": "/api/v1/game/746320/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 20473,
+  "attendanceTotal": 3724775,
+  "attendanceTotalAway": 2066428,
+  "attendanceTotalHome": 1658347,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 118,
+   "name": "Kansas City Royals",
+   "link": "/api/v1/teams/118"
+  }
+ },
+ {
+  "team_id": 119,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 36253,
+  "attendanceAverageHome": 48657,
+  "attendanceAverageYtd": 42494,
+  "attendanceHigh": 54070,
+  "attendanceHighDate": "2024-07-24T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 746119,
+   "link": "/api/v1.1/game/746119/feed/live",
+   "content": {
+    "link": "/api/v1/game/746119/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15928,
+  "attendanceLowDate": "2024-03-21T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 746175,
+   "link": "/api/v1.1/game/746175/feed/live",
+   "content": {
+    "link": "/api/v1/game/746175/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 48657,
+  "attendanceTotal": 6841502,
+  "attendanceTotalAway": 2900251,
+  "attendanceTotalHome": 3941251,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 119,
+   "name": "Los Angeles Dodgers",
+   "link": "/api/v1/teams/119"
+  }
+ },
+ {
+  "team_id": 120,
+  "season": 2024,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2024",
+  "attendanceAverageAway": 28044,
+  "attendanceAverageHome": 24288,
+  "attendanceAverageYtd": 26154,
+  "attendanceHigh": 40405,
+  "attendanceHighDate": "2024-04-01T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 744875,
+   "link": "/api/v1.1/game/744875/feed/live",
+   "content": {
+    "link": "/api/v1/game/744875/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11135,
+  "attendanceLowDate": "2024-04-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 744870,
+   "link": "/api/v1.1/game/744870/feed/live",
+   "content": {
+    "link": "/api/v1/game/744870/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24288,
+  "attendanceTotal": 4210782,
+  "attendanceTotalAway": 2243480,
+  "attendanceTotalHome": 1967302,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 120,
+   "name": "Washington Nationals",
+   "link": "/api/v1/teams/120"
+  }
+ },
+ {
+  "team_id": 121,
+  "season": 2024,
+  "openingsTotal": 159,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 79,
+  "openingsTotalLost": 2,
+  "gamesTotal": 170,
+  "gamesAwayTotal": 85,
+  "gamesHomeTotal": 85,
+  "year": "2024",
+  "attendanceAverageAway": 30771,
+  "attendanceAverageHome": 29485,
+  "attendanceAverageYtd": 30132,
+  "attendanceHigh": 53882,
+  "attendanceHighDate": "2024-06-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 745814,
+   "link": "/api/v1.1/game/745814/feed/live",
+   "content": {
+    "link": "/api/v1/game/745814/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15020,
+  "attendanceLowDate": "2024-04-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 745844,
+   "link": "/api/v1.1/game/745844/feed/live",
+   "content": {
+    "link": "/api/v1/game/745844/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28839,
+  "attendanceTotal": 4791012,
+  "attendanceTotalAway": 2461713,
+  "attendanceTotalHome": 2329299,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 121,
+   "name": "New York Mets",
+   "link": "/api/v1/teams/121"
+  }
+ }
+]

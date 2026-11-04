@@ -1,0 +1,1442 @@
+[
+ {
+  "team_id": 133,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 29304,
+  "attendanceAverageHome": 9867,
+  "attendanceAverageYtd": 19585,
+  "attendanceHigh": 12592,
+  "attendanceHighDate": "2026-07-01T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824985,
+   "link": "/api/v1.1/game/824985/feed/live",
+   "content": {
+    "link": "/api/v1/game/824985/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 7217,
+  "attendanceLowDate": "2026-09-09T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824956,
+   "link": "/api/v1.1/game/824956/feed/live",
+   "content": {
+    "link": "/api/v1/game/824956/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 9867,
+  "attendanceTotal": 3172849,
+  "attendanceTotalAway": 2373609,
+  "attendanceTotalHome": 799240,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 133,
+   "name": "Athletics",
+   "link": "/api/v1/teams/133"
+  }
+ },
+ {
+  "team_id": 134,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 82,
+  "year": "2026",
+  "attendanceAverageAway": 30987,
+  "attendanceAverageHome": 21040,
+  "attendanceAverageYtd": 26013,
+  "attendanceHigh": 39105,
+  "attendanceHighDate": "2026-07-25T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823355,
+   "link": "/api/v1.1/game/823355/feed/live",
+   "content": {
+    "link": "/api/v1/game/823355/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8446,
+  "attendanceLowDate": "2026-04-06T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823401,
+   "link": "/api/v1.1/game/823401/feed/live",
+   "content": {
+    "link": "/api/v1/game/823401/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 21040,
+  "attendanceTotal": 4214159,
+  "attendanceTotalAway": 2509930,
+  "attendanceTotalHome": 1704229,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 134,
+   "name": "Pittsburgh Pirates",
+   "link": "/api/v1/teams/134"
+  }
+ },
+ {
+  "team_id": 135,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 29843,
+  "attendanceAverageHome": 41322,
+  "attendanceAverageYtd": 35583,
+  "attendanceHigh": 46095,
+  "attendanceHighDate": "2026-04-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823314,
+   "link": "/api/v1.1/game/823314/feed/live",
+   "content": {
+    "link": "/api/v1/game/823314/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 33276,
+  "attendanceLowDate": "2026-09-09T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823251,
+   "link": "/api/v1.1/game/823251/feed/live",
+   "content": {
+    "link": "/api/v1/game/823251/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 41322,
+  "attendanceTotal": 5764392,
+  "attendanceTotalAway": 2417311,
+  "attendanceTotalHome": 3347081,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 135,
+   "name": "San Diego Padres",
+   "link": "/api/v1/teams/135"
+  }
+ },
+ {
+  "team_id": 136,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28026,
+  "attendanceAverageHome": 35602,
+  "attendanceAverageYtd": 31814,
+  "attendanceHigh": 46018,
+  "attendanceHighDate": "2026-08-21T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823101,
+   "link": "/api/v1.1/game/823101/feed/live",
+   "content": {
+    "link": "/api/v1/game/823101/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15704,
+  "attendanceLowDate": "2026-04-22T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823147,
+   "link": "/api/v1.1/game/823147/feed/live",
+   "content": {
+    "link": "/api/v1/game/823147/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 35602,
+  "attendanceTotal": 5153917,
+  "attendanceTotalAway": 2270119,
+  "attendanceTotalHome": 2883798,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 136,
+   "name": "Seattle Mariners",
+   "link": "/api/v1/teams/136"
+  }
+ },
+ {
+  "team_id": 137,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 30098,
+  "attendanceAverageHome": 35269,
+  "attendanceAverageYtd": 32700,
+  "attendanceHigh": 41559,
+  "attendanceHighDate": "2026-07-24T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823196,
+   "link": "/api/v1.1/game/823196/feed/live",
+   "content": {
+    "link": "/api/v1/game/823196/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 24130,
+  "attendanceLowDate": "2026-08-26T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823180,
+   "link": "/api/v1.1/game/823180/feed/live",
+   "content": {
+    "link": "/api/v1/game/823180/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 35269,
+  "attendanceTotal": 5264620,
+  "attendanceTotalAway": 2407810,
+  "attendanceTotalHome": 2856810,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 137,
+   "name": "San Francisco Giants",
+   "link": "/api/v1/teams/137"
+  }
+ },
+ {
+  "team_id": 138,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 83,
+  "year": "2026",
+  "attendanceAverageAway": 29224,
+  "attendanceAverageHome": 27579,
+  "attendanceAverageYtd": 28402,
+  "attendanceHigh": 45037,
+  "attendanceHighDate": "2026-03-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823081,
+   "link": "/api/v1.1/game/823081/feed/live",
+   "content": {
+    "link": "/api/v1/game/823081/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 17901,
+  "attendanceLowDate": "2026-04-13T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823073,
+   "link": "/api/v1.1/game/823073/feed/live",
+   "content": {
+    "link": "/api/v1/game/823073/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 27579,
+  "attendanceTotal": 4601060,
+  "attendanceTotalAway": 2367158,
+  "attendanceTotalHome": 2233902,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 138,
+   "name": "St. Louis Cardinals",
+   "link": "/api/v1/teams/138"
+  }
+ },
+ {
+  "team_id": 139,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 29024,
+  "attendanceAverageHome": 17469,
+  "attendanceAverageYtd": 23246,
+  "attendanceHigh": 28055,
+  "attendanceHighDate": "2026-08-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 822941,
+   "link": "/api/v1.1/game/822941/feed/live",
+   "content": {
+    "link": "/api/v1/game/822941/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10159,
+  "attendanceLowDate": "2026-08-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 822939,
+   "link": "/api/v1.1/game/822939/feed/live",
+   "content": {
+    "link": "/api/v1/game/822939/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 17469,
+  "attendanceTotal": 3765916,
+  "attendanceTotalAway": 2350941,
+  "attendanceTotalHome": 1414975,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 139,
+   "name": "Tampa Bay Rays",
+   "link": "/api/v1/teams/139"
+  }
+ },
+ {
+  "team_id": 140,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 27503,
+  "attendanceAverageHome": 29706,
+  "attendanceAverageYtd": 28605,
+  "attendanceHigh": 39704,
+  "attendanceHighDate": "2026-05-29T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 822894,
+   "link": "/api/v1.1/game/822894/feed/live",
+   "content": {
+    "link": "/api/v1/game/822894/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20997,
+  "attendanceLowDate": "2026-04-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 822915,
+   "link": "/api/v1.1/game/822915/feed/live",
+   "content": {
+    "link": "/api/v1/game/822915/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 29706,
+  "attendanceTotal": 4633960,
+  "attendanceTotalAway": 2227743,
+  "attendanceTotalHome": 2406217,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 140,
+   "name": "Texas Rangers",
+   "link": "/api/v1/teams/140"
+  }
+ },
+ {
+  "team_id": 141,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28616,
+  "attendanceAverageHome": 41221,
+  "attendanceAverageYtd": 34918,
+  "attendanceHigh": 43554,
+  "attendanceHighDate": "2026-09-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 822762,
+   "link": "/api/v1.1/game/822762/feed/live",
+   "content": {
+    "link": "/api/v1/game/822762/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 35273,
+  "attendanceLowDate": "2026-06-25T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 822797,
+   "link": "/api/v1.1/game/822797/feed/live",
+   "content": {
+    "link": "/api/v1/game/822797/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 41221,
+  "attendanceTotal": 5656751,
+  "attendanceTotalAway": 2317873,
+  "attendanceTotalHome": 3338878,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 141,
+   "name": "Toronto Blue Jays",
+   "link": "/api/v1/teams/141"
+  }
+ },
+ {
+  "team_id": 142,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28022,
+  "attendanceAverageHome": 21486,
+  "attendanceAverageYtd": 24754,
+  "attendanceHigh": 39853,
+  "attendanceHighDate": "2026-06-24T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823691,
+   "link": "/api/v1.1/game/823691/feed/live",
+   "content": {
+    "link": "/api/v1/game/823691/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 7163,
+  "attendanceLowDate": "2026-08-13T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823669,
+   "link": "/api/v1.1/game/823669/feed/live",
+   "content": {
+    "link": "/api/v1/game/823669/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 21486,
+  "attendanceTotal": 4010172,
+  "attendanceTotalAway": 2269806,
+  "attendanceTotalHome": 1740366,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 142,
+   "name": "Minnesota Twins",
+   "link": "/api/v1/teams/142"
+  }
+ },
+ {
+  "team_id": 143,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2026",
+  "attendanceAverageAway": 31501,
+  "attendanceAverageHome": 39883,
+  "attendanceAverageYtd": 35692,
+  "attendanceHigh": 44802,
+  "attendanceHighDate": "2026-08-21T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823420,
+   "link": "/api/v1.1/game/823420/feed/live",
+   "content": {
+    "link": "/api/v1/game/823420/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 34109,
+  "attendanceLowDate": "2026-04-30T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823471,
+   "link": "/api/v1.1/game/823471/feed/live",
+   "content": {
+    "link": "/api/v1/game/823471/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 39883,
+  "attendanceTotal": 5782139,
+  "attendanceTotalAway": 2551613,
+  "attendanceTotalHome": 3230526,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 143,
+   "name": "Philadelphia Phillies",
+   "link": "/api/v1/teams/143"
+  }
+ },
+ {
+  "team_id": 144,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 0,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 83,
+  "year": "2026",
+  "attendanceAverageAway": 30600,
+  "attendanceAverageHome": 35006,
+  "attendanceAverageYtd": 32789,
+  "attendanceHigh": 40863,
+  "attendanceHighDate": "2026-09-12T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824870,
+   "link": "/api/v1.1/game/824870/feed/live",
+   "content": {
+    "link": "/api/v1/game/824870/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 22912,
+  "attendanceLowDate": "2026-04-13T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824937,
+   "link": "/api/v1.1/game/824937/feed/live",
+   "content": {
+    "link": "/api/v1/game/824937/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 34615,
+  "attendanceTotal": 5279032,
+  "attendanceTotalAway": 2478586,
+  "attendanceTotalHome": 2800446,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 144,
+   "name": "Atlanta Braves",
+   "link": "/api/v1/teams/144"
+  }
+ },
+ {
+  "team_id": 145,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 83,
+  "year": "2026",
+  "attendanceAverageAway": 28374,
+  "attendanceAverageHome": 24524,
+  "attendanceAverageYtd": 26449,
+  "attendanceHigh": 38795,
+  "attendanceHighDate": "2026-05-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824600,
+   "link": "/api/v1.1/game/824600/feed/live",
+   "content": {
+    "link": "/api/v1/game/824600/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10128,
+  "attendanceLowDate": "2026-04-16T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824614,
+   "link": "/api/v1.1/game/824614/feed/live",
+   "content": {
+    "link": "/api/v1/game/824614/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24524,
+  "attendanceTotal": 4284687,
+  "attendanceTotalAway": 2298262,
+  "attendanceTotalHome": 1986425,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 145,
+   "name": "Chicago White Sox",
+   "link": "/api/v1/teams/145"
+  }
+ },
+ {
+  "team_id": 146,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 29009,
+  "attendanceAverageHome": 15198,
+  "attendanceAverageYtd": 22104,
+  "attendanceHigh": 36060,
+  "attendanceHighDate": "2026-09-25T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823816,
+   "link": "/api/v1.1/game/823816/feed/live",
+   "content": {
+    "link": "/api/v1/game/823816/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 6505,
+  "attendanceLowDate": "2026-04-01T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823889,
+   "link": "/api/v1.1/game/823889/feed/live",
+   "content": {
+    "link": "/api/v1/game/823889/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 15198,
+  "attendanceTotal": 3580786,
+  "attendanceTotalAway": 2349768,
+  "attendanceTotalHome": 1231018,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 146,
+   "name": "Miami Marlins",
+   "link": "/api/v1/teams/146"
+  }
+ },
+ {
+  "team_id": 147,
+  "season": 2026,
+  "openingsTotal": 160,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 79,
+  "openingsTotalLost": 2,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 85,
+  "year": "2026",
+  "attendanceAverageAway": 31961,
+  "attendanceAverageHome": 41736,
+  "attendanceAverageYtd": 36787,
+  "attendanceHigh": 48788,
+  "attendanceHighDate": "2026-04-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823568,
+   "link": "/api/v1.1/game/823568/feed/live",
+   "content": {
+    "link": "/api/v1/game/823568/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 34413,
+  "attendanceLowDate": "2026-09-25T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823491,
+   "link": "/api/v1.1/game/823491/feed/live",
+   "content": {
+    "link": "/api/v1/game/823491/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 41146,
+  "attendanceTotal": 5885960,
+  "attendanceTotalAway": 2588806,
+  "attendanceTotalHome": 3297154,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 147,
+   "name": "New York Yankees",
+   "link": "/api/v1/teams/147"
+  }
+ },
+ {
+  "team_id": 158,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28550,
+  "attendanceAverageHome": 34431,
+  "attendanceAverageYtd": 31491,
+  "attendanceHigh": 43556,
+  "attendanceHighDate": "2026-09-27T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823731,
+   "link": "/api/v1.1/game/823731/feed/live",
+   "content": {
+    "link": "/api/v1/game/823731/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2432,
+  "attendanceLowDate": "2026-08-23T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823745,
+   "link": "/api/v1.1/game/823745/feed/live",
+   "content": {
+    "link": "/api/v1/game/823745/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 34431,
+  "attendanceTotal": 5101480,
+  "attendanceTotalAway": 2312546,
+  "attendanceTotalHome": 2788934,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 158,
+   "name": "Milwaukee Brewers",
+   "link": "/api/v1/teams/158"
+  }
+ },
+ {
+  "team_id": 108,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 27030,
+  "attendanceAverageHome": 32493,
+  "attendanceAverageYtd": 29761,
+  "attendanceHigh": 44931,
+  "attendanceHighDate": "2026-04-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824056,
+   "link": "/api/v1.1/game/824056/feed/live",
+   "content": {
+    "link": "/api/v1/game/824056/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 21375,
+  "attendanceLowDate": "2026-04-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824050,
+   "link": "/api/v1.1/game/824050/feed/live",
+   "content": {
+    "link": "/api/v1/game/824050/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32493,
+  "attendanceTotal": 4821349,
+  "attendanceTotalAway": 2189430,
+  "attendanceTotalHome": 2631919,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 108,
+   "name": "Los Angeles Angels",
+   "link": "/api/v1/teams/108"
+  }
+ },
+ {
+  "team_id": 109,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 30759,
+  "attendanceAverageHome": 28254,
+  "attendanceAverageYtd": 29507,
+  "attendanceHigh": 48350,
+  "attendanceHighDate": "2026-03-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 825108,
+   "link": "/api/v1.1/game/825108/feed/live",
+   "content": {
+    "link": "/api/v1/game/825108/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 14761,
+  "attendanceLowDate": "2026-05-21T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 825083,
+   "link": "/api/v1.1/game/825083/feed/live",
+   "content": {
+    "link": "/api/v1/game/825083/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28254,
+  "attendanceTotal": 4780100,
+  "attendanceTotalAway": 2491514,
+  "attendanceTotalHome": 2288586,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 109,
+   "name": "Arizona Diamondbacks",
+   "link": "/api/v1/teams/109"
+  }
+ },
+ {
+  "team_id": 110,
+  "season": 2026,
+  "openingsTotal": 159,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 84,
+  "year": "2026",
+  "attendanceAverageAway": 27145,
+  "attendanceAverageHome": 22866,
+  "attendanceAverageYtd": 24992,
+  "attendanceHigh": 42134,
+  "attendanceHighDate": "2026-03-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824865,
+   "link": "/api/v1.1/game/824865/feed/live",
+   "content": {
+    "link": "/api/v1/game/824865/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10289,
+  "attendanceLowDate": "2026-04-30T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824848,
+   "link": "/api/v1.1/game/824848/feed/live",
+   "content": {
+    "link": "/api/v1/game/824848/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 22533,
+  "attendanceTotal": 3973671,
+  "attendanceTotalAway": 2144419,
+  "attendanceTotalHome": 1829252,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 110,
+   "name": "Baltimore Orioles",
+   "link": "/api/v1/teams/110"
+  }
+ },
+ {
+  "team_id": 111,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 83,
+  "year": "2026",
+  "attendanceAverageAway": 30465,
+  "attendanceAverageHome": 34905,
+  "attendanceAverageYtd": 32685,
+  "attendanceHigh": 38005,
+  "attendanceHighDate": "2026-07-22T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824732,
+   "link": "/api/v1.1/game/824732/feed/live",
+   "content": {
+    "link": "/api/v1/game/824732/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20411,
+  "attendanceLowDate": "2026-09-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824705,
+   "link": "/api/v1.1/game/824705/feed/live",
+   "content": {
+    "link": "/api/v1/game/824705/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 34905,
+  "attendanceTotal": 5295008,
+  "attendanceTotalAway": 2467693,
+  "attendanceTotalHome": 2827315,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 111,
+   "name": "Boston Red Sox",
+   "link": "/api/v1/teams/111"
+  }
+ },
+ {
+  "team_id": 112,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 82,
+  "year": "2026",
+  "attendanceAverageAway": 32445,
+  "attendanceAverageHome": 36662,
+  "attendanceAverageYtd": 34567,
+  "attendanceHigh": 40706,
+  "attendanceHighDate": "2026-06-20T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824665,
+   "link": "/api/v1.1/game/824665/feed/live",
+   "content": {
+    "link": "/api/v1/game/824665/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 25125,
+  "attendanceLowDate": "2026-04-01T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824698,
+   "link": "/api/v1.1/game/824698/feed/live",
+   "content": {
+    "link": "/api/v1/game/824698/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 36662,
+  "attendanceTotal": 5565220,
+  "attendanceTotalAway": 2595637,
+  "attendanceTotalHome": 2969583,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 112,
+   "name": "Chicago Cubs",
+   "link": "/api/v1/teams/112"
+  }
+ },
+ {
+  "team_id": 113,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 84,
+  "year": "2026",
+  "attendanceAverageAway": 31571,
+  "attendanceAverageHome": 24589,
+  "attendanceAverageYtd": 28080,
+  "attendanceHigh": 43897,
+  "attendanceHighDate": "2026-03-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824541,
+   "link": "/api/v1.1/game/824541/feed/live",
+   "content": {
+    "link": "/api/v1/game/824541/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 12166,
+  "attendanceLowDate": "2026-08-17T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824478,
+   "link": "/api/v1.1/game/824478/feed/live",
+   "content": {
+    "link": "/api/v1/game/824478/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24589,
+  "attendanceTotal": 4548974,
+  "attendanceTotalAway": 2557271,
+  "attendanceTotalHome": 1991703,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 113,
+   "name": "Cincinnati Reds",
+   "link": "/api/v1/teams/113"
+  }
+ },
+ {
+  "team_id": 114,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 84,
+  "year": "2026",
+  "attendanceAverageAway": 28194,
+  "attendanceAverageHome": 25018,
+  "attendanceAverageYtd": 26616,
+  "attendanceHigh": 37360,
+  "attendanceHighDate": "2026-04-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824458,
+   "link": "/api/v1.1/game/824458/feed/live",
+   "content": {
+    "link": "/api/v1/game/824458/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10328,
+  "attendanceLowDate": "2026-04-05T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824459,
+   "link": "/api/v1.1/game/824459/feed/live",
+   "content": {
+    "link": "/api/v1/game/824459/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24770,
+  "attendanceTotal": 4285120,
+  "attendanceTotalAway": 2283705,
+  "attendanceTotalHome": 2001415,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 114,
+   "name": "Cleveland Guardians",
+   "link": "/api/v1/teams/114"
+  }
+ },
+ {
+  "team_id": 115,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 82,
+  "year": "2026",
+  "attendanceAverageAway": 30717,
+  "attendanceAverageHome": 27721,
+  "attendanceAverageYtd": 29210,
+  "attendanceHigh": 48635,
+  "attendanceHighDate": "2026-07-04T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824334,
+   "link": "/api/v1.1/game/824334/feed/live",
+   "content": {
+    "link": "/api/v1/game/824334/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11155,
+  "attendanceLowDate": "2026-05-06T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824361,
+   "link": "/api/v1.1/game/824361/feed/live",
+   "content": {
+    "link": "/api/v1/game/824361/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 27721,
+  "attendanceTotal": 4702748,
+  "attendanceTotalAway": 2457322,
+  "attendanceTotalHome": 2245426,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 115,
+   "name": "Colorado Rockies",
+   "link": "/api/v1/teams/115"
+  }
+ },
+ {
+  "team_id": 116,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28538,
+  "attendanceAverageHome": 28677,
+  "attendanceAverageYtd": 28607,
+  "attendanceHigh": 45008,
+  "attendanceHighDate": "2026-04-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824299,
+   "link": "/api/v1.1/game/824299/feed/live",
+   "content": {
+    "link": "/api/v1/game/824299/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15034,
+  "attendanceLowDate": "2026-04-16T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824289,
+   "link": "/api/v1.1/game/824289/feed/live",
+   "content": {
+    "link": "/api/v1/game/824289/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28677,
+  "attendanceTotal": 4634403,
+  "attendanceTotalAway": 2311550,
+  "attendanceTotalHome": 2322853,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 116,
+   "name": "Detroit Tigers",
+   "link": "/api/v1/teams/116"
+  }
+ },
+ {
+  "team_id": 117,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 27254,
+  "attendanceAverageHome": 30520,
+  "attendanceAverageYtd": 28897,
+  "attendanceHigh": 41329,
+  "attendanceHighDate": "2026-03-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824218,
+   "link": "/api/v1.1/game/824218/feed/live",
+   "content": {
+    "link": "/api/v1/game/824218/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20934,
+  "attendanceLowDate": "2026-08-20T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824153,
+   "link": "/api/v1.1/game/824153/feed/live",
+   "content": {
+    "link": "/api/v1/game/824153/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 30520,
+  "attendanceTotal": 4652403,
+  "attendanceTotalAway": 2180285,
+  "attendanceTotalHome": 2472118,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 117,
+   "name": "Houston Astros",
+   "link": "/api/v1/teams/117"
+  }
+ },
+ {
+  "team_id": 118,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 82,
+  "year": "2026",
+  "attendanceAverageAway": 27987,
+  "attendanceAverageHome": 18853,
+  "attendanceAverageYtd": 23420,
+  "attendanceHigh": 39320,
+  "attendanceHighDate": "2026-03-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 824135,
+   "link": "/api/v1.1/game/824135/feed/live",
+   "content": {
+    "link": "/api/v1/game/824135/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10803,
+  "attendanceLowDate": "2026-09-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 824069,
+   "link": "/api/v1.1/game/824069/feed/live",
+   "content": {
+    "link": "/api/v1/game/824069/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 18853,
+  "attendanceTotal": 3794061,
+  "attendanceTotalAway": 2266963,
+  "attendanceTotalHome": 1527098,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 118,
+   "name": "Kansas City Royals",
+   "link": "/api/v1/teams/118"
+  }
+ },
+ {
+  "team_id": 119,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 36314,
+  "attendanceAverageHome": 49805,
+  "attendanceAverageYtd": 43060,
+  "attendanceHigh": 54211,
+  "attendanceHighDate": "2026-09-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823903,
+   "link": "/api/v1.1/game/823903/feed/live",
+   "content": {
+    "link": "/api/v1/game/823903/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 44092,
+  "attendanceLowDate": "2026-08-23T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823909,
+   "link": "/api/v1.1/game/823909/feed/live",
+   "content": {
+    "link": "/api/v1/game/823909/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 49805,
+  "attendanceTotal": 6975671,
+  "attendanceTotalAway": 2941452,
+  "attendanceTotalHome": 4034219,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 119,
+   "name": "Los Angeles Dodgers",
+   "link": "/api/v1/teams/119"
+  }
+ },
+ {
+  "team_id": 120,
+  "season": 2026,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2026",
+  "attendanceAverageAway": 28185,
+  "attendanceAverageHome": 22705,
+  "attendanceAverageYtd": 25445,
+  "attendanceHigh": 41161,
+  "attendanceHighDate": "2026-04-03T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 822758,
+   "link": "/api/v1.1/game/822758/feed/live",
+   "content": {
+    "link": "/api/v1/game/822758/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10746,
+  "attendanceLowDate": "2026-08-31T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 822689,
+   "link": "/api/v1.1/game/822689/feed/live",
+   "content": {
+    "link": "/api/v1/game/822689/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 22705,
+  "attendanceTotal": 4122079,
+  "attendanceTotalAway": 2282963,
+  "attendanceTotalHome": 1839116,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 120,
+   "name": "Washington Nationals",
+   "link": "/api/v1/teams/120"
+  }
+ },
+ {
+  "team_id": 121,
+  "season": 2026,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 84,
+  "year": "2026",
+  "attendanceAverageAway": 30749,
+  "attendanceAverageHome": 33902,
+  "attendanceAverageYtd": 32315,
+  "attendanceHigh": 41449,
+  "attendanceHighDate": "2026-03-26T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 823649,
+   "link": "/api/v1.1/game/823649/feed/live",
+   "content": {
+    "link": "/api/v1/game/823649/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 22672,
+  "attendanceLowDate": "2026-04-26T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 823635,
+   "link": "/api/v1.1/game/823635/feed/live",
+   "content": {
+    "link": "/api/v1/game/823635/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 33425,
+  "attendanceTotal": 5202757,
+  "attendanceTotalAway": 2490637,
+  "attendanceTotalHome": 2712120,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 121,
+   "name": "New York Mets",
+   "link": "/api/v1/teams/121"
+  }
+ }
+]
