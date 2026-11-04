@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 import uuid
 from bisect import bisect_left
@@ -16,12 +17,14 @@ from agents.tool_context import ToolContext
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, StreamingResponse
+from pydantic import BaseModel, Field
 
 import data_tools
 from context_panel import AgentContexts, PanelHooks, add_context_panel
 from tools import describe_schema, read_wikipedia, run_sql, search_wikipedia
 
 load_dotenv(Path(__file__).parent / ".env")
+logger = logging.getLogger(__name__)
 
 # Traces upload to OpenAI by default, which needs an OpenAI key. We're on Gemini.
 set_tracing_disabled(True)
@@ -302,6 +305,9 @@ team will explain the limit.
 A question is vague if it gives none of those, e.g. "Tell me about attendance", "Which teams are
 good?" or "Help me with my pitch."
 
+If the question comes with the conversation so far, read it in that light: "What about 2026?" is
+clear after a question about the Mets.
+
 If it is clear, reply CLEAR and nothing else. If it is vague, reply with one short question that
 asks for what is missing, and nothing else.""",
     model=MODEL,
@@ -469,12 +475,14 @@ def citation_problems(report: str, tool_calls: list[dict]) -> list[str]:
             + sample_size_problems(report))
 
 
-async def deep_research(question: str, hooks: PanelHooks, may_clarify: bool = True) -> Research:
-    """Research a question. Returns a report, or one clarifying question for a vague question.
+async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
+    """Research run.question. Fills in a report, or one clarifying question for a vague question.
 
     Pass may_clarify=False once the user has answered, so a question is asked at most once.
+    history is the conversation so far, so follow-up questions work.
     """
-    run = Research(hooks=hooks, question=question)
+    hooks = run.hooks
+    question = f"Conversation so far:\n{history}\n\nNew question: {run.question}" if history else run.question
 
     # 1. Clarify: a vague question gets one follow-up instead of a research run
     if may_clarify:
@@ -526,12 +534,74 @@ async def deep_research(question: str, hooks: PanelHooks, may_clarify: bool = Tr
     return run
 
 
+# --- Chat sessions and errors ---
+
+MAX_HISTORY_TURNS = 3
+MAX_HISTORY_CHARS = 1_500
+
+
+@dataclass
+class ChatSession:
+    """What a conversation remembers between messages. In-memory, single process."""
+
+    turns: list[tuple[str, str]] = field(default_factory=list)  # (question, answer)
+    pending_question: str | None = None  # waiting on the user's answer to a clarifying question
+
+
+def history_text(session: ChatSession) -> str:
+    return "\n\n".join(f"User: {q}\nAnswer: {a[:MAX_HISTORY_CHARS]}"
+                        for q, a in session.turns[-MAX_HISTORY_TURNS:])
+
+
+async def answer(session: ChatSession, message: str, hooks: PanelHooks) -> Research:
+    """Answer one message in a conversation, and remember it."""
+    pending = session.pending_question
+    question = (f"{pending} (The user added, when asked for more detail: {message})"
+                if pending else message)
+    run = Research(hooks=hooks, question=question)
+    session.pending_question = None
+    try:
+        await deep_research(run, may_clarify=pending is None, history=history_text(session))
+    except Exception as e:
+        run.report = friendly_error(e)
+        logger.exception("Research failed for %r", question)
+        return run
+    if run.needs_clarification:
+        session.pending_question = question
+    else:
+        session.turns.append((question, run.report))
+    return run
+
+
+def friendly_error(error: Exception) -> str:
+    """What to tell the user. Raw exception text stays in the logs."""
+    text = f"{type(error).__name__} {error}".lower()
+    if any(k in text for k in ("ratelimit", "resource_exhausted", "resourceexhausted", "quota", "429")):
+        return "The model has hit its usage limit for now. Please wait a minute and try again."
+    if any(k in text for k in ("timeout", "timed out", "deadline")):
+        return "The model took too long to respond. Please try again, or ask a narrower question."
+    if isinstance(error, MaxTurnsExceeded):
+        return "This question needed more research steps than allowed. Please ask a narrower question."
+    if any(k in text for k in ("permission", "credential", "unauthenticated", "403", "401")):
+        return "The app could not sign in to the model service. Please tell the site owner."
+    if "every researcher failed" in text:
+        return "The research failed for a technical reason, not because the data is missing. Please try again."
+    return "Something went wrong before the research finished. Please try again."
+
+
 # --- FastAPI App ---
 
 HERE = Path(__file__).parent
 
 # run_id -> every agent's context, in order. In-memory, single process. The context panel reads it.
 sessions: dict[str, AgentContexts] = {}
+# session_id -> the conversation. In-memory, single process.
+chats: dict[str, ChatSession] = {}
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, description="The user's question or follow-up.")
+    session_id: str | None = Field(default=None, description="Continue this conversation. Omit to start one.")
 
 app = FastAPI()
 add_context_panel(app, sessions)
@@ -543,21 +613,29 @@ def index():
     return FileResponse(HERE / "index.html", headers={"Cache-Control": "no-cache"})
 
 
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    """Answer one message. tool_calls lists every call made, by every agent, for this message."""
+    session_id = request.session_id or str(uuid.uuid4())
+    run_id = str(uuid.uuid4())
+    sessions[run_id] = AgentContexts()
+    hooks = PanelHooks(sessions[run_id], lambda event: None)
+    result = await answer(chats.setdefault(session_id, ChatSession()), request.message, hooks)
+    return {"response": result.report, "session_id": session_id, "tool_calls": result.tool_calls}
+
+
 @app.get("/run")
-async def run(question: str):
+async def run(question: str, session_id: str | None = None):
     """Research one question and stream what happens as Server-Sent Events."""
+    session_id = session_id or str(uuid.uuid4())
     run_id = str(uuid.uuid4())
     sessions[run_id] = AgentContexts()
     queue: asyncio.Queue = asyncio.Queue()
     hooks = PanelHooks(sessions[run_id], queue.put_nowait)
 
     async def work():
-        try:
-            result = await deep_research(question, hooks)
-            queue.put_nowait({"type": "done", "markdown": result.report})
-        except Exception as e:
-            # Auth, quota, a model that won't stop: show it on the page, not as a dropped stream.
-            queue.put_nowait({"type": "error", "message": f"{type(e).__name__}: {str(e)[:500]}"})
+        result = await answer(chats.setdefault(session_id, ChatSession()), question, hooks)
+        queue.put_nowait({"type": "done", "markdown": result.report, "session_id": session_id})
 
     task = asyncio.create_task(work())
 
