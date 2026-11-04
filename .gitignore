@@ -221,3 +221,6 @@ __marimo__/
 
 # macOS
 .DS_Store
+
+# Claude Code project notes (local only)
+CLAUDE.md
