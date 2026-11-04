@@ -9,7 +9,8 @@ game did against its own park's norm for that season.
 Team level: log(average attendance) on win rate, metro population, prior-year attendance
 and season. Residuals say how a team-season did against those expectations.
 
-Tables written: game_model, team_season_model, team_markets, model_coefficients, model_fit.
+Tables written: game_model, team_season_model, team_markets, model_coefficients, model_fit,
+crowd_tv_residual. Views written: games_clean, game_viewership_clean.
 
 Usage: uv run python scripts/build_models.py
 """
@@ -29,8 +30,12 @@ MARKETS = ROOT / "data" / "raw" / "market" / "team_markets.csv"
 
 CEILING_FILL = 0.95   # near_ceiling: at least this share of listed capacity, or
 CEILING_REPEATS = 5   # at the venue-season maximum in at least this many games
+SEASON_HIGH_SHARE = 0.90  # ceiling_game: capped, and at least this share of the season high
 PRIOR_GAMES = 10      # pre-game win rate is shrunk toward .500 by this many games
 FOLDS = 5
+MIN_CORR_GAMES = 5    # below this a correlation is not computed
+TOO_FEW_GAMES = 10    # below this a correlation should not be read at all
+SMALL_N_GAMES = 30    # below this a correlation is noisy: report it with its range
 
 GAME_FORMULA = (
     "log_attendance ~ C(venue_season) + C(day_night) + C(weekday) + C(month_group)"
@@ -56,11 +61,18 @@ GAME_TABLE_COMMENT = (
     "not in the data, so a residual may reflect one: say so. Correlational, not causal."
 )
 GAME_COLUMN_COMMENTS = {
-    "expected_attendance": "exp(fitted log attendance). NULL when not in the model.",
-    "residual_pct": "Actual over expected, minus 1. 0.10 means 10% above expected.",
-    "near_ceiling": "Fill of at least 95% of listed capacity, or at the venue-season maximum "
-                    "in a venue-season with 5+ games at that maximum. The crowd may be capped "
-                    "by the park, so true demand may be higher: say so when citing this game.",
+    "expected_raw": "exp(fitted log attendance), with no ceiling, so it can exceed what the park "
+                    "holds. Do not show this to users. NULL when not in the model.",
+    "expected_capped": "expected_raw, capped at the venue-season maximum for near_ceiling games and "
+                       "parks with 5+ games at that maximum. Use this for comparisons.",
+    "is_capped": "TRUE when expected_capped is below expected_raw. Say the value is capped.",
+    "residual_capped": "attendance minus expected_capped.",
+    "residual_pct_capped": "Actual over expected_capped, minus 1. 0.10 means 10% above expected.",
+    "residual_pct_raw": "Actual over expected_raw, minus 1. Misleading for capped games.",
+    "ceiling_game": "Capped or near_ceiling, and at least 90% of the park season high. Never say "
+                    "this game beat or missed expected: quote expected_text instead.",
+    "expected_text": "The phrase to quote word for word, without quotation marks. For a "
+                     "ceiling_game it replaces any comparison with expected.",
     "exclusion_reason": "Why the game is not in the model. NULL when it is.",
     "home_games_back_before": "Games behind the division leader at the start of the day.",
 }
@@ -75,6 +87,12 @@ TEAM_COLUMN_COMMENTS = {
 TEAM_TABLE_COMMENT = (
     "Team-season average attendance against win rate, metro population and prior-year crowd. "
     "Market population is not split in two-team metros. Correlational, not causal."
+)
+CROWD_TV_COMMENT = (
+    "Correlation of log crowd and log national TV audience within each network and season, then "
+    "after removing the park-season norm and game factors (corr_residual_tv). Excludes special "
+    "events and shared-gate doubleheaders. small_n means n under 30: give the range. too_few means "
+    "n under 10: do not read it. Correlational, not causal."
 )
 
 
@@ -164,14 +182,33 @@ def fit_game_model(g: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
         cov_kwds={"groups": sample["venue_season"].astype("category").cat.codes})
 
     sample["fitted"] = fit.fittedvalues
-    sample["expected_attendance"] = np.exp(sample["fitted"])
-    sample["residual"] = sample["attendance"] - sample["expected_attendance"]
-    sample["residual_pct"] = sample["attendance"] / sample["expected_attendance"] - 1
+    sample["expected_raw"] = np.exp(sample["fitted"])
+    sample["residual_raw"] = sample["attendance"] - sample["expected_raw"]
+    sample["residual_pct_raw"] = sample["attendance"] / sample["expected_raw"] - 1
     sample["venue_season_max"] = sample.groupby("venue_season")["attendance"].transform("max")
     at_max = sample["attendance"] == sample["venue_season_max"]
     repeats = at_max.groupby(sample["venue_season"]).transform("sum")
     sample["near_ceiling"] = ((sample["fill_rate_raw"] >= CEILING_FILL)
                               | (at_max & (repeats >= CEILING_REPEATS)))
+
+    # The model has no ceiling, so expected can exceed what a capped park can hold.
+    capped_park = sample["near_ceiling"] | (repeats >= CEILING_REPEATS)
+    ceiling = np.minimum(sample["expected_raw"], sample["venue_season_max"])
+    sample["expected_capped"] = sample["expected_raw"].where(~capped_park, ceiling)
+    sample["is_capped"] = sample["expected_capped"] < sample["expected_raw"]
+    sample["residual_capped"] = sample["attendance"] - sample["expected_capped"]
+    sample["residual_pct_capped"] = sample["attendance"] / sample["expected_capped"] - 1
+
+    # A crowd at or near the season high cannot show whether it beat or missed demand.
+    sample["ceiling_game"] = ((sample["near_ceiling"] | sample["is_capped"])
+                              & (sample["attendance"] >= SEASON_HIGH_SHARE * sample["venue_season_max"]))
+    # The exact phrase to quote, so a figure and its label cannot drift apart in a report.
+    sample["expected_text"] = [
+        f"The crowd was at or near the park's season high of {int(top):,}, and demand may have been higher." if ceiling
+        else f"{round(value):,} (capped at the park's season high)" if capped
+        else f"{round(value):,}"
+        for value, top, ceiling, capped in zip(sample["expected_capped"], sample["venue_season_max"],
+                                               sample["ceiling_game"], sample["is_capped"])]
 
     within_y = sample["log_attendance"] - sample.groupby("venue_season")["log_attendance"].transform("mean")
     within_e = sample["log_attendance"] - sample["fitted"]
@@ -256,6 +293,56 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
     return team[cols], pd.DataFrame(rows), stats
 
 
+def create_clean_views(con) -> None:
+    """The researchers' defaults: no special events, no shared-gate doubleheader games."""
+    con.execute("""
+        CREATE OR REPLACE VIEW games_clean AS
+        SELECT g.*, m.* EXCLUDE (game_pk, expected_raw, residual_raw, residual_pct_raw)
+        FROM games g JOIN game_model m USING (game_pk)
+        WHERE g.special_event IS NULL AND NOT g.dh_shared_gate
+          AND NOT (g.attendance_api_zero AND g.doubleheader = 'Y')""")
+    con.execute("""
+        CREATE OR REPLACE VIEW game_viewership_clean AS
+        SELECT g.*, v.* EXCLUDE (game_pk, season)
+        FROM games_clean g JOIN viewership_games v USING (game_pk)""")
+
+
+def correlation_row(network: str, season: int, crowd, tv, residual) -> dict:
+    """Correlations with TV audience, with a 95% range for the one that removes the baseline."""
+    n = len(crowd)
+    row = {"network": network, "season": season, "n": n, "corr_crowd_tv": None,
+           "corr_residual_tv": None, "residual_ci_low": None, "residual_ci_high": None,
+           "too_few": n < TOO_FEW_GAMES, "small_n": n < SMALL_N_GAMES}
+    if n >= MIN_CORR_GAMES:
+        row["corr_crowd_tv"] = float(np.corrcoef(crowd, tv)[0, 1])
+        r = float(np.corrcoef(residual, tv)[0, 1])
+        margin = 1.96 / np.sqrt(n - 3)
+        row.update(corr_residual_tv=r, residual_ci_low=float(np.tanh(np.arctanh(r) - margin)),
+                   residual_ci_high=float(np.tanh(np.arctanh(r) + margin)))
+    return row
+
+
+def crowd_tv_table(con) -> pd.DataFrame:
+    """Do crowds and TV audiences move together, before and after removing each park's norm?
+
+    All values are in logs. Audiences are only compared within a network, because network
+    reach swamps everything else.
+    """
+    d = con.execute("""select network, season, attendance, viewers_total, residual_pct_capped
+                       from game_viewership_clean
+                       where viewers_total is not null and residual_pct_capped is not null""").df()
+    d["crowd"] = np.log(d["attendance"].astype(float))
+    d["tv"] = np.log(d["viewers_total"].astype(float))
+    d["residual"] = np.log1p(d["residual_pct_capped"])
+    rows = [correlation_row(network, season, x["crowd"], x["tv"], x["residual"])
+            for (network, season), x in d.groupby(["network", "season"])]
+    for season, x in d.groupby("season"):
+        within = x[["crowd", "tv", "residual"]] - x.groupby("network")[["crowd", "tv", "residual"]].transform("mean")
+        rows.append(correlation_row("All networks, within network", season,
+                                    within["crowd"], within["tv"], within["residual"]))
+    return pd.DataFrame(rows)
+
+
 def main() -> None:
     con = duckdb.connect(str(DB_PATH))
     games = con.execute("select * from games").df()
@@ -266,22 +353,34 @@ def main() -> None:
     sample, game_coefs, game_stats = fit_game_model(g)
     team, team_coefs, team_stats = fit_team_model(con, sample, markets)
 
-    keep = ["game_pk", "expected_attendance", "residual", "residual_pct", "venue_season_max",
-            "near_ceiling"]
+    keep = ["game_pk", "expected_raw", "residual_raw", "residual_pct_raw", "expected_capped",
+            "is_capped", "residual_capped", "residual_pct_capped", "ceiling_game",
+            "expected_text", "venue_season_max", "near_ceiling"]
     game_model = g[["game_pk", "in_model", "exclusion_reason", "home_games_back_before"]].merge(
         sample[keep], on="game_pk", how="left")
     coefs = pd.concat([game_coefs, team_coefs])
     coefs["pct_effect"] = np.exp(coefs["coef"]) - 1
     fit_rows = pd.DataFrame([{"model": "game", **game_stats}, {"model": "team", **team_stats}])
 
-    for name, df in {"game_model": game_model, "team_season_model": team, "team_markets": markets,
-                     "model_coefficients": coefs, "model_fit": fit_rows}.items():
+    def write_table(name: str, df: pd.DataFrame) -> None:
         con.register("df_view", df)
         con.execute(f"CREATE OR REPLACE TABLE {name} AS SELECT * FROM df_view")
         con.unregister("df_view")
+        # pandas writes missing floats as NaN. In this database, unknown is always NULL.
+        floats = con.execute("""select column_name from duckdb_columns()
+                                where table_name = ? and data_type = 'DOUBLE'""", [name]).fetchall()
+        for (column,) in floats:
+            con.execute(f"UPDATE {name} SET {column} = NULL WHERE isnan({column})")
+
+    for name, df in {"game_model": game_model, "team_season_model": team, "team_markets": markets,
+                     "model_coefficients": coefs, "model_fit": fit_rows}.items():
+        write_table(name, df)
+    create_clean_views(con)
+    write_table("crowd_tv_residual", crowd_tv_table(con))
 
     con.execute(f"COMMENT ON TABLE game_model IS '{GAME_TABLE_COMMENT}'")
     con.execute(f"COMMENT ON TABLE team_season_model IS '{TEAM_TABLE_COMMENT}'")
+    con.execute(f"COMMENT ON TABLE crowd_tv_residual IS '{CROWD_TV_COMMENT}'")
     for col, text in GAME_COLUMN_COMMENTS.items():
         con.execute(f"COMMENT ON COLUMN game_model.{col} IS '{text}'")
     for col, text in TEAM_COLUMN_COMMENTS.items():

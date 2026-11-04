@@ -5,6 +5,7 @@ exception and a generic error gives it nothing to correct.
 """
 
 import json
+import math
 import re
 import threading
 from pathlib import Path
@@ -19,8 +20,14 @@ FIRST_SEASON, LAST_SEASON = 2024, 2026
 COVERAGE = "The data covers the 2024 to 2026 regular seasons. The postseason is not included."
 
 TABLE_DOCS = {
+    "games_clean": "Default for attendance work. Every played game except special events and "
+                   "shared-gate doubleheader games, with the game_model columns included.",
+    "game_viewership_clean": "Default for crowd vs TV work. games_clean joined to single-game "
+                             "national broadcasts: one row per broadcast.",
+    "crowd_tv_residual": "Precomputed crowd vs TV correlations with n per network and season. Use "
+                         "this first for whether crowds and TV audiences move together.",
     "games": "One row per played regular-season game, 2024 to 2026. Key: game_pk. NULL attendance "
-             "means unknown. Exclude special_event games from comparisons unless asked.",
+             "means unknown. Includes special events: use games_clean unless asked about them.",
     "teams": "One row per team per season, with league and division. Key: team_id, season.",
     "team_season_attendance": "MLB season attendance totals per team. Key: team_id, season.",
     "viewership_games": "One row per single-game national broadcast, 2025 and 2026, including "
@@ -45,11 +52,19 @@ VIEWERSHIP_NOTE = ("Viewership is publicly reported average audience (P2+) compi
                    "TV audience, excluding streaming add-ons. Netflix games are streaming-only. "
                    "If total_uncertain is true, say the total is uncertain. If viewers_basis is "
                    "main_only, say so, and compare only within one network.")
+GAME_MODEL_NOTE = ("Use residual_pct_capped for rankings and groups of games. When ceiling_game "
+                   "is true, never say the game beat or missed expected: give expected_text "
+                   "word for word as its own sentence, with no quotation marks or percent gap. Results compare a "
+                   "game with its own park that season. Promotions are not in the data.")
 RESULT_NOTES = {
     "viewership_games": VIEWERSHIP_NOTE,
+    "game_viewership_clean": VIEWERSHIP_NOTE + " " + GAME_MODEL_NOTE,
     "fox_windows": VIEWERSHIP_NOTE,
-    "game_model": "Residuals compare a game with its own park that season. Promotions are not in "
-                  "the data. For near_ceiling games true demand may be higher than the crowd.",
+    "game_model": GAME_MODEL_NOTE,
+    "games_clean": GAME_MODEL_NOTE,
+    "crowd_tv_residual": "Correlational, not causal. Give n for every figure. small_n means the "
+                         "figure is noisy: give the range. too_few means do not read it. "
+                         + VIEWERSHIP_NOTE,
     "team_season_model": "Results are relative to the prior year, so a rebound can look like "
                          "over-performance. Check prior_residual_pct and look for the reason.",
     "model_coefficients": "Effects are correlational, not causal. The indoor term partly reflects "
@@ -69,7 +84,9 @@ def _error(message: str, hint: str) -> str:
 
 
 def _table_names(con) -> list[str]:
-    rows = con.execute("select table_name from duckdb_tables() order by 1").fetchall()
+    rows = con.execute("""select table_name from duckdb_tables()
+                          union select view_name from duckdb_views() where not internal
+                          order by 1""").fetchall()
     return [r[0] for r in rows]
 
 
@@ -164,7 +181,7 @@ def _empty_result_message(con, query: str) -> str:
         rows = con.execute("select distinct name from teams where season = 2026 order by 1").fetchall()
         hints.append("games.home_team and away_team use full names such as 'New York Yankees'. "
                      f"Teams: {', '.join(r[0] for r in rows)}.")
-    if "season" in text and re.search(r"viewership_games|fox_window", source, re.IGNORECASE):
+    if "season" in text and re.search(r"viewership|fox_window", source, re.IGNORECASE):
         hints.append("Viewership covers 2025 and 2026 only. The 2025 tables end in early September.")
     if "network" in text:
         rows = con.execute("select distinct network from viewership_games order by 1").fetchall()
@@ -210,6 +227,9 @@ def run_sql(query: str) -> str:
         outside = _years_outside_data(query)
         if rows and outside:
             notes.append(f"{outside} is outside the data. {COVERAGE}")
+        # NaN is not valid JSON and crashes the model call: corr() of one row returns it.
+        rows = [[None if isinstance(v, float) and not math.isfinite(v) else v for v in row]
+                for row in rows]
         result = {"columns": columns, "row_count": min(len(rows), MAX_ROWS), "rows": rows[:MAX_ROWS]}
         if not rows:
             result["message"] = _empty_result_message(con, query)
@@ -248,8 +268,9 @@ def describe_schema(table: str = "") -> str:
             return _error(f"There is no table named {table!r}.", f"Available tables: {', '.join(names)}.")
         columns = con.execute("""select column_name, data_type, comment from duckdb_columns()
                                  where table_name = ? order by column_index""", [name]).fetchall()
-        comment = con.execute("select comment from duckdb_tables() where table_name = ?",
-                              [name]).fetchone()[0]
+        comment = con.execute("""select comment from duckdb_tables() where table_name = ?
+                                 union all select comment from duckdb_views()
+                                 where view_name = ?""", [name, name]).fetchone()[0]
         return json.dumps({
             "table": name, "description": TABLE_DOCS.get(name, ""), "note": comment,
             "columns": [{"name": c, "type": t, **({"description": d} if d else {})}
