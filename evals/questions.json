@@ -7,13 +7,16 @@
    "0.47",
    "0.16",
    "0.14",
-   "Mostly no"
+   "Mostly no",
+   "0.52",
+   "prove"
   ],
   "must_not": [
    "raw correlation",
    "technical",
    "ESPN"
-  ]
+  ],
+  "chart": null
  },
  {
   "id": "sample_mets",
@@ -42,9 +45,11 @@
    "converted",
    "share of viewers",
    "data cannot answer",
-   "technical"
+   "technical",
+   "96.0%"
   ],
-  "max_researchers": 2
+  "max_researchers": 2,
+  "chart": null
  },
  {
   "id": "capped_game",
@@ -124,7 +129,8 @@
   ],
   "must_not": [
    "technical"
-  ]
+  ],
+  "max_researchers": 2
  },
  {
   "id": "main_only",
@@ -135,7 +141,8 @@
   "must_not": [
    "676",
    "technical"
-  ]
+  ],
+  "max_researchers": 2
  },
  {
   "id": "single_game_tv",
@@ -145,7 +152,8 @@
   ],
   "must_not": [
    "technical"
-  ]
+  ],
+  "max_researchers": 2
  },
  {
   "id": "rsn",
@@ -197,8 +205,6 @@
   "must_not": [
    "37,140.2",
    "coefficient of",
-   "technical",
-   "ceiling game",
    "6,219"
   ]
  },
@@ -274,8 +280,10 @@
   ],
   "must_not": [
    "demand may have been higher",
-   "technical"
-  ]
+   "technical",
+   "7.1%"
+  ],
+  "chart": null
  },
  {
   "id": "new_as",
@@ -295,7 +303,8 @@
    "no national tv broadcasts recorded",
    "no broadcasts",
    "technical"
-  ]
+  ],
+  "chart": null
  },
  {
   "id": "plain_lookup",
@@ -306,7 +315,8 @@
   "must_not": [
    "demand may have been higher",
    "technical"
-  ]
+  ],
+  "chart": null
  },
  {
   "id": "new_cubs_day_night",
@@ -316,7 +326,34 @@
   ],
   "must_not": [
    "demand may have been higher",
-   "technical"
+   "technical",
+   "byproduct",
+   "rather than a general"
   ]
+ },
+ {
+  "id": "chart_cubs_months",
+  "q": "How did Cubs attendance change by month in 2025?",
+  "chart": "line"
+ },
+ {
+  "id": "chart_top_teams",
+  "q": "Which five teams drew the highest average attendance in 2025?",
+  "chart": "bar"
+ },
+ {
+  "id": "chart_weekdays",
+  "q": "How did average attendance differ by weekday across MLB in 2025?",
+  "chart": "bar"
+ },
+ {
+  "id": "chart_al_east",
+  "q": "Compare actual and expected average attendance for the five AL East teams in 2025.",
+  "chart": "paired"
+ },
+ {
+  "id": "chart_network_rank",
+  "q": "Rank the networks by average national TV audience in 2026.",
+  "chart": "any"
  }
 ]

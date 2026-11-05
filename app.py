@@ -13,14 +13,16 @@ from urllib.parse import unquote
 
 import uvicorn
 from agents import Agent, ModelSettings, Runner, function_tool, set_tracing_disabled
-from agents.exceptions import MaxTurnsExceeded
+from agents.exceptions import MaxTurnsExceeded, ModelBehaviorError
 from agents.extensions.models.litellm_model import LitellmModel
 from agents.tool_context import ToolContext
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+import charts
+import citations
 import data_tools
 from context_panel import AgentContexts, PanelHooks, add_context_panel
 from tools import describe_schema, read_wikipedia, run_sql, search_wikipedia
@@ -64,7 +66,13 @@ class Research:
     findings: list[str] = field(default_factory=list)  # what each researcher reported, for the Writer
     tool_calls: list[dict] = field(default_factory=list)  # every call, for POST /chat
     errors: list[str] = field(default_factory=list)  # researcher failures, for logs
+    failed_roles: set[str] = field(default_factory=set)  # roles with no successful researcher yet
+    retries: int = 0  # researchers rerun after a malformed tool call
     report: str = ""
+    chart: dict | None = None  # built from query rows in charts.py, never from the report's text
+    cited: str = ""  # the report with inline citations, as the checks saw it
+    sources: list[dict] = field(default_factory=list)  # footnotes, numbered as in the report
+    data_note: str = ""
     needs_clarification: bool = False
 
 
@@ -82,7 +90,8 @@ network_text and capped_text. Copy those word for word as a bullet that starts R
 To find a team, query team_aliases by alias_key, in lower case with no punctuation, then filter other
 tables by team_id. Work out every difference and average in SQL, as a column in your query, so the
 exact number is in your result. Report only what the task asks for: no extra games, networks or
-seasons."""
+seasons. For a trend or a comparison of several items, get it in one query with one label column,
+such as month, season, team, network or weekday, and the value columns, so it can be charted."""
 
 SQL_CITATION = "End every bullet with the tables it came from, e.g. (table: games, game_model)."
 
@@ -135,8 +144,9 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 - A team's TV picture: from team_tv_summary, by team_id. Report appearances, single_games,
   fox_window_games, special_event_games, avg_single_game_viewers, highest_single_game_viewers and
   network_mix. Window games have no audience of their own.
-- Whether crowds and TV audiences move together overall: select headline_text from crowd_tv_headline.
-  Report only that, with no network figures. Use crowd_tv_residual only if the task names a network.
+- Whether crowds and TV audiences move together overall: select headline_text from crowd_tv_headline,
+  and scope, n, corr_team_crowd_tv, ci_low and ci_high from team_crowd_tv for scope '2025 and 2026'.
+  Report only those, with no network figures. Use crowd_tv_residual only if the task names a network.
 - Comparing networks: select network_text from network_audience.
 - Viewership starts in 2025. A season before that is not in our data: say that, and never say a team
   had no broadcasts in that season.
@@ -183,7 +193,7 @@ ROLES = {
 
 VIEWERSHIP_TABLES = {"viewership_games", "game_viewership_clean", "fox_windows", "fox_window_games",
                      "crowd_tv_residual", "crowd_tv_headline", "game_tv_lookup", "team_tv_summary",
-                     "network_audience"}
+                     "team_crowd_tv", "network_audience"}
 ATTENDANCE_MODEL_TABLES = {"games_clean", "game_viewership_clean", "team_season_model"}
 
 
@@ -209,9 +219,15 @@ PERFORMANCE_QUESTION = re.compile(r"expected|expectation|predict|over-?perform|u
 NETWORK_NAMES = re.compile(r"\b(ESPN|FS1|TBS|NBC|ABC|Fox|Netflix|truTV)\b", re.I)
 HEADLINE_END = "both ranges include zero"
 OPENING_CHARS = 120
+GAME_DATE = re.compile(r"\b(March|April|May|June|July|August|September|October) \d{1,2}\b")
+SEVERAL_TEAMS = re.compile(r"\bteams\b|\bcompare\b|\b(by|each) (month|weekday|day|network)\b", re.I)
+SIMPLE_LOOKUP = re.compile(r"^(how many|how much|what was|what were)\b", re.I)
+STATED_CAUSE = re.compile(r"by-?product|stems? from|as a result of|attributable|(is|are) linked to|"
+                          r"rather than a (general )?preference|(difference|gap) (is|was) (due to|because)", re.I)
 NETWORK_AVERAGE = re.compile(r"averaged [\d,]+ viewers across \d+ (windows|games) with known audiences")
 LIMIT_LIST = re.compile(r"\b(RSN|Peacock|late-September)\b")
 EXPECTED_WORDS = re.compile(r"expected (attendance|average)|model's expected", re.I)
+TEAM_LEVEL = re.compile(r"team-season|team-level|team level|each team|consistent with|prove", re.I)
 HEADLINE_PARTS = re.compile(r"^(Yes on the raw numbers|Mostly no after comparing)")
 CROWD_TV_QUESTION = re.compile(r"coincid|go with|went with|correlat|move together|moved together|link|relationship", re.I)
 AFTER_SEASON = re.compile(r"\b(after|following) the (\d{4} )?season\b", re.I)
@@ -219,7 +235,7 @@ AFTER_SEASON = re.compile(r"\b(after|following) the (\d{4} )?season\b", re.I)
 
 def sentences(line: str) -> list[str]:
     """Split a line into sentences, keeping a trailing citation with its sentence."""
-    return re.split(r"(?<=[.!?])\s+(?!\(tables?:)", line)
+    return re.split(r"(?<=[.!?])(?<!St\.)(?<!vs\.)(?<! [A-Z]\.)\s+(?!\(tables?:)", line)
 
 
 def edit_sentences(report: str, edit) -> str:
@@ -264,7 +280,48 @@ def trim_to_headline(report: str, question: str) -> str:
     if NETWORK_NAMES.search(question):
         return report
     stop = report.find(".", end)
-    return report[:stop + 1] if stop >= 0 else report
+    if stop < 0:
+        return report
+    # After the headline, only the team-level fact and its reading may follow.
+    rest = [s for s in sentences(report[stop + 1:].strip().split("\n")[0]) if TEAM_LEVEL.search(s)]
+    return " ".join([report[:stop + 1]] + rest)
+
+
+def drop_stated_causes(report: str) -> str:
+    """The data shows what coincided. A claimed cause of a crowd or audience is removed."""
+    def edit(sentence: str) -> str | None:
+        match = STATED_CAUSE.search(sentence)
+        if not match:
+            return sentence
+        head, comma, _ = sentence[:match.start()].rpartition(",")
+        if comma and re.search(r"\d", head):  # keep the facts and lose only the causal clause
+            return head.rstrip() + "."
+        return None
+
+    return edit_sentences(report, edit)
+
+
+def fix_units(report: str) -> str:
+    """A gap between fill rates is percentage points, and coverage is a whole percent."""
+    report = re.sub(r"(\d+)\.0%( of the country)", r"\1%\2", report)
+    report = re.sub(r"(fill.{0,70}?\b)(\d+(?:\.\d+)?)%( higher| lower| more| less)", r"\1\2 percentage points\3",
+                    report, flags=re.I)
+    return re.sub(r"(fill.{0,90}?difference of )(\d+(?:\.\d+)?)%", r"\1\2 percentage points", report, flags=re.I)
+
+
+def team_level_sentence(fact: dict) -> str:
+    return (f"Across team-seasons, teams with bigger average crowds also had bigger average national TV "
+            f"audiences (correlation {fact['corr_team_crowd_tv']:.2f}, n = {fact['n']}, range "
+            f"{fact['ci_low']:.2f} to {fact['ci_high']:.2f}), which is consistent with team-level factors "
+            "such as popularity and market size driving both, though the data does not prove the cause "
+            "(table: team_crowd_tv).")
+
+
+def require_no_proof_note(report: str) -> str:
+    """The team-level reading always comes with the statement that the data does not prove it."""
+    if re.search(r"consistent with", report, re.I) and not re.search(r"prove", report, re.I):
+        return f"{report} The data does not prove the cause."
+    return report
 
 
 def drop_unasked(report: str, question: str) -> str:
@@ -326,43 +383,66 @@ def club_name(team: str) -> str:
 
 
 def answer_team_season(report: str, question: str) -> dict | None:
-    """The one team-season an answer is about: a team in the question or the opening sentence, and
-    the season the question names. Anything else mentioned is context, not the subject."""
-    years = [int(y) for y in re.findall(r"\b(20\d\d)\b", question)]
-    if len(set(years)) != 1:
+    """The one team-season an answer is about, or None. A game, a comparison or several teams is not
+    a team-season answer. 'Which team...' takes the team the answer opens with."""
+    years = set(re.findall(r"\b(20\d\d)\b", question))
+    if len(years) != 1 or GAME_DATE.search(question) or SEVERAL_TEAMS.search(question):
+        return None
+    rows = [t for t in data_tools.team_season_facts() if t["season"] == int(next(iter(years)))]
+    named = [t for t in rows if club_name(t["home_team"]).lower() in question.lower()]
+    if len(named) > 1:
+        return None
+    if named:
+        return named[0]
+    if not re.match(r"which team\b", question.strip(), re.I):
         return None
     opening = report[:OPENING_CHARS]  # not a sentence split: 'St. Louis' would end it early
-    rows = [t for t in data_tools.team_season_facts() if t["season"] == years[0]]
-    return (next((t for t in rows if club_name(t["home_team"]).lower() in question.lower()), None)
-            or next((t for t in rows if club_name(t["home_team"]).lower() in opening.lower()), None))
+    return next((t for t in rows if club_name(t["home_team"]).lower() in opening.lower()), None)
 
 
-def missing_team_facts(report: str, question: str, tool_calls: list[dict]) -> list[tuple[str, dict]]:
-    """Required sentences for the team-season the answer is about."""
-    t = answer_team_season(report, question) if "team_season_model" in tables_queried(tool_calls) else None
-    if t is None:
-        return []
-    required = []
-    average = f"{t['avg_attendance']:,.0f}"
-    if average not in report:
-        required.append(f"The {t['home_team']} averaged {average} a game in {t['season']} "
-                        "(table: team_season_model).")
-    change = t["yoy_change_pct"]
-    if f"{abs(change):.1%}" not in report:
-        side = "up" if change >= 0 else "down"
-        required.append(f"Average attendance was {side} {abs(change):.1%} from "
-                        f"{t['prior_season_avg']:,.0f} the season before (table: team_season_model).")
-    gap = t["residual_pct"]
-    if gap is not None and f"{abs(gap):.1%}" not in report:
+def team_opening(t: dict) -> str:
+    """The conclusion of a team answer, with its key numbers, for when the Writer's opening lacks them."""
+    change, gap = t["yoy_change_pct"], t["residual_pct"]
+    text = f"The {t['home_team']} averaged {t['avg_attendance']:,.0f} a game in {t['season']}"
+    if gap is not None:
         side = "above" if gap >= 0 else "below"
-        required.append(f"That is {abs(gap):.1%} {side} the {t['expected_avg_attendance']:,.0f} that the "
-                        "prior two years of crowds, win rate and market would predict "
-                        "(table: team_season_model).")
-    if t["possible_rebound"] and "rebound" not in report.lower():
+        text += (f", {abs(gap):.1%} {side} the {t['expected_avg_attendance']:,.0f} their prior two years "
+                 "of crowds, win rate and market would predict,")
+    text += f" {'up' if change >= 0 else 'down'} {abs(change):.1%} from {t['prior_season_avg']:,.0f} the season before"
+    if t["possible_rebound"]:
         was = "below" if t["prior_residual_pct"] < 0 else "above"
-        required.append(f"Part of this may be a rebound: the team was {abs(t['prior_residual_pct']):.1%} "
-                        f"{was} its prediction the season before (table: team_season_model).")
-    return [(fact, t) for fact in required]
+        text += f", and part of this may be a rebound from {abs(t['prior_residual_pct']):.1%} {was} prediction"
+    return text + " (table: team_season_model)."
+
+
+def first_sentence_gaps(report: str, t: dict) -> list[str]:
+    """Which key facts the first sentence lacks."""
+    first = sentences(report.strip().split("\n")[0])[0]
+    needed = [f"{t['avg_attendance']:,.0f}", f"{abs(t['yoy_change_pct']):.1%}"]
+    if t["residual_pct"] is not None:
+        needed.append(f"{abs(t['residual_pct']):.1%}")
+    gaps = [n for n in needed if n not in first]
+    if t["possible_rebound"] and "rebound" not in first.lower():
+        gaps.append("rebound")
+    return gaps
+
+
+def opening_gaps(report: str, question: str, tool_calls: list[dict]) -> tuple[dict | None, list[str]]:
+    """The team-season the answer is about, and which key facts its first sentence lacks."""
+    t = answer_team_season(report, question) if "team_season_model" in tables_queried(tool_calls) else None
+    return (t, first_sentence_gaps(report, t)) if t else (None, [])
+
+
+def lead_with_team_result(report: str, t: dict) -> str:
+    """Put the conclusion first, and drop later sentences that only repeat its numbers."""
+    numbers = [f"{t['avg_attendance']:,.0f}", f"{abs(t['yoy_change_pct']):.1%}"]
+    if t["residual_pct"] is not None:
+        numbers.append(f"{abs(t['residual_pct']):.1%}")
+
+    def edit(sentence: str) -> str | None:
+        return None if "http" not in sentence and any(n in sentence for n in numbers) else sentence
+
+    return f"{team_opening(t)} {edit_sentences(report, edit)}".strip()
 
 
 def season_assumption(question: str, today: date) -> tuple[str, int] | None:
@@ -378,7 +458,10 @@ def season_assumption(question: str, today: date) -> tuple[str, int] | None:
 def round_counts(report: str) -> str:
     """'170.69' -> '171' for counts of people. Percents, correlations and small decimals stay."""
     def whole(m: re.Match) -> str:
-        return f"{round(float(m[0].replace(',', ''))):,}" if float(m[0].replace(",", "")) >= 100 else m[0]
+        value = float(m[0].replace(",", ""))
+        if value >= 100:
+            return f"{round(value):,}"
+        return f"{value:.1f}" if len(m[0].split(".")[1]) > 2 else m[0]  # 8.9333 reads as noise
     return re.sub(r"(?<![\d.])\d[\d,]*\.\d+(?![\d%]| percent| percentage)", whole, report)
 
 
@@ -406,6 +489,10 @@ def word_count(report: str) -> int:
 def strip_quoted_phrases(report: str) -> str:
     """The capped phrases are copied from the data and read wrongly in quotation marks."""
     return re.sub(r"[\"“]([^\"”]*(?:capped at the park|season high)[^\"”]*)[\"”]", r"\1", report)
+
+
+def is_simple_lookup(question: str) -> bool:
+    return bool(SIMPLE_LOOKUP.search(question.strip()))
 
 
 def asks_why(question: str) -> bool:
@@ -445,6 +532,10 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
     if role == "context" and not asks_why(run.question) and not found_anomaly(run.tool_calls):
         return ("Context refused: the question does not ask why, and no anomaly has been found. "
                 "Do not retry unless the findings show one.")
+    if is_simple_lookup(run.question) and run.researchers >= 1 and not run.failed_roles:
+        return "This lookup needs one researcher, and one has it. Do not re-verify. Reply DONE."
+    if is_simple_lookup(run.question) and run.researchers >= 2:
+        return "This lookup has had its one retry. Reply DONE."
     # Parallel calls from one Lead turn share a request count, so they count as one round.
     turn = ctx.usage.requests
     if turn not in run.rounds and len(run.rounds) >= MAX_ROUNDS:
@@ -458,16 +549,27 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
     run.researchers += 1
     base = ROLES[role]
     agent = base.clone(name=f"{base.name} {run.researchers}")
+    failed = False
     try:
-        result = await Runner.run(agent, f"Task: {task}", context=run, hooks=run.hooks, max_turns=14)
+        try:
+            result = await Runner.run(agent, f"Task: {task}", context=run, hooks=run.hooks, max_turns=14)
+        except ModelBehaviorError:  # Gemini sometimes emits a malformed tool call: try once more
+            run.retries += 1
+            result = await Runner.run(agent, f"Task: {task}", context=run, hooks=run.hooks, max_turns=14)
         findings = str(result.final_output)
     except MaxTurnsExceeded:
+        failed = True
         findings = f"The {role} researcher ran out of turns on this task and found no answer."
     except Exception as e:
-        # Say what failed, so the gap reaches the Lead and the report instead of vanishing.
+        # Say what failed, so the gap reaches the Lead instead of vanishing.
+        failed = True
         findings = f"The {role} researcher failed on this task and found no answer ({type(e).__name__})."
         run.errors.append(f"{agent.name}: {type(e).__name__}: {str(e)[:300]}")
-    run.findings.append(f"Task ({role}): {task}\n\n{findings}")
+    if failed:
+        run.failed_roles.add(role)
+    else:
+        run.failed_roles.discard(role)
+        run.findings.append(f"Task ({role}): {task}\n\n{findings}")
     run.tool_calls.append({"name": "research", "args": {"task": task, "role": role},
                            "result": findings, "agent": ctx.agent.name})
     return findings
@@ -510,7 +612,8 @@ relate to national TV audiences in 2025 and 2026.
 1. Call describe_schema to see what the data covers.
 2. Split the question into independent tasks: 1 for a simple lookup, 2 to 4 for anything broader.
    For a comparison, ask for the difference to be worked out in SQL, and for fill rates.
-   If the data cannot cover what was asked, send no context researcher.
+   If the data cannot cover what was asked, send no context researcher. A simple lookup gets one
+   researcher. Do not re-verify an answer: send another only to retry a failed researcher.
    Call research once per task, all in the same turn, so the researchers work in parallel. Each
    task must name the teams, seasons and comparison it needs. Use the attendance role for crowds
    and viewership for TV. Use context only when the question asks why, or in a later round if the
@@ -542,15 +645,19 @@ you're given.
    without quotation marks.
 3. Phrase everything else yourself from the facts, in natural sentences. Answer only what was
    asked: no extra games, networks or seasons, even if the findings have them. Copy numbers exactly:
-   show attendance and viewers as whole numbers, percents to one decimal, correlations to two.
+   show attendance and viewers as whole numbers, percents to one decimal, correlations to two. An
+   average of a count, such as appearances per team, is one decimal and must be called an average.
    Never work out a difference or an average yourself: use the one in the findings.
 4. When comparing, say the result directly: who was higher, by how much, and both fill rates. Give
-   only the compared values, the difference and the fill rates.
-5. A team result: give the change from the season before first, then how far it was from what the
-   prior two years of crowds, win rate and market would predict. If possible_rebound is true, say
-   part of this may be a rebound.
+   only the compared values, the difference and the fill rates. A gap between fill rates is in
+   percentage points. Do not say why a gap exists: the data shows what coincided, not the reason.
+5. A team result: the first sentence states the conclusion with the key numbers: the average, how
+   far it was from what the prior two years of crowds, win rate and market would predict, the
+   change from the season before, and part of this may be a rebound if possible_rebound is true.
+   Context comes after.
 6. A game in a regional Fox window: say the data has no number for that game alone, give the whole
-   window's total and the games in it, and the share of the country it reached.
+   window's total and the games in it, and the share of the country that game reached, as a whole
+   percent.
 7. If an audience is uncertain or main-network only, say so. If a value is empty, say it is unknown.
    But for a game with the season-high sentence, use that sentence and say nothing more about
    expected attendance.
@@ -565,9 +672,14 @@ you're given.
     with no citation for them. A researcher failing is a technical problem, not a limit of the data.
 11. Write for a seller: everyday words, no column names or game IDs, and no mention of research,
     findings or rules. Say what is true and move on.
-12. Do not add notes about data sources, Nielsen, streaming, promotions, cause and effect, or which
+12. If the findings have both the adjusted game-level result and the team-level correlation, give
+    the team-level correlation with n and its range. You may then say the pattern is consistent with
+    team-level factors such as popularity and market size driving both, and you must say the data
+    does not prove the cause.
+13. Do not add notes about data sources, Nielsen, streaming, promotions, cause and effect, or which
     season was assumed. Those are added automatically.
-13. If the question only asks what something in an earlier answer means, explain it from How the
+14. A chart is added automatically when it fits: do not mention one.
+15. If the question only asks what something in an earlier answer means, explain it from How the
     numbers work, in a few sentences, with no citation.
 
 How the numbers work:
@@ -618,7 +730,8 @@ def unverified_numbers(report: str, tool_calls: list[dict], sources: list[float]
         if decimals == 0 and (value < 100 or 1900 <= value <= 2100):
             continue  # counts, ranks and years
         scale = {"m": 1e6, "k": 1e3}.get((match[1] or " ")[0].lower(), 1)
-        tolerance = 0.5 * 10 ** -decimals + 1e-9
+        # A count can be a rounding step away from a query's average.
+        tolerance = 1.0 if value >= 1000 else 0.5 * 10 ** -decimals + 1e-9
         targets = [(value, tolerance), (value / 100, tolerance / 100), (value * scale, tolerance * scale)]
         hit = any(abs(s - t) <= tol for t, tol in targets
                   for s in sources[bisect_left(sources, t - tol):bisect_left(sources, t + tol) + 1])
@@ -676,10 +789,11 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
         if unquote(url).split("#")[0] not in read:
             problems.append(f"The link {url} was not read in this research.")
     for group in re.findall(r"\(tables?: ([^)]+)\)", report):
-        for table in re.split(r",\s*", group.strip()):
+        for table in re.split(r"[,;]\s*(?:tables?:\s*)?", group.strip()):
             if table not in queried:
                 problems.append(f"The table {table} was not queried in this research.")
-    missing = [f"Include this required fact: {f}" for f, _ in missing_team_facts(report, question, tool_calls)]
+    team, gaps = opening_gaps(report, question, tool_calls)
+    missing = [f"The first sentence must state the conclusion with its key numbers. Start with: {team_opening(team)}"] if gaps else []
     return (list(dict.fromkeys(problems)) + unverified_numbers(report, tool_calls)
             + sample_size_problems(report) + jargon_problems(report) + missing)
 
@@ -707,11 +821,12 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     await Runner.run(lead, f"Question: {question}", context=run, hooks=hooks, max_turns=12)
 
     # A technical failure must never read as a gap in the data.
-    if run.errors and run.researchers == len(run.errors):
+    if run.errors and not run.findings:
         raise RuntimeError(f"Every researcher failed: {run.errors[0]}")
 
     # 3. Write: one call, outside the loop. The Writer sees only the question and the findings.
-    findings = "\n\n---\n\n".join(run.findings) or (
+    gaps_note = [f"The {role} researcher failed on its task, for a technical reason." for role in sorted(run.failed_roles)]
+    findings = "\n\n---\n\n".join(run.findings + gaps_note) or (
         "No new research was needed. Answer from the conversation so far." if history else
         "The question is outside what the data covers: the 2024 to 2026 regular seasons.")
     prompt = f"Question: {question}\n\nFindings:\n\n{findings}"
@@ -739,25 +854,32 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
 
     run.report = strip_quoted_phrases(run.report).replace("—", ", ").replace("READY:", "").strip()
     run.report = fix_citation_format(run.report)
+    team, _ = opening_gaps(run.report, asked, run.tool_calls)  # before cleanup can remove the opening
     run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
-    run.report = add_thousands(drop_unasked(run.report, run.question))
+    run.report = fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question))))
+    if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):
+        fact = data_tools.team_crowd_tv_fact()
+        run.report += f" {team_level_sentence(fact)}"
+        run.tool_calls.append({"name": "run_sql", "args": {"query": "select * from team_crowd_tv where scope = '2025 and 2026'"},
+                               "result": json.dumps(fact), "agent": "Required facts check"})
+    run.report = require_no_proof_note(run.report)
     for note in missing_audience_notes(run.report, run.tool_calls):
         run.report += f" {note}"
-    for fact, row in missing_team_facts(run.report, asked, run.tool_calls):
-        run.report += f" {fact}"
+    if team and first_sentence_gaps(run.report, team):
+        run.report = lead_with_team_result(run.report, team)
         # Logged like any other call: these numbers came from a query, made here by the app.
-        query = (f"select * from team_season_model where home_team = '{row['home_team']}' "
-                 f"and season = {row['season']}")
+        query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
+                 f"and season = {team['season']}")
         run.tool_calls.append({"name": "run_sql", "args": {"query": query},
-                               "result": json.dumps(row, default=str), "agent": "Required facts check"})
-    # never hide it: the reader should know what could not be traced
-    untraced = [p for p in citation_problems(run.report, run.tool_calls, asked) if p.startswith("The table")]
-    if untraced:
-        run.report += "\n\n**Could not be traced to a source:** " + " ".join(untraced)
+                               "result": json.dumps(team, default=str), "agent": "Required facts check"})
+    run.chart = charts.pick_chart(run.report, run.question, run.tool_calls, list(data_tools.TABLE_DOCS))
+    run.cited = run.report
+    run.report, run.sources, run.data_note = citations.apply(
+        run.report, run.tool_calls, read_urls(run.tool_calls), list(data_tools.TABLE_DOCS), sentences)
     if assumed:
         run.report += f"\n\n*Assumed {assumed[0]} means the {assumed[1]} season.*"
     run.report += fixed_notes(run.report, run.tool_calls)
-    if run.errors:
+    if run.failed_roles:  # only if no later researcher covered that part
         run.report += ("\n\n**Incomplete:** part of this research failed for a technical reason, "
                        "not because the data is missing. Try the question again.")
     return run
@@ -844,6 +966,12 @@ def index():
     return FileResponse(HERE / "index.html", headers={"Cache-Control": "no-cache"})
 
 
+@app.get("/charts")
+def team_chart_rows():
+    return JSONResponse(json.loads(json.dumps(data_tools.chart_data(), default=str)),
+                        headers={"Cache-Control": "max-age=3600"})
+
+
 @app.post("/chat")
 async def chat(request: ChatRequest):
     """Answer one message. tool_calls lists every call made, by every agent, for this message."""
@@ -852,7 +980,8 @@ async def chat(request: ChatRequest):
     sessions[run_id] = AgentContexts()
     hooks = PanelHooks(sessions[run_id], lambda event: None)
     result = await answer(chats.setdefault(session_id, ChatSession()), request.message, hooks)
-    return {"response": result.report, "session_id": session_id, "tool_calls": result.tool_calls}
+    return {"response": citations.to_markdown(result.report, result.sources, result.data_note),
+            "session_id": session_id, "tool_calls": result.tool_calls, "chart": result.chart}
 
 
 @app.get("/run")
@@ -863,10 +992,19 @@ async def run(question: str, session_id: str | None = None):
     sessions[run_id] = AgentContexts()
     queue: asyncio.Queue = asyncio.Queue()
     hooks = PanelHooks(sessions[run_id], queue.put_nowait)
+    sent = 0  # timeline events already sent on this stream
+
+    def with_timeline(event: dict) -> dict:
+        """Send the timeline on this stream. A separate request could reach another instance."""
+        nonlocal sent
+        fresh = sessions[run_id].events[sent:]
+        sent += len(fresh)
+        return {**event, "events": fresh}
 
     async def work():
         result = await answer(chats.setdefault(session_id, ChatSession()), question, hooks)
-        queue.put_nowait({"type": "done", "markdown": result.report, "session_id": session_id})
+        queue.put_nowait({"type": "done", "markdown": result.report, "session_id": session_id,
+                          "chart": result.chart, "sources": result.sources, "data_note": result.data_note})
 
     task = asyncio.create_task(work())
 
@@ -874,7 +1012,7 @@ async def run(question: str, session_id: str | None = None):
         try:
             yield f"data: {json.dumps({'type': 'start', 'run_id': run_id})}\n\n"
             while True:
-                event = await queue.get()
+                event = with_timeline(await queue.get())
                 yield f"data: {json.dumps(event, default=str)}\n\n"
                 if event["type"] in ("done", "error"):
                     break

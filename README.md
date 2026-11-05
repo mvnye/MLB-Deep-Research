@@ -9,7 +9,7 @@ To test the agent against 23 questions with required facts, run `uv run python s
 
 **Expected answer:** Yes on the raw numbers, but there is no clear link after adjusting. Comparing games on the same network, smaller crowds tended to come with smaller TV audiences, a moderate correlation of 0.34 in 2025 (n = 82, range 0.14 to 0.52) and 0.47 in 2026 (n = 83, range 0.29 to 0.62), where 0 means no link and 1 means a perfect match. Adjusting compares each game with its own park's usual crowd, so popular teams do not drive the result. After that, the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34). Both ranges include zero, so a crowd below a park's usual level did not clearly mean a smaller TV audience.
 
-**Source:** `crowd_tv_residual`, built from `game_viewership_clean`.
+**Source:** `crowd_tv_headline`, built from `crowd_tv_residual`.
 
 **Agent answer:**
 

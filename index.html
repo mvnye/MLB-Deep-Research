@@ -3,9 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light" />
         <title>MLB Attendance and TV Research</title>
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
+            :root { color-scheme: light; }
+            html { background: #fff; }
             body { font-family: system-ui, sans-serif; padding: 2rem; color: #111; line-height: 1.5; }
             main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
             h1 { font-size: 1.5rem; }
@@ -27,13 +30,35 @@
             .answer p { margin-top: 0.5rem; }
             .answer ul { margin: 0.5rem 0 0 1.25rem; }
             .answer em { color: #555; font-size: 0.9rem; }
+            sup.fn { font-size: 0.7em; line-height: 0; }
+            sup.fn a { text-decoration: none; padding: 0 1px; }
+            .sources { margin-top: 0.75rem; font-size: 0.85rem; }
+            .sources ol { list-style: none; margin-top: 0.5rem; }
+            .sources li { margin-top: 0.35rem; }
+            .sources code { display: block; white-space: pre-wrap; word-break: break-word; background: #f5f5f3; padding: 0.4rem; margin-top: 0.25rem; font-size: 0.8rem; }
+            .data-note { font-size: 0.8rem; color: #52514e; margin-top: 0.5rem; }
             .error { color: #b00020; }
             #status { color: #666; font-size: 0.9rem; min-height: 1.4rem; }
             .row { display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; }
-            #work { display: none; }
-            #work li { margin-left: 1.25rem; font-size: 0.85rem; color: #444; }
-            .agent { font-weight: 600; }
-            body.show-work #work { display: block; }
+            #progress { list-style: none; color: #555; font-size: 0.9rem; }
+            #progress:empty { display: none; }
+            .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; align-items: center; font-size: 0.9rem; }
+            select { font: inherit; padding: 0.25rem; border: 1px solid #bbb; background: #fff; }
+            svg { width: 100%; height: auto; display: block; }
+            svg text { font-size: 11px; fill: #52514e; font-family: inherit; }
+            .grid { stroke: #e5e5e2; stroke-width: 1; }
+            .axis0 { stroke: #a8a7a2; stroke-width: 1; }
+            #tooltip { position: fixed; display: none; pointer-events: none; z-index: 5; background: #111; color: #fff; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 4px; max-width: 16rem; }
+            .legend { display: flex; gap: 1rem; font-size: 0.85rem; margin: 0.25rem 0 0.5rem; }
+            .legend span::before { content: ""; display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: 2px; margin-right: 0.3rem; background: var(--key); vertical-align: -1px; }
+            details { margin-top: 0.75rem; font-size: 0.85rem; }
+            table { border-collapse: collapse; margin-top: 0.5rem; width: 100%; }
+            th, td { text-align: right; padding: 0.15rem 0.5rem; border-bottom: 1px solid #eee; }
+            th:first-child, td:first-child { text-align: left; }
+            .scroll { max-height: 16rem; overflow-y: auto; }
+            .answer-chart { margin-top: 1rem; }
+            .answer-chart h3 { font-size: 0.95rem; margin: 0 0 0.25rem; }
+            .chart-source { font-size: 0.8rem; color: #52514e; margin-top: 0.25rem; }
             /* The context panel stays hidden until the toggle opens it. */
             body:not(.show-work) { margin-right: 0 !important; }
             body:not(.show-work) #context-panel { display: none !important; }
@@ -49,7 +74,7 @@
                 <h2 style="margin-top: 0.75rem">Who it is for</h2>
                 <p>Sports media and sponsorship sellers preparing team pitches.</p>
                 <h2 style="margin-top: 0.75rem">How to use it</h2>
-                <p>Ask about a team, season, game or comparison, then ask follow-ups in the same conversation. A vague question gets one clarifying question first. Answers take up to a few minutes, and every fact shows its source.</p>
+                <p>Ask about a team, season, game or comparison, then ask follow-ups in the same conversation. A vague question gets one clarifying question first. Answers take up to about 2 minutes, and every fact shows its source.</p>
                 <p class="limits">Attendance covers the 2024 to 2026 regular seasons. National TV audiences cover 2025 and 2026, and the 2025 figures end in early September. Local TV viewership and the postseason are not included.</p>
             </section>
 
@@ -62,20 +87,33 @@
                     <button type="button">Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?</button>
                     <button type="button">Why did the Mets over-perform on attendance in 2025?</button>
                     <button type="button">How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?</button>
+                    <button type="button">How did the Oakland A's viewership change in their final season before moving?</button>
                 </div>
             </section>
 
-            <div id="status" role="status"></div>
             <div id="thread"></div>
+            <div id="status" role="status"></div>
+            <ul id="progress"></ul>
 
             <div class="row">
                 <button id="toggle" class="plain" type="button" aria-expanded="false">Show the agents' work</button>
                 <button id="reset" class="plain" type="button">New conversation</button>
             </div>
-            <section id="work">
-                <h2>The agents' work</h2>
-                <ol id="activity"></ol>
+
+            <section>
+                <h2>Team attendance: actual and expected</h2>
+                <div class="controls"><label>Team <select id="team"></select></label></div>
+                <p id="teamTitle" style="font-weight: 600; font-size: 0.95rem"></p>
+                <div class="legend">
+                    <span style="--key: #2a78d6">Actual average</span>
+                    <span style="--key: #eb6834">Expected average</span>
+                </div>
+                <svg id="teamChart" viewBox="0 0 680 240" role="img" aria-label="Actual and expected average attendance by season"></svg>
+                <p class="limits" id="teamNote"></p>
+                <p class="chart-source">Source: team_season_model</p>
+                <details><summary>Show as a table</summary><table id="teamTable"></table></details>
             </section>
+            <div id="tooltip"></div>
         </main>
 
         <script src="/context-panel.js"></script>
@@ -89,27 +127,83 @@
                 text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
             // Text is escaped first, so the model's output can never add HTML of its own.
-            function inline(text) {
+            let turnCount = 0;
+
+            function inline(text, turn) {
                 return escapeHtml(text)
+                    .replace(/\[(\d+)\](?!\()/g, `<sup class="fn"><a href="#src-${turn}-$1" data-source="src-${turn}-$1">$1</a></sup>`)
                     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
                     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
                     .replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
             }
 
-            function renderMarkdown(markdown) {
+            function renderMarkdown(markdown, turn) {
+                const inline2 = (text) => inline(text, turn);
                 return markdown.trim().split(/\n{2,}/).map((block) => {
                     const lines = block.split("\n");
                     const heading = block.match(/^(#{1,6})\s+(.*)$/);
-                    if (heading && lines.length === 1) return `<h3>${inline(heading[2])}</h3>`;
+                    if (heading && lines.length === 1) return `<h3>${inline2(heading[2])}</h3>`;
                     if (lines.every((l) => /^\s*[-*]\s+/.test(l))) {
-                        return "<ul>" + lines.map((l) => `<li>${inline(l.replace(/^\s*[-*]\s+/, ""))}</li>`).join("") + "</ul>";
+                        return "<ul>" + lines.map((l) => `<li>${inline2(l.replace(/^\s*[-*]\s+/, ""))}</li>`).join("") + "</ul>";
                     }
                     return lines.map((l) => {
                         const h = l.match(/^(#{1,6})\s+(.*)$/);
-                        return h ? `<h3>${inline(h[2])}</h3>` : `<p>${inline(l)}</p>`;
+                        return h ? `<h3>${inline2(h[2])}</h3>` : `<p>${inline2(l)}</p>`;
                     }).join("");
                 }).join("");
             }
+
+            function sourceList(sources, turn) {
+                const box = document.createElement("details");
+                box.className = "sources";
+                const summary = document.createElement("summary");
+                summary.textContent = `Sources (${sources.length})`;
+                const list = document.createElement("ol");
+                box.append(summary, list);
+                for (const s of sources) {
+                    const li = document.createElement("li");
+                    li.id = `src-${turn}-${s.n}`;
+                    if (s.kind === "article") {
+                        const link = document.createElement("a");
+                        link.href = s.url;
+                        link.target = "_blank";
+                        link.rel = "noopener";
+                        link.textContent = s.title;
+                        li.append(`${s.n}. `, link);
+                    } else {
+                        const item = document.createElement("details");
+                        const head = document.createElement("summary");
+                        head.textContent = `${s.n}. ${s.tables.join(", ") || "Database query"}`;
+                        const sql = document.createElement("code");
+                        sql.textContent = s.query;
+                        item.append(head, sql);
+                        if (s.rows.length) {
+                            const table = document.createElement("table");
+                            table.innerHTML = "<tr>" + s.columns.map((c) => `<th>${escapeHtml(String(c))}</th>`).join("") + "</tr>" +
+                                s.rows.map((r) => "<tr>" + r.map((v) => `<td>${escapeHtml(typeof v === "number" ? v.toLocaleString(undefined, { maximumFractionDigits: 2 }) : String(v ?? ""))}</td>`).join("") + "</tr>").join("");
+                            const scroll = document.createElement("div");
+                            scroll.style.overflowX = "auto";
+                            scroll.appendChild(table);
+                            item.appendChild(scroll);
+                        }
+                        li.appendChild(item);
+                    }
+                    list.appendChild(li);
+                }
+                return box;
+            }
+
+            // A footnote opens the list and its entry, then scrolls to it.
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a[data-source]");
+                if (!link) return;
+                e.preventDefault();
+                const item = document.getElementById(link.dataset.source);
+                if (!item) return;
+                item.closest(".sources").open = true;
+                item.querySelector("details")?.setAttribute("open", "");
+                item.scrollIntoView({ block: "center" });
+            });
 
             function addTurn(question) {
                 const turn = document.createElement("section");
@@ -123,32 +217,47 @@
                 return answer;
             }
 
-            function addActivity(agent, text) {
+            // Short, plain progress lines. The full timeline lives only in the side panel.
+            const ROLE_WORK = { Attendance: "game data", Viewership: "TV audience data" };
+            function progressLine(agent, text) {
+                const name = agent.replace(/ \d+$/, "");
+                if (text.startsWith("called run_sql")) return `${name} is querying ${ROLE_WORK[name.split(" ")[0]] || "the data"}`;
+                if (text.startsWith("called describe_schema")) return `${name} is checking what data is available`;
+                if (text.startsWith("called search_wikipedia")) return `${name} is searching Wikipedia`;
+                if (text.startsWith("called read_wikipedia")) return `${name} is reading a Wikipedia article`;
+                if (text.startsWith("called research")) return "Lead is sending a researcher";
+                if (text === "started" && name === "Lead") return "Lead is planning the research";
+                if (text === "started" && name === "Writer") return "Writer is writing the answer";
+                if (text === "started" && name === "Clarifier") return "Checking the question";
+                return null;
+            }
+
+            function addProgress(agent, text) {
+                const line = progressLine(agent, text);
+                const list = $("progress");
+                if (!line || list.lastElementChild?.textContent === line) return;
                 const li = document.createElement("li");
-                if (agent) {
-                    const name = document.createElement("span");
-                    name.className = "agent";
-                    name.textContent = agent + " ";
-                    li.appendChild(name);
-                }
-                li.append(text);
-                $("activity").appendChild(li);
+                li.textContent = line;
+                list.appendChild(li);
+                while (list.children.length > 5) list.firstElementChild.remove();
             }
 
             function finish() {
                 $("status").textContent = "";
+                $("progress").replaceChildren();
                 $("send").disabled = false;
+                document.querySelectorAll("#samples button").forEach((b) => (b.disabled = false));
                 source.close();
             }
 
             function ask(question) {
-                if (!question) return;
-                if (source) source.close();
+                if (!question || $("send").disabled) return;
                 const answer = addTurn(question);
                 $("question").value = "";
                 $("send").disabled = true;
-                $("status").textContent = "Researching. This can take up to a few minutes.";
-                $("activity").replaceChildren();
+                document.querySelectorAll("#samples button").forEach((b) => (b.disabled = true));
+                $("status").textContent = "Researching. This can take up to about 2 minutes.";
+                $("progress").replaceChildren();
                 resetContext();
 
                 const params = new URLSearchParams({ question });
@@ -156,12 +265,21 @@
                 source = new EventSource("/run?" + params);
                 source.onmessage = (msg) => {
                     const event = JSON.parse(msg.data);
-                    if (event.type === "start") runId = event.run_id;
-                    else if (event.type === "context") showContext(runId);
-                    else if (event.type === "activity") addActivity(event.agent, event.text);
+                    // The timeline arrives on this stream, so the panel fills whether it is open or not.
+                    if (event.events?.length) renderTimeline(event.events);
+                    if (event.type === "activity") addProgress(event.agent, event.text);
                     else if (event.type === "done") {
                         sessionId = event.session_id;
-                        answer.innerHTML = renderMarkdown(event.markdown);
+                        const turn = ++turnCount;
+                        answer.innerHTML = renderMarkdown(event.markdown, turn);
+                        if (event.chart) answer.appendChild(answerChart(event.chart));
+                        if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
+                        if (event.data_note) {
+                            const note = document.createElement("p");
+                            note.className = "data-note";
+                            note.innerHTML = inline(event.data_note, turn);
+                            answer.appendChild(note);
+                        }
                         finish();
                     }
                 };
@@ -181,12 +299,179 @@
                 const open = document.body.classList.toggle("show-work");
                 $("toggle").textContent = open ? "Hide the agents' work" : "Show the agents' work";
                 $("toggle").setAttribute("aria-expanded", open);
+                // A hidden panel loses its scroll position, so open at the latest activity.
+                if (open) { contextPanel.scrollTop = contextPanel.scrollHeight; contextPanel.scrollLeft = contextPanel.scrollWidth; }
             });
             $("reset").addEventListener("click", () => {
                 sessionId = null;
                 $("thread").replaceChildren();
-                $("activity").replaceChildren();
                 resetContext();
+            });
+
+            // --- Charts ---
+            const SVG = "http://www.w3.org/2000/svg";
+            const BLUE = "#2a78d6", ORANGE = "#eb6834";
+            let chartData = null;
+
+            function el(tag, attrs, parent, text) {
+                const node = document.createElementNS(SVG, tag);
+                for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+                if (text !== undefined) node.textContent = text;
+                parent.appendChild(node);
+                return node;
+            }
+
+            function tip(node, text) {
+                const box = $("tooltip");
+                node.addEventListener("mousemove", (e) => {
+                    box.textContent = text;
+                    box.style.display = "block";
+                    box.style.left = Math.min(e.clientX + 12, innerWidth - 270) + "px";
+                    box.style.top = e.clientY + 12 + "px";
+                });
+                node.addEventListener("mouseleave", () => (box.style.display = "none"));
+            }
+
+            const fmt = (value, unit) => {
+                const text = Math.round(value * 10) % 10 && Math.abs(value) < 1000 ? value.toFixed(1) : Math.round(value).toLocaleString();
+                return unit === "%" ? `${text}%` : unit ? `${text} ${unit}` : text;
+            };
+            const short = (value) => Math.abs(value) >= 1e6 ? (value / 1e6).toFixed(1) + "M" : Math.round(value).toLocaleString();
+
+            function niceMax(value) {
+                const power = 10 ** Math.floor(Math.log10(Math.max(value, 1)));
+                return [1, 2, 2.5, 5, 10].map((m) => m * power).find((v) => v >= value);
+            }
+
+            function axisTitles(svg, xText, yText, width, height, vertical) {
+                el("text", { x: width / 2, y: height - 4, "text-anchor": "middle" }, svg, vertical ? xText : yText);
+                el("text", { x: 11, y: height / 2, "text-anchor": "middle", transform: `rotate(-90 11 ${height / 2})` }, svg, vertical ? yText : xText);
+            }
+
+            function lineChart(svg, c) {
+                const W = 680, H = 300, m = { l: 74, r: 36, t: 16, b: 48 }, w = W - m.l - m.r, h = H - m.t - m.b;
+                svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+                const values = c.series[0].values, top = niceMax(Math.max(...values)), low = Math.min(0, ...values);
+                const x = (i) => m.l + (values.length === 1 ? w / 2 : (i / (values.length - 1)) * w);
+                const y = (v) => m.t + h - ((v - low) / (top - low)) * h;
+                for (let i = 0; i <= 4; i++) {
+                    const v = low + ((top - low) * i) / 4;
+                    el("line", { x1: m.l, x2: m.l + w, y1: y(v), y2: y(v), class: i === 0 ? "axis0" : "grid" }, svg);
+                    el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg, short(v) + (c.unit === "%" ? "%" : ""));
+                }
+                c.labels.forEach((label, i) => el("text", { x: x(i), y: m.t + h + 16, "text-anchor": "middle" }, svg, label));
+                el("path", { d: values.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join(" "), fill: "none", stroke: BLUE, "stroke-width": 2 }, svg);
+                values.forEach((v, i) => {
+                    el("circle", { cx: x(i), cy: y(v), r: 4, fill: BLUE, stroke: "#fff", "stroke-width": 2 }, svg);
+                    tip(el("circle", { cx: x(i), cy: y(v), r: 12, fill: "transparent" }, svg), `${c.labels[i]}: ${fmt(v, c.unit)}`);
+                });
+                axisTitles(svg, c.x_label, c.y_label, W, H, true);
+            }
+
+            function barChart(svg, c) {
+                const pair = c.series.length === 2, rowH = pair ? 30 : 24;
+                const W = 680, m = { l: 170, r: 76, t: 8, b: 44 }, w = W - m.l - m.r, h = c.labels.length * rowH, H = h + m.t + m.b;
+                svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+                const all = c.series.flatMap((s) => s.values);
+                const top = niceMax(Math.max(...all, 0)), low = Math.min(0, ...all);
+                const x = (v) => m.l + ((v - low) / (top - low)) * w;
+                for (let i = 0; i <= 4; i++) {
+                    const v = low + ((top - low) * i) / 4;
+                    el("line", { x1: x(v), x2: x(v), y1: m.t, y2: m.t + h, class: v === 0 ? "axis0" : "grid" }, svg);
+                    el("text", { x: x(v), y: m.t + h + 14, "text-anchor": "middle" }, svg, short(v) + (c.unit === "%" ? "%" : ""));
+                }
+                const thick = pair ? 11 : 16;
+                c.labels.forEach((label, i) => {
+                    const center = m.t + rowH * (i + 0.5);
+                    el("text", { x: m.l - 8, y: center + 4, "text-anchor": "end" }, svg, label.length > 24 ? label.slice(0, 23) + "…" : label);
+                    c.series.forEach((s, k) => {
+                        const v = s.values[i], top2 = center - (pair ? thick + 1 - k * (thick + 2) : thick / 2);
+                        const left = Math.min(x(0), x(v)), width = Math.max(Math.abs(x(v) - x(0)), 1);
+                        const bar = el("rect", { x: left, y: top2, width, height: thick, rx: 3, fill: k ? ORANGE : BLUE }, svg);
+                        tip(bar, `${label}, ${s.name}: ${fmt(v, c.unit)}`);
+                        if (!pair) el("text", { x: left + width + 5, y: center + 4 }, svg, short(v) + (c.unit === "%" ? "%" : ""));
+                    });
+                });
+                axisTitles(svg, c.x_label, c.y_label, W, H, false);
+            }
+
+            function answerChart(c) {
+                const wrap = document.createElement("figure");
+                wrap.className = "answer-chart";
+                const title = document.createElement("h3");
+                title.textContent = c.title;
+                wrap.appendChild(title);
+                if (c.series.length === 2) {
+                    const legend = document.createElement("div");
+                    legend.className = "legend";
+                    c.series.forEach((s, k) => {
+                        const key = document.createElement("span");
+                        key.style.setProperty("--key", k ? ORANGE : BLUE);
+                        key.textContent = s.name;
+                        legend.appendChild(key);
+                    });
+                    wrap.appendChild(legend);
+                }
+                const svg = document.createElementNS(SVG, "svg");
+                svg.setAttribute("role", "img");
+                svg.setAttribute("aria-label", c.title);
+                (c.type === "line" ? lineChart : barChart)(svg, c);
+                wrap.appendChild(svg);
+                const source = document.createElement("p");
+                source.className = "chart-source";
+                source.textContent = "Source: " + (c.source.join(", ") || "database query");
+                wrap.appendChild(source);
+                return wrap;
+            }
+
+            function drawTeamChart() {
+                const rows = chartData.teams.filter((t) => t.team_id === Number($("team").value));
+                const svg = $("teamChart");
+                svg.replaceChildren();
+                const m = { l: 74, r: 10, t: 22, b: 44 }, w = 680 - m.l - m.r, h = 240 - m.t - m.b;
+                const max = Math.max(...rows.flatMap((t) => [t.avg_attendance, t.expected_avg_attendance || 0])) * 1.1;
+                const y = (v) => m.t + h - (v / max) * h;
+                const step = max > 30000 ? 10000 : 5000;
+                for (let v = 0; v <= max; v += step) {
+                    el("line", { x1: m.l, x2: m.l + w, y1: y(v), y2: y(v), class: v === 0 ? "axis0" : "grid" }, svg);
+                    el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg, v.toLocaleString());
+                }
+                const group = w / rows.length, bar = Math.min(56, group / 3);
+                const column = (cx, value, color, label) => {
+                    const top = y(value), base = m.t + h;
+                    const path = `M${cx},${base} V${top + 4} Q${cx},${top} ${cx + 4},${top} H${cx + bar - 4} Q${cx + bar},${top} ${cx + bar},${top + 4} V${base} Z`;
+                    tip(el("path", { d: path, fill: color }, svg), label);
+                    el("text", { x: cx + bar / 2, y: top - 5, "text-anchor": "middle" }, svg, Math.round(value).toLocaleString());
+                };
+                rows.forEach((t, i) => {
+                    const center = m.l + group * (i + 0.5);
+                    column(center - bar - 1, t.avg_attendance, BLUE, `${t.season} actual: ${Math.round(t.avg_attendance).toLocaleString()}`);
+                    if (t.expected_avg_attendance) column(center + 1, t.expected_avg_attendance, ORANGE, `${t.season} expected: ${Math.round(t.expected_avg_attendance).toLocaleString()}`);
+                    el("text", { x: center, y: m.t + h + 15, "text-anchor": "middle" }, svg, t.season);
+                });
+                axisTitles(svg, "Season", "Average attendance (fans per game)", 680, 240, true);
+                $("teamTitle").textContent = `${rows[rows.length - 1].home_team}: actual and expected average attendance by season`;
+                const missing = rows.filter((t) => !t.expected_avg_attendance);
+                $("teamNote").textContent = "Expected is what the prior two years of crowds, win rate and market would predict. " +
+                    missing.map((t) => `${t.season}: no prediction (${t.exclusion_reason}).`).join(" ");
+                $("teamTable").innerHTML = "<tr><th>Season</th><th>Actual</th><th>Expected</th></tr>" + rows.map((t) =>
+                    `<tr><td>${t.season}</td><td>${Math.round(t.avg_attendance).toLocaleString()}</td><td>${t.expected_avg_attendance ? Math.round(t.expected_avg_attendance).toLocaleString() : "None"}</td></tr>`).join("");
+            }
+
+            function option(select, value, label) {
+                const o = document.createElement("option");
+                o.value = value;
+                o.textContent = label;
+                select.appendChild(o);
+            }
+
+            fetch("/charts").then((r) => r.json()).then((data) => {
+                chartData = data;
+                const teams = new Map(data.teams.map((t) => [t.team_id, t.home_team]));
+                [...teams].sort((a, b) => a[1].localeCompare(b[1])).forEach(([id, name]) => option($("team"), id, name));
+                $("team").value = 121;
+                $("team").addEventListener("change", drawTeamChart);
+                drawTeamChart();
             });
         </script>
     </body>

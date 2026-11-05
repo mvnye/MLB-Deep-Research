@@ -11,7 +11,7 @@ attendance and season. Residuals say how a team-season did against those expecta
 
 Tables written: game_model, team_season_model, team_markets, model_coefficients, model_fit,
 crowd_tv_residual, crowd_tv_headline, game_tv_lookup, team_tv_summary, network_audience,
-team_aliases, data_coverage. Views written: games_clean, game_viewership_clean.
+team_crowd_tv, team_aliases, data_coverage. Views written: games_clean, game_viewership_clean.
 
 Usage: uv run python scripts/build_models.py
 """
@@ -433,6 +433,29 @@ def crowd_tv_headline(table: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame([{"headline_text": text}])
 
 
+def team_crowd_tv_table(con) -> pd.DataFrame:
+    """Team-level link: each team-season's average crowd against its average TV audience, in logs.
+
+    Single-game broadcasts only, 2025 and 2026. An average across networks partly reflects which
+    networks carried a team.
+    """
+    d = con.execute("""
+        select s.season, m.avg_attendance, s.avg_single_game_viewers
+        from team_tv_summary s join team_season_model m using (team_id, season)
+        where s.avg_single_game_viewers is not null""").df()
+    d["crowd"] = np.log(d["avg_attendance"].astype(float))
+    d["tv"] = np.log(d["avg_single_game_viewers"].astype(float))
+    rows = []
+    for scope, x in [("2025 and 2026", d), ("2025", d[d.season == 2025]), ("2026", d[d.season == 2026])]:
+        n = len(x)
+        r = float(np.corrcoef(x["crowd"], x["tv"])[0, 1])
+        margin = 1.96 / np.sqrt(n - 3)
+        rows.append({"scope": scope, "n": n, "corr_team_crowd_tv": round(r, 2),
+                     "ci_low": round(float(np.tanh(np.arctanh(r) - margin)), 2),
+                     "ci_high": round(float(np.tanh(np.arctanh(r) + margin)), 2)})
+    return pd.DataFrame(rows)
+
+
 def network_audience_table(con) -> pd.DataFrame:
     """Average audience per network and season, counting only broadcasts with a known total.
 
@@ -608,6 +631,7 @@ def main() -> None:
                          ("window_total", "BIGINT"), ("coverage_pct", "INTEGER"), ("official_date", "DATE")):
         con.execute(f"ALTER TABLE game_tv_lookup ALTER {column} TYPE {kind}")
     con.execute(TEAM_TV_SUMMARY_SQL)
+    write_table("team_crowd_tv", team_crowd_tv_table(con))
     write_table("network_audience", network_audience_table(con))
     write_table("team_aliases", team_aliases_table(con))
     write_table("data_coverage", pd.DataFrame(COVERAGE_ROWS))

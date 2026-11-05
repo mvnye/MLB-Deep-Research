@@ -36,6 +36,8 @@ TABLE_DOCS = {
     "crowd_tv_headline": "The fixed answer to whether crowds and TV audiences move together. Use "
                          "headline_text for that question, word for word.",
     "crowd_tv_residual": "Crowd vs TV correlations per network and season, with n and ranges.",
+    "team_crowd_tv": "Team-level link: each team-season's average crowd against its average national "
+                     "TV audience, single-game broadcasts, with n and a 95% range.",
     "game_tv_lookup": "One row per nationally televised game, including Fox windows and special "
                       "events. Use this first for how many people watched a game.",
     "team_tv_summary": "One row per team and season for 2025 and 2026: appearances, single games, Fox "
@@ -68,6 +70,7 @@ TABLE_DOCS = {
 # Sent with any result that touches these tables, so the caveat travels with the numbers.
 RESULT_NOTES = {
     "crowd_tv_headline": "Copy headline_text word for word.",
+    "team_crowd_tv": "Report corr_team_crowd_tv with n and ci_low to ci_high.",
     "network_audience": "Copy network_text word for word.",
     "game_tv_lookup": "When can_split is false, the data has no audience for this game alone: report "
                       "window_total as the whole window, and coverage_pct as the share of the country.",
@@ -253,6 +256,31 @@ def run_sql(query: str) -> str:
                                    "Select fewer columns or aggregate.")
             text = json.dumps(result, default=str)
         return text
+    finally:
+        con.close()
+
+
+def _rows(con, sql: str) -> list[dict]:
+    cursor = con.execute(sql)
+    columns = [c[0] for c in cursor.description]
+    return [dict(zip(columns, r)) for r in cursor.fetchall()]
+
+
+def chart_data() -> dict:
+    """Rows for the page's fixed team chart."""
+    con = _connect()
+    try:
+        return {"teams": _rows(con, """select team_id, home_team, season, avg_attendance,
+                expected_avg_attendance, exclusion_reason from team_season_model order by home_team, season""")}
+    finally:
+        con.close()
+
+
+def team_crowd_tv_fact() -> dict:
+    """The team-level correlation across both seasons. Read by code, not by the model."""
+    con = _connect()
+    try:
+        return _rows(con, "select * from team_crowd_tv where scope = '2025 and 2026'")[0]
     finally:
         con.close()
 
