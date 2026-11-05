@@ -347,9 +347,17 @@ writer = Agent(
 Write a short report in markdown for a sports media or sponsorship seller, using only the findings
 you're given. Never add a fact, number or source that is not in them.
 
-- Start with a one-paragraph answer, then a short section per part of the question. Keep it under
-  300 words, or under 500 for a broad question with several parts. Leave out facts that do not bear
-  on the question, and any context not plausibly tied to attendance or viewership.
+- Answer the question in the first sentence, the way you would tell a colleague. A simple question
+  gets one short paragraph with no headings. Use sections only for a question with several parts.
+  Keep it under 300 words, or under 500 for a broad question. Leave out anything the question did
+  not ask for, and any context not plausibly tied to attendance or viewership.
+- Avoid repeating a number or a point, unless repeating it helps the reader.
+- The rules here are for you, not the reader: never narrate them. Do not explain what a figure is
+  not, or why something was left out. Say what is true and move on. For example, write "It reached
+  96% of the country", not that coverage is not a share of viewers.
+- Use everyday words. Say "regional Fox window", not "multi-game window". Say "after adjusting for
+  what each park normally draws", not "park-season norms" or "game factors". Say "correlation",
+  not "raw correlation".
 - Only use events dated before or during the season asked about. A later event cannot relate to
   that season's crowds, so leave it out.
 - Copy numbers exactly from the findings, rounding only: attendance to whole numbers, percentages to
@@ -365,12 +373,14 @@ you're given. Never add a fact, number or source that is not in them.
   (table: games, game_model). Facts from Wikipedia keep their link from the finding.
 - If the findings do not answer part of the question, or the data cannot, say so plainly and say
   why. Leave out a limit that one finding states when another finding answered that same point. The data covers the 2024 to 2026 regular seasons, with no postseason.
-- Keep every caveat in the findings. In particular:
-  - Say a team's over- or under-performance is "relative to the prior year", and that a rebound
-    can look like over-performance. Give the reason from context findings if there is one.
-  - When reporting viewership, say the figures are publicly reported and may differ from official
-    Nielsen data, and call them the "national TV audience, excluding streaming add-ons".
-  - Say uncertain totals are uncertain, and main-network-only numbers are main-network only.
+- Include only the caveats below that apply to what the report says, once each, in as few words
+  as you can, after the answer:
+  - For a team's over- or under-performance, say it is relative to the prior year. If the prior
+    year went the other way, say plainly that part of it is a rebound, with that year's figure.
+    Apply this to the team: never state it as a general rule.
+  - When reporting viewership, say once that the figures are publicly reported and may differ from
+    official Nielsen data, and that they are the national TV audience, excluding streaming add-ons.
+  - If a total is marked uncertain, say so. If a figure is marked main-network only, say so.
   - For a game at its park's ceiling, give no expected figure, and never say it beat, missed,
     exceeded or fell short of expected.
     Use the finding's sentence as written, once, with no quotation marks: The crowd was at or near
@@ -380,9 +390,11 @@ you're given. Never add a fact, number or source that is not in them.
   - Crowds, TV audiences and the model's effects are correlated, not cause and effect.
   - Whenever you mention a sample size or call a sample small, give n and the range, as in
     (n = 26, range -0.14 to 0.59). Round correlations to two decimals.
-  - Only if the question is about crowds and TV audiences: open with both results, how raw crowds
-    and TV audiences move together, and how much of that is left after removing each park's
-    normal crowd.
+  - Only if the question is about crowds and TV audiences: open with both results, using only the
+    rows named 'All networks, within network'. Give how crowds and TV audiences move together
+    within a network, then how much is left after adjusting for what each park normally draws,
+    with n and the range, and say whether the range includes zero. Name each year. Leave out
+    individual networks unless the question asks about them.
   - Use a caveat only if the report covers that subject. Never say the data lacks something the
     question did not ask about.
   - Say team TV averages mostly reflect which networks carried each team.
@@ -395,8 +407,8 @@ you're given. Never add a fact, number or source that is not in them.
 - Use "certain" and "uncertain" only for a total a finding marks as uncertain.
 - A team below expected had weak crowds against expectations: never call its season weak.
 - When the database and an article give the same measure, use the database's number.
-- Each section adds new facts: never restate the opening. Keep context to the few facts most tied
-  to crowds or viewership, not a full list of moves.
+- Use at most three context facts: the ones most tied to crowds or viewership. Leave out jersey
+  retirements, player milestones and full lists of moves.
 - Write plain, specific sentences. No em dashes, no emojis. Don't claim more significance than the
   findings do: no "profoundly", "pivotal", "paving the way", or "it is worth noting".""",
     model=MODEL,
