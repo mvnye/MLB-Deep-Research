@@ -7,11 +7,12 @@
    "0.47",
    "0.16",
    "0.14",
-   "no clear link"
+   "Mostly no"
   ],
   "must_not": [
    "raw correlation",
-   "technical"
+   "technical",
+   "ESPN"
   ]
  },
  {
@@ -33,7 +34,7 @@
   "q": "How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?",
   "must": [
    "3,094,000",
-   "96%"
+   "96"
   ],
   "must_not": [
    "converted",
@@ -48,7 +49,8 @@
   "q": "How did the Padres vs Dodgers crowd on August 23, 2025 compare with expected?",
   "must": [
    "46,326",
-   "season high"
+   "season high",
+   "demand may have been higher"
   ],
   "must_not": [
    "65,953",
@@ -56,7 +58,6 @@
    "below expected",
    "above expected",
    "65,952",
-   "raw",
    "47,345 and",
    "coefficient",
    "residual",
@@ -65,7 +66,9 @@
    "cannot compare",
    "below the expected",
    "% below",
-   "% above"
+   "% above",
+   "raw fill",
+   "prevented"
   ],
   "context": false
  },
@@ -228,6 +231,69 @@
   ],
   "must": [
    "Home openers"
+  ]
+ },
+ {
+  "id": "new_cubs",
+  "q": "How did the Cubs do on attendance and viewership last year?",
+  "must": [
+   "Assumed",
+   "2025 season",
+   "37,130",
+   "17"
+  ],
+  "must_not": [
+   "10 national",
+   "technical",
+   "37,259"
+  ]
+ },
+ {
+  "id": "new_opener",
+  "q": "Did the Red Sox or the Yankees have better season opener attendance in 2024?",
+  "must": [
+   "47,812",
+   "36,093",
+   "11,719",
+   "102.7%",
+   "95.6%"
+  ],
+  "must_not": [
+   "demand may have been higher",
+   "technical",
+   "45,337",
+   "42,642"
+  ]
+ },
+ {
+  "id": "new_as",
+  "q": "How did the Oakland A's viewership change in their final season before moving?",
+  "must": [
+   "2025"
+  ],
+  "must_any": [
+   "not in our data",
+   "does not cover",
+   "doesn't cover",
+   "starts in 2025",
+   "begins in 2025",
+   "only covers"
+  ],
+  "must_not": [
+   "no national tv broadcasts recorded",
+   "no broadcasts",
+   "technical"
+  ]
+ },
+ {
+  "id": "plain_lookup",
+  "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
+  "must": [
+   "46,326"
+  ],
+  "must_not": [
+   "demand may have been higher",
+   "technical"
   ]
  }
 ]

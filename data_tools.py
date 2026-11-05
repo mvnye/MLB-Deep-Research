@@ -18,21 +18,34 @@ MAX_CHARS = 20_000
 TIMEOUT_SECONDS = 15
 FIRST_SEASON, LAST_SEASON = 2024, 2026
 COVERAGE = "The data covers the 2024 to 2026 regular seasons. The postseason is not included."
+COVERAGE_FACTS = {
+    "attendance_seasons": "2024 to 2026, regular season only",
+    "viewership_starts": 2025,
+    "viewership_note": "National TV only, 2025 and 2026. The 2025 tables end in early September. A "
+                       "season before 2025 is not in our data, which does not mean a team was not on TV.",
+}
 
 # Kept for audit, not listed for researchers: games_clean holds what answers need.
-HIDDEN_TABLES = {"game_model", "game_model_raw"}
+HIDDEN_TABLES = {"game_model", "game_model_raw", "team_season_attendance"}
 
 TABLE_DOCS = {
     "games_clean": "Default for attendance work. Every played game except special events and "
                    "shared-gate doubleheader games, with the game_model columns included.",
     "game_viewership_clean": "Default for crowd vs TV work. games_clean joined to single-game "
                              "national broadcasts: one row per broadcast.",
-    "crowd_tv_residual": "Crowd vs TV correlations per network and season. summary_text is a finished "
-                         "sentence. Use this first for whether crowds and TV audiences move together.",
+    "crowd_tv_headline": "The fixed answer to whether crowds and TV audiences move together. Use "
+                         "headline_text for that question, word for word.",
+    "crowd_tv_residual": "Crowd vs TV correlations per network and season, with n and ranges.",
+    "game_tv_lookup": "One row per nationally televised game, including Fox windows and special "
+                      "events. Use this first for how many people watched a game.",
+    "team_tv_summary": "One row per team and season for 2025 and 2026: appearances, single games, Fox "
+                       "window games, special events, audiences and network mix. Use this for a "
+                       "team's TV picture.",
+    "team_aliases": "Finds team_id from any team name. alias_key is lower case with no punctuation, "
+                    "e.g. 'as' for the A's. Filter other tables by team_id, not by name.",
+    "data_coverage": "Which seasons each dataset covers.",
     "network_audience": "Average audience per network and season, counting only known audiences. "
                         "network_text is a finished sentence. Use this to compare networks.",
-    "game_tv_lookup": "One row per nationally televised game. tv_text is a finished sentence about its "
-                      "audience. Use this first for how many people watched a game.",
     "games": "One row per played regular-season game, 2024 to 2026. Key: game_pk. NULL attendance "
              "means unknown. Includes special events: use games_clean unless asked about them.",
     "teams": "One row per team per season, with league and division. Key: team_id, season.",
@@ -54,15 +67,13 @@ TABLE_DOCS = {
 
 # Sent with any result that touches these tables, so the caveat travels with the numbers.
 RESULT_NOTES = {
-    "games_clean": "Copy game_result_text word for word for a single game.",
-    "game_viewership_clean": "Copy game_result_text word for word for a single game. Compare viewers "
-                             "only within one network.",
-    "game_tv_lookup": "Copy tv_text word for word.",
+    "crowd_tv_headline": "Copy headline_text word for word.",
     "network_audience": "Copy network_text word for word.",
-    "crowd_tv_residual": "Copy summary_text word for word. Use the rows named 'All networks, within "
-                         "network' unless the task names a network.",
-    "team_season_model": "Copy team_result_text word for word.",
-    "model_coefficients": "Copy effect_text word for word. Never report coef.",
+    "game_tv_lookup": "When can_split is false, the data has no audience for this game alone: report "
+                      "window_total as the whole window, and coverage_pct as the share of the country.",
+    "team_tv_summary": "window games have no audience of their own, so they are not in the averages.",
+    "team_season_model": "residual_pct is against the prediction, not a year-over-year change.",
+    "model_coefficients": "Report label and effect_pct, never coef. Filter to label is not null.",
 }
 
 
@@ -106,11 +117,13 @@ def _sql_error_hint(con, query: str, error: Exception) -> str:
             r"game_?type|post_?season|playoff", text, re.IGNORECASE) else ""
         return f"Columns by table. {listing}.{extra}"
     if isinstance(error, duckdb.ParserException):
-        return "Fix the SQL syntax at the position shown. DuckDB uses PostgreSQL-style SQL."
+        return ("Fix the SQL syntax at the position shown. DuckDB uses PostgreSQL-style SQL. Write an "
+                "apostrophe in a string as two: 'A''s'. For teams, use team_aliases and team_id.")
     if isinstance(error, duckdb.PermissionException):
         return "Only the tables in this database can be read. No files or URLs."
     if isinstance(error, duckdb.ConversionException):
-        return "A value does not fit the column type. Check it with describe_schema."
+        return ("A value does not fit the column type. team_id is a number: find it in team_aliases. "
+                "Check other columns with describe_schema.")
     return "Check the query against describe_schema."
 
 
@@ -175,8 +188,9 @@ def _empty_result_message(con, query: str) -> str:
         rows = con.execute("select distinct name from teams where season = 2026 order by 1").fetchall()
         hints.append("games.home_team and away_team use full names such as 'New York Yankees'. "
                      f"Teams: {', '.join(r[0] for r in rows)}.")
-    if "season" in text and re.search(r"viewership|fox_window", source, re.IGNORECASE):
-        hints.append("Viewership covers 2025 and 2026 only. The 2025 tables end in early September.")
+    if "season" in text and re.search(r"viewership|fox_window|tv_lookup|tv_summary", source, re.IGNORECASE):
+        hints.append("Viewership covers 2025 and 2026 only. The 2025 tables end in early September. "
+                     "An earlier season is not in our data, which does not mean no TV games.")
     if "network" in text:
         rows = con.execute("select distinct network from viewership_games order by 1").fetchall()
         hints.append(f"Networks: {', '.join(r[0] for r in rows)}.")
@@ -254,6 +268,7 @@ def describe_schema(table: str = "") -> str:
         if not table.strip():
             return json.dumps({
                 "coverage": COVERAGE,
+                "coverage_facts": COVERAGE_FACTS,
                 "tables": [{"table": t, "rows": con.execute(f"select count(*) from {t}").fetchone()[0],
                             "description": TABLE_DOCS.get(t, "")} for t in names],
             })

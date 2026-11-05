@@ -1,7 +1,7 @@
 [project]
-name = "wikipedia-deep-research"
+name = "mlb-deep-research"
 version = "0.1.0"
-description = "Deep research over Wikipedia: a lead fans out researchers that walk Wikipedia's links, then a writer turns their findings into a cited report"
+description = "Deep research on MLB attendance and national TV audiences: a lead fans out researchers over DuckDB and Wikipedia, then a writer turns their findings into a cited report"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.109.0",

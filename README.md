@@ -57,6 +57,10 @@ To test the agent against 18 questions with required facts, run `uv run python s
 
 Viewership figures are publicly reported average audience (P2+), compiled by TV Media Blog from network press releases and trade coverage (Sports Business Journal, Sports Media Watch). They may differ from official Nielsen data. `viewers_total` is the national TV audience, excluding streaming add-ons (Peacock/Adobe, HBO Max): the main network plus TV simulcasts (Deportes, ESPN2, truTV). Netflix games are streaming-only.
 
+## Using the deployed app
+
+Answers take up to about 2 minutes. Conversations are kept in memory, so sessions reset when the service restarts.
+
 ## Market size data
 
 Team market size uses metro population, one figure per team and season:
