@@ -1,0 +1,1442 @@
+[
+ {
+  "team_id": 133,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 79,
+  "openingsTotalLost": 2,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 80,
+  "year": "2022",
+  "attendanceAverageAway": 26032,
+  "attendanceAverageHome": 9973,
+  "attendanceAverageYtd": 18103,
+  "attendanceHigh": 40065,
+  "attendanceHighDate": "2022-08-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662308,
+   "link": "/api/v1.1/game/662308/feed/live",
+   "content": {
+    "link": "/api/v1/game/662308/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2488,
+  "attendanceLowDate": "2022-07-21T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662411,
+   "link": "/api/v1.1/game/662411/feed/live",
+   "content": {
+    "link": "/api/v1/game/662411/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 9881,
+  "attendanceTotal": 2896460,
+  "attendanceTotalAway": 2108558,
+  "attendanceTotalHome": 787902,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 133,
+   "name": "Oakland Athletics",
+   "link": "/api/v1/teams/133"
+  }
+ },
+ {
+  "team_id": 134,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 82,
+  "year": "2022",
+  "attendanceAverageAway": 28496,
+  "attendanceAverageHome": 15524,
+  "attendanceAverageYtd": 21970,
+  "attendanceHigh": 38781,
+  "attendanceHighDate": "2022-07-30T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662415,
+   "link": "/api/v1.1/game/662415/feed/live",
+   "content": {
+    "link": "/api/v1/game/662415/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8331,
+  "attendanceLowDate": "2022-04-27T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662289,
+   "link": "/api/v1.1/game/662289/feed/live",
+   "content": {
+    "link": "/api/v1/game/662289/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 15524,
+  "attendanceTotal": 3537129,
+  "attendanceTotalAway": 2279671,
+  "attendanceTotalHome": 1257458,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 134,
+   "name": "Pittsburgh Pirates",
+   "link": "/api/v1/teams/134"
+  }
+ },
+ {
+  "team_id": 135,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 29755,
+  "attendanceAverageHome": 36882,
+  "attendanceAverageYtd": 33341,
+  "attendanceHigh": 44930,
+  "attendanceHighDate": "2022-04-24T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662274,
+   "link": "/api/v1.1/game/662274/feed/live",
+   "content": {
+    "link": "/api/v1/game/662274/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 23828,
+  "attendanceLowDate": "2022-08-02T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662250,
+   "link": "/api/v1.1/game/662250/feed/live",
+   "content": {
+    "link": "/api/v1/game/662250/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 36882,
+  "attendanceTotal": 5367849,
+  "attendanceTotalAway": 2380379,
+  "attendanceTotalHome": 2987470,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 135,
+   "name": "San Diego Padres",
+   "link": "/api/v1/teams/135"
+  }
+ },
+ {
+  "team_id": 136,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 164,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 22973,
+  "attendanceAverageHome": 28591,
+  "attendanceAverageYtd": 25765,
+  "attendanceHigh": 45586,
+  "attendanceHighDate": "2022-08-27T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662140,
+   "link": "/api/v1.1/game/662140/feed/live",
+   "content": {
+    "link": "/api/v1/game/662140/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9374,
+  "attendanceLowDate": "2022-10-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662200,
+   "link": "/api/v1.1/game/662200/feed/live",
+   "content": {
+    "link": "/api/v1/game/662200/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 28284,
+  "attendanceTotal": 4148093,
+  "attendanceTotalAway": 1860826,
+  "attendanceTotalHome": 2287267,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 136,
+   "name": "Seattle Mariners",
+   "link": "/api/v1/teams/136"
+  }
+ },
+ {
+  "team_id": 137,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 29338,
+  "attendanceAverageHome": 30650,
+  "attendanceAverageYtd": 30002,
+  "attendanceHigh": 41279,
+  "attendanceHighDate": "2022-07-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662113,
+   "link": "/api/v1.1/game/662113/feed/live",
+   "content": {
+    "link": "/api/v1/game/662113/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 20039,
+  "attendanceLowDate": "2022-05-09T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662097,
+   "link": "/api/v1.1/game/662097/feed/live",
+   "content": {
+    "link": "/api/v1/game/662097/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 30650,
+  "attendanceTotal": 4800358,
+  "attendanceTotalAway": 2317672,
+  "attendanceTotalHome": 2482686,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 137,
+   "name": "San Francisco Giants",
+   "link": "/api/v1/teams/137"
+  }
+ },
+ {
+  "team_id": 138,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 85,
+  "year": "2022",
+  "attendanceAverageAway": 27895,
+  "attendanceAverageHome": 40994,
+  "attendanceAverageYtd": 34486,
+  "attendanceHigh": 48581,
+  "attendanceHighDate": "2022-08-06T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661949,
+   "link": "/api/v1.1/game/661949/feed/live",
+   "content": {
+    "link": "/api/v1/game/661949/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 31193,
+  "attendanceLowDate": "2022-06-14T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662018,
+   "link": "/api/v1.1/game/662018/feed/live",
+   "content": {
+    "link": "/api/v1/game/662018/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 40994,
+  "attendanceTotal": 5552187,
+  "attendanceTotalAway": 2231636,
+  "attendanceTotalHome": 3320551,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 138,
+   "name": "St. Louis Cardinals",
+   "link": "/api/v1/teams/138"
+  }
+ },
+ {
+  "team_id": 139,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 25028,
+  "attendanceAverageHome": 13927,
+  "attendanceAverageYtd": 19478,
+  "attendanceHigh": 25025,
+  "attendanceHighDate": "2022-04-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661918,
+   "link": "/api/v1.1/game/661918/feed/live",
+   "content": {
+    "link": "/api/v1/game/661918/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 6749,
+  "attendanceLowDate": "2022-04-28T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661908,
+   "link": "/api/v1.1/game/661908/feed/live",
+   "content": {
+    "link": "/api/v1/game/661908/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 13927,
+  "attendanceTotal": 3155361,
+  "attendanceTotalAway": 2027234,
+  "attendanceTotalHome": 1128127,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 139,
+   "name": "Tampa Bay Rays",
+   "link": "/api/v1/teams/139"
+  }
+ },
+ {
+  "team_id": 140,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 79,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 22443,
+  "attendanceAverageHome": 24832,
+  "attendanceAverageYtd": 23652,
+  "attendanceHigh": 38832,
+  "attendanceHighDate": "2022-10-04T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662010,
+   "link": "/api/v1.1/game/662010/feed/live",
+   "content": {
+    "link": "/api/v1/game/662010/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 13121,
+  "attendanceLowDate": "2022-08-15T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661834,
+   "link": "/api/v1.1/game/661834/feed/live",
+   "content": {
+    "link": "/api/v1/game/661834/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24832,
+  "attendanceTotal": 3784382,
+  "attendanceTotalAway": 1773021,
+  "attendanceTotalHome": 2011361,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 140,
+   "name": "Texas Rangers",
+   "link": "/api/v1/teams/140"
+  }
+ },
+ {
+  "team_id": 141,
+  "season": 2022,
+  "openingsTotal": 159,
+  "openingsTotalAway": 78,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 26280,
+  "attendanceAverageHome": 32763,
+  "attendanceAverageYtd": 29583,
+  "attendanceHigh": 45311,
+  "attendanceHighDate": "2022-08-27T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661703,
+   "link": "/api/v1.1/game/661703/feed/live",
+   "content": {
+    "link": "/api/v1/game/661703/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18577,
+  "attendanceLowDate": "2022-05-02T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661823,
+   "link": "/api/v1.1/game/661823/feed/live",
+   "content": {
+    "link": "/api/v1/game/661823/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32763,
+  "attendanceTotal": 4703696,
+  "attendanceTotalAway": 2049866,
+  "attendanceTotalHome": 2653830,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 141,
+   "name": "Toronto Blue Jays",
+   "link": "/api/v1/teams/141"
+  }
+ },
+ {
+  "team_id": 142,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 83,
+  "year": "2022",
+  "attendanceAverageAway": 22824,
+  "attendanceAverageHome": 22514,
+  "attendanceAverageYtd": 22669,
+  "attendanceHigh": 39030,
+  "attendanceHighDate": "2022-08-04T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661660,
+   "link": "/api/v1.1/game/661660/feed/live",
+   "content": {
+    "link": "/api/v1/game/661660/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11803,
+  "attendanceLowDate": "2022-05-11T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661702,
+   "link": "/api/v1.1/game/661702/feed/live",
+   "content": {
+    "link": "/api/v1/game/661702/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 22514,
+  "attendanceTotal": 3627025,
+  "attendanceTotalAway": 1825897,
+  "attendanceTotalHome": 1801128,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 142,
+   "name": "Minnesota Twins",
+   "link": "/api/v1/teams/142"
+  }
+ },
+ {
+  "team_id": 143,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 165,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 83,
+  "year": "2022",
+  "attendanceAverageAway": 29193,
+  "attendanceAverageHome": 28459,
+  "attendanceAverageYtd": 28829,
+  "attendanceHigh": 44232,
+  "attendanceHighDate": "2022-04-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661131,
+   "link": "/api/v1.1/game/661131/feed/live",
+   "content": {
+    "link": "/api/v1/game/661131/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 17145,
+  "attendanceLowDate": "2022-05-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661626,
+   "link": "/api/v1.1/game/661626/feed/live",
+   "content": {
+    "link": "/api/v1/game/661626/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 27995,
+  "attendanceTotal": 4641407,
+  "attendanceTotalAway": 2364671,
+  "attendanceTotalHome": 2276736,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 143,
+   "name": "Philadelphia Phillies",
+   "link": "/api/v1/teams/143"
+  }
+ },
+ {
+  "team_id": 144,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 162,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 28216,
+  "attendanceAverageHome": 38641,
+  "attendanceAverageYtd": 33461,
+  "attendanceHigh": 42925,
+  "attendanceHighDate": "2022-07-11T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661507,
+   "link": "/api/v1.1/game/661507/feed/live",
+   "content": {
+    "link": "/api/v1/game/661507/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 29339,
+  "attendanceLowDate": "2022-05-25T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661542,
+   "link": "/api/v1.1/game/661542/feed/live",
+   "content": {
+    "link": "/api/v1/game/661542/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 38641,
+  "attendanceTotal": 5387240,
+  "attendanceTotalAway": 2257309,
+  "attendanceTotalHome": 3129931,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 144,
+   "name": "Atlanta Braves",
+   "link": "/api/v1/teams/144"
+  }
+ },
+ {
+  "team_id": 145,
+  "season": 2022,
+  "openingsTotal": 159,
+  "openingsTotalAway": 78,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 85,
+  "gamesHomeTotal": 82,
+  "year": "2022",
+  "attendanceAverageAway": 22119,
+  "attendanceAverageHome": 24807,
+  "attendanceAverageYtd": 23488,
+  "attendanceHigh": 38080,
+  "attendanceHighDate": "2022-05-29T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661461,
+   "link": "/api/v1.1/game/661461/feed/live",
+   "content": {
+    "link": "/api/v1/game/661461/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 11242,
+  "attendanceLowDate": "2022-04-28T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661532,
+   "link": "/api/v1.1/game/661532/feed/live",
+   "content": {
+    "link": "/api/v1/game/661532/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 24807,
+  "attendanceTotal": 3734609,
+  "attendanceTotalAway": 1725250,
+  "attendanceTotalHome": 2009359,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 145,
+   "name": "Chicago White Sox",
+   "link": "/api/v1/teams/145"
+  }
+ },
+ {
+  "team_id": 146,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 27804,
+  "attendanceAverageHome": 11204,
+  "attendanceAverageYtd": 19452,
+  "attendanceHigh": 31184,
+  "attendanceHighDate": "2022-04-14T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661418,
+   "link": "/api/v1.1/game/661418/feed/live",
+   "content": {
+    "link": "/api/v1/game/661418/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 5095,
+  "attendanceLowDate": "2022-09-12T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661420,
+   "link": "/api/v1.1/game/661420/feed/live",
+   "content": {
+    "link": "/api/v1/game/661420/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 11204,
+  "attendanceTotal": 3131784,
+  "attendanceTotalAway": 2224297,
+  "attendanceTotalHome": 907487,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 146,
+   "name": "Miami Marlins",
+   "link": "/api/v1/teams/146"
+  }
+ },
+ {
+  "team_id": 147,
+  "season": 2022,
+  "openingsTotal": 159,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 78,
+  "openingsTotalLost": 3,
+  "gamesTotal": 169,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 87,
+  "year": "2022",
+  "attendanceAverageAway": 30418,
+  "attendanceAverageHome": 40208,
+  "attendanceAverageYtd": 35221,
+  "attendanceHigh": 49217,
+  "attendanceHighDate": "2022-08-23T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661237,
+   "link": "/api/v1.1/game/661237/feed/live",
+   "content": {
+    "link": "/api/v1/game/661237/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 25068,
+  "attendanceLowDate": "2022-05-22T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661288,
+   "link": "/api/v1.1/game/661288/feed/live",
+   "content": {
+    "link": "/api/v1/game/661288/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 38836,
+  "attendanceTotal": 5600088,
+  "attendanceTotalAway": 2463881,
+  "attendanceTotalHome": 3136207,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 147,
+   "name": "New York Yankees",
+   "link": "/api/v1/teams/147"
+  }
+ },
+ {
+  "team_id": 158,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 27290,
+  "attendanceAverageHome": 30280,
+  "attendanceAverageYtd": 28776,
+  "attendanceHigh": 42794,
+  "attendanceHighDate": "2022-04-14T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 661292,
+   "link": "/api/v1.1/game/661292/feed/live",
+   "content": {
+    "link": "/api/v1/game/661292/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 18612,
+  "attendanceLowDate": "2022-09-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 661219,
+   "link": "/api/v1.1/game/661219/feed/live",
+   "content": {
+    "link": "/api/v1/game/661219/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 29993,
+  "attendanceTotal": 4632929,
+  "attendanceTotalAway": 2210509,
+  "attendanceTotalHome": 2422420,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 158,
+   "name": "Milwaukee Brewers",
+   "link": "/api/v1/teams/158"
+  }
+ },
+ {
+  "team_id": 108,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 25562,
+  "attendanceAverageHome": 30339,
+  "attendanceAverageYtd": 27950,
+  "attendanceHigh": 44728,
+  "attendanceHighDate": "2022-07-16T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663415,
+   "link": "/api/v1.1/game/663415/feed/live",
+   "content": {
+    "link": "/api/v1/game/663415/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 15594,
+  "attendanceLowDate": "2022-09-19T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663423,
+   "link": "/api/v1.1/game/663423/feed/live",
+   "content": {
+    "link": "/api/v1/game/663423/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 30339,
+  "attendanceTotal": 4527975,
+  "attendanceTotalAway": 2070514,
+  "attendanceTotalHome": 2457461,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 108,
+   "name": "Los Angeles Angels",
+   "link": "/api/v1/teams/108"
+  }
+ },
+ {
+  "team_id": 109,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 29182,
+  "attendanceAverageHome": 19817,
+  "attendanceAverageYtd": 24500,
+  "attendanceHigh": 37802,
+  "attendanceHighDate": "2022-07-23T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663305,
+   "link": "/api/v1.1/game/663305/feed/live",
+   "content": {
+    "link": "/api/v1/game/663305/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8855,
+  "attendanceLowDate": "2022-05-10T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663350,
+   "link": "/api/v1.1/game/663350/feed/live",
+   "content": {
+    "link": "/api/v1/game/663350/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 19817,
+  "attendanceTotal": 3968967,
+  "attendanceTotalAway": 2363768,
+  "attendanceTotalHome": 1605199,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 109,
+   "name": "Arizona Diamondbacks",
+   "link": "/api/v1/teams/109"
+  }
+ },
+ {
+  "team_id": 110,
+  "season": 2022,
+  "openingsTotal": 159,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 78,
+  "openingsTotalLost": 3,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 81,
+  "gamesHomeTotal": 86,
+  "year": "2022",
+  "attendanceAverageAway": 26132,
+  "attendanceAverageHome": 17543,
+  "attendanceAverageYtd": 21919,
+  "attendanceHigh": 44461,
+  "attendanceHighDate": "2022-04-11T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663403,
+   "link": "/api/v1.1/game/663403/feed/live",
+   "content": {
+    "link": "/api/v1/game/663403/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 2467,
+  "attendanceLowDate": "2022-09-05T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663353,
+   "link": "/api/v1.1/game/663353/feed/live",
+   "content": {
+    "link": "/api/v1/game/663353/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 16741,
+  "attendanceTotal": 3485068,
+  "attendanceTotalAway": 2116701,
+  "attendanceTotalHome": 1368367,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 110,
+   "name": "Baltimore Orioles",
+   "link": "/api/v1/teams/110"
+  }
+ },
+ {
+  "team_id": 111,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 26106,
+  "attendanceAverageHome": 32409,
+  "attendanceAverageYtd": 29257,
+  "attendanceHigh": 37291,
+  "attendanceHighDate": "2022-07-10T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663232,
+   "link": "/api/v1.1/game/663232/feed/live",
+   "content": {
+    "link": "/api/v1/game/663232/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 24809,
+  "attendanceLowDate": "2022-05-30T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663298,
+   "link": "/api/v1.1/game/663298/feed/live",
+   "content": {
+    "link": "/api/v1/game/663298/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32409,
+  "attendanceTotal": 4739708,
+  "attendanceTotalAway": 2114619,
+  "attendanceTotalHome": 2625089,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 111,
+   "name": "Boston Red Sox",
+   "link": "/api/v1/teams/111"
+  }
+ },
+ {
+  "team_id": 112,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 84,
+  "year": "2022",
+  "attendanceAverageAway": 29044,
+  "attendanceAverageHome": 32306,
+  "attendanceAverageYtd": 30675,
+  "attendanceHigh": 40755,
+  "attendanceHighDate": "2022-06-18T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663239,
+   "link": "/api/v1.1/game/663239/feed/live",
+   "content": {
+    "link": "/api/v1/game/663239/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 23425,
+  "attendanceLowDate": "2022-09-29T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663110,
+   "link": "/api/v1.1/game/663110/feed/live",
+   "content": {
+    "link": "/api/v1/game/663110/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32306,
+  "attendanceTotal": 4969383,
+  "attendanceTotalAway": 2352603,
+  "attendanceTotalHome": 2616780,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 112,
+   "name": "Chicago Cubs",
+   "link": "/api/v1/teams/112"
+  }
+ },
+ {
+  "team_id": 113,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 83,
+  "year": "2022",
+  "attendanceAverageAway": 29956,
+  "attendanceAverageHome": 17447,
+  "attendanceAverageYtd": 23740,
+  "attendanceHigh": 43036,
+  "attendanceHighDate": "2022-04-12T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663088,
+   "link": "/api/v1.1/game/663088/feed/live",
+   "content": {
+    "link": "/api/v1/game/663088/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 7823,
+  "attendanceLowDate": "2022-09-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663107,
+   "link": "/api/v1.1/game/663107/feed/live",
+   "content": {
+    "link": "/api/v1/game/663107/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 17159,
+  "attendanceTotal": 3822191,
+  "attendanceTotalAway": 2426421,
+  "attendanceTotalHome": 1395770,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 113,
+   "name": "Cincinnati Reds",
+   "link": "/api/v1/teams/113"
+  }
+ },
+ {
+  "team_id": 114,
+  "season": 2022,
+  "openingsTotal": 157,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 76,
+  "openingsTotalLost": 5,
+  "gamesTotal": 174,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 91,
+  "year": "2022",
+  "attendanceAverageAway": 25304,
+  "attendanceAverageHome": 17051,
+  "attendanceAverageYtd": 21309,
+  "attendanceHigh": 33469,
+  "attendanceHighDate": "2022-04-15T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 663136,
+   "link": "/api/v1.1/game/663136/feed/live",
+   "content": {
+    "link": "/api/v1/game/663136/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8345,
+  "attendanceLowDate": "2022-06-07T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 663122,
+   "link": "/api/v1.1/game/663122/feed/live",
+   "content": {
+    "link": "/api/v1/game/663122/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 16209,
+  "attendanceTotal": 3345503,
+  "attendanceTotalAway": 2049633,
+  "attendanceTotalHome": 1295870,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 114,
+   "name": "Cleveland Guardians",
+   "link": "/api/v1/teams/114"
+  }
+ },
+ {
+  "team_id": 115,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 83,
+  "year": "2022",
+  "attendanceAverageAway": 27802,
+  "attendanceAverageHome": 32468,
+  "attendanceAverageYtd": 30135,
+  "attendanceHigh": 48627,
+  "attendanceHighDate": "2022-04-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662933,
+   "link": "/api/v1.1/game/662933/feed/live",
+   "content": {
+    "link": "/api/v1/game/662933/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 19387,
+  "attendanceLowDate": "2022-06-01T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662981,
+   "link": "/api/v1.1/game/662981/feed/live",
+   "content": {
+    "link": "/api/v1/game/662981/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 32184,
+  "attendanceTotal": 4821569,
+  "attendanceTotalAway": 2224141,
+  "attendanceTotalHome": 2597428,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 115,
+   "name": "Colorado Rockies",
+   "link": "/api/v1/teams/115"
+  }
+ },
+ {
+  "team_id": 116,
+  "season": 2022,
+  "openingsTotal": 157,
+  "openingsTotalAway": 77,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 168,
+  "gamesAwayTotal": 83,
+  "gamesHomeTotal": 85,
+  "year": "2022",
+  "attendanceAverageAway": 23735,
+  "attendanceAverageHome": 19694,
+  "attendanceAverageYtd": 21676,
+  "attendanceHigh": 43480,
+  "attendanceHighDate": "2022-04-08T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662888,
+   "link": "/api/v1.1/game/662888/feed/live",
+   "content": {
+    "link": "/api/v1/game/662888/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 10522,
+  "attendanceLowDate": "2022-05-04T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662838,
+   "link": "/api/v1.1/game/662838/feed/live",
+   "content": {
+    "link": "/api/v1/game/662838/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 19505,
+  "attendanceTotal": 3403124,
+  "attendanceTotalAway": 1827580,
+  "attendanceTotalHome": 1575544,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 116,
+   "name": "Detroit Tigers",
+   "link": "/api/v1/teams/116"
+  }
+ },
+ {
+  "team_id": 117,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 25112,
+  "attendanceAverageHome": 33198,
+  "attendanceAverageYtd": 29180,
+  "attendanceHigh": 42646,
+  "attendanceHighDate": "2022-04-18T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662928,
+   "link": "/api/v1.1/game/662928/feed/live",
+   "content": {
+    "link": "/api/v1/game/662928/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 23752,
+  "attendanceLowDate": "2022-06-08T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662760,
+   "link": "/api/v1.1/game/662760/feed/live",
+   "content": {
+    "link": "/api/v1/game/662760/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 33198,
+  "attendanceTotal": 4697958,
+  "attendanceTotalAway": 2008960,
+  "attendanceTotalHome": 2688998,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 117,
+   "name": "Houston Astros",
+   "link": "/api/v1/teams/117"
+  }
+ },
+ {
+  "team_id": 118,
+  "season": 2022,
+  "openingsTotal": 160,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 80,
+  "openingsTotalLost": 1,
+  "gamesTotal": 166,
+  "gamesAwayTotal": 84,
+  "gamesHomeTotal": 82,
+  "year": "2022",
+  "attendanceAverageAway": 22474,
+  "attendanceAverageHome": 15971,
+  "attendanceAverageYtd": 19223,
+  "attendanceHigh": 29689,
+  "attendanceHighDate": "2022-08-13T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662670,
+   "link": "/api/v1.1/game/662670/feed/live",
+   "content": {
+    "link": "/api/v1/game/662670/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 8471,
+  "attendanceLowDate": "2022-08-09T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662647,
+   "link": "/api/v1.1/game/662647/feed/live",
+   "content": {
+    "link": "/api/v1/game/662647/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 15812,
+  "attendanceTotal": 3075633,
+  "attendanceTotalAway": 1797947,
+  "attendanceTotalHome": 1277686,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 118,
+   "name": "Kansas City Royals",
+   "link": "/api/v1/teams/118"
+  }
+ },
+ {
+  "team_id": 119,
+  "season": 2022,
+  "openingsTotal": 162,
+  "openingsTotalAway": 81,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 163,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 81,
+  "year": "2022",
+  "attendanceAverageAway": 31228,
+  "attendanceAverageHome": 47672,
+  "attendanceAverageYtd": 39450,
+  "attendanceHigh": 53432,
+  "attendanceHighDate": "2022-08-10T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662575,
+   "link": "/api/v1.1/game/662575/feed/live",
+   "content": {
+    "link": "/api/v1/game/662575/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 35643,
+  "attendanceLowDate": "2022-05-18T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662744,
+   "link": "/api/v1.1/game/662744/feed/live",
+   "content": {
+    "link": "/api/v1/game/662744/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 47672,
+  "attendanceTotal": 6390902,
+  "attendanceTotalAway": 2529494,
+  "attendanceTotalHome": 3861408,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 119,
+   "name": "Los Angeles Dodgers",
+   "link": "/api/v1/teams/119"
+  }
+ },
+ {
+  "team_id": 120,
+  "season": 2022,
+  "openingsTotal": 161,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 81,
+  "openingsTotalLost": 0,
+  "gamesTotal": 167,
+  "gamesAwayTotal": 82,
+  "gamesHomeTotal": 85,
+  "year": "2022",
+  "attendanceAverageAway": 27840,
+  "attendanceAverageHome": 25017,
+  "attendanceAverageYtd": 26420,
+  "attendanceHigh": 42730,
+  "attendanceHighDate": "2022-06-18T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662500,
+   "link": "/api/v1.1/game/662500/feed/live",
+   "content": {
+    "link": "/api/v1/game/662500/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 9261,
+  "attendanceLowDate": "2022-04-19T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662587,
+   "link": "/api/v1.1/game/662587/feed/live",
+   "content": {
+    "link": "/api/v1/game/662587/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 25017,
+  "attendanceTotal": 4253599,
+  "attendanceTotalAway": 2227198,
+  "attendanceTotalHome": 2026401,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 120,
+   "name": "Washington Nationals",
+   "link": "/api/v1/teams/120"
+  }
+ },
+ {
+  "team_id": 121,
+  "season": 2022,
+  "openingsTotal": 157,
+  "openingsTotalAway": 80,
+  "openingsTotalHome": 77,
+  "openingsTotalLost": 4,
+  "gamesTotal": 170,
+  "gamesAwayTotal": 86,
+  "gamesHomeTotal": 84,
+  "year": "2022",
+  "attendanceAverageAway": 29330,
+  "attendanceAverageHome": 33308,
+  "attendanceAverageYtd": 31281,
+  "attendanceHigh": 43857,
+  "attendanceHighDate": "2022-08-13T00:00:00",
+  "attendanceHighGame": {
+   "gamePk": 662428,
+   "link": "/api/v1.1/game/662428/feed/live",
+   "content": {
+    "link": "/api/v1/game/662428/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceLow": 22007,
+  "attendanceLowDate": "2022-05-03T00:00:00",
+  "attendanceLowGame": {
+   "gamePk": 662569,
+   "link": "/api/v1.1/game/662569/feed/live",
+   "content": {
+    "link": "/api/v1/game/662569/content"
+   },
+   "dayNight": "day"
+  },
+  "attendanceOpeningAverage": 31934,
+  "attendanceTotal": 4911139,
+  "attendanceTotalAway": 2346402,
+  "attendanceTotalHome": 2564737,
+  "gameType": {
+   "id": "R",
+   "description": "Regular Season"
+  },
+  "team": {
+   "id": 121,
+   "name": "New York Mets",
+   "link": "/api/v1/teams/121"
+  }
+ }
+]

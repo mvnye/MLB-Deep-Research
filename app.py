@@ -119,8 +119,10 @@ Rules:
   group that is near_ceiling. If most of a group is near_ceiling, do not call it below expected:
   say those games were at the park's ceiling.
 - Promotions and giveaways are not in the data: say so when explaining a game's residual.
-- Team residuals are relative to the prior year, so a rebound can look like over-performance.
-  Report prior_residual_pct next to residual_pct.
+- Team results: use avg_attendance and expected_avg_attendance from team_season_model together,
+  never an average from another table next to them. Report yoy_change_pct first, the plain change
+  in average crowd from the season before. Then residual_pct, how far the crowd was from what the prior two years of crowds, win
+  rate and market predict. Report prior_residual_pct too: a rebound can look like over-performance.
 - The indoor coefficient partly reflects roofs closed for bad weather. Opponent effects are not
   causal: they also carry the dates those teams visit and their traveling fans.
 
@@ -153,9 +155,9 @@ Rules:
 - Crowds vs TV: start from crowd_tv_residual. Network reach swamps everything else, so never
   average across networks. Report both corr_crowd_tv, how raw crowds and TV audiences move
   together, and corr_residual_tv, what is left after removing each park's normal crowd and game
-  factors, with n for every figure. Where small_n is true, say the sample is small and give
-  residual_ci_low to residual_ci_high. Where too_few is true, say there are too few games to read.
-  Whenever you mention a sample size, write it as (n = 26, range -0.14 to 0.59). For an average,
+  factors, with n for every figure and its own range: crowd_ci_low to crowd_ci_high for the first,
+  residual_ci_low to residual_ci_high for the second. Where small_n is true, say the sample is small. Where too_few is true, say there are too few games to read.
+  Whenever you mention a sample size, write it as (n = 40, range 0.10 to 0.50). For an average,
   the range is the lowest to the highest value.
   The rows named 'All networks, within network' are the headline for each season. Round
   correlations to two decimals. Only call a sample small where small_n is true.
@@ -330,6 +332,8 @@ relate to national TV audiences in 2025 and 2026.
    and viewership for TV. Use context only when the question asks why, or in a later round if the
    findings show an anomaly: a gap of more than 15% from expected, a special event, or a temporary
    park. Otherwise do not use context: a request for it will be refused.
+   If the new question only asks what something in an earlier answer means, send no researchers:
+   reply DONE, and the writer will explain it.
 3. Read the findings. If part of the question is still unanswered, call research again for just
    that part. You get {MAX_ROUNDS} rounds and {MAX_RESEARCHERS} researchers in all. Do not send
    researchers after something the data cannot answer: the writer will say so.
@@ -353,15 +357,20 @@ you're given. Never add a fact, number or source that is not in them.
   not ask for, and any context not plausibly tied to attendance or viewership.
 - Avoid repeating a number or a point, unless repeating it helps the reader.
 - The rules here are for you, not the reader: never narrate them. Do not explain what a figure is
-  not, or why something was left out. Say what is true and move on. For example, write "It reached
-  96% of the country", not that coverage is not a share of viewers.
+  not, or why something was left out. Say what is true and move on.
 - Use everyday words. Say "regional Fox window", not "multi-game window". Say "after adjusting for
   what each park normally draws", not "park-season norms" or "game factors". Say "correlation",
   not "raw correlation".
 - Only use events dated before or during the season asked about. A later event cannot relate to
   that season's crowds, so leave it out.
-- Copy numbers exactly from the findings, rounding only: attendance to whole numbers, percentages to
-  one decimal. Do not calculate new numbers.
+- Copy numbers exactly from the findings, rounding only: attendance and viewers to whole numbers,
+  percentages to one decimal. Do not calculate new numbers. Never write a range the findings do not
+  give.
+- Give one average per measure: do not put averages from different tables side by side.
+- Lead with the total audience. Give the main-network number only as a breakdown of it.
+- Answer only what was asked: no attendance in an answer about viewers, and no viewers in an answer
+  about attendance, unless the question links them.
+- Describe coverage as the share of the country a game reached, and stop there.
 - Never mention the research process, the findings, tools, or who did what.
 - Write for a seller, not an analyst: no column names, game IDs, or terms like "residual" or
   "ceiling game". Say "above expected" or "below expected". State a point once, and do not explain
@@ -375,9 +384,9 @@ you're given. Never add a fact, number or source that is not in them.
   why. Leave out a limit that one finding states when another finding answered that same point. The data covers the 2024 to 2026 regular seasons, with no postseason.
 - Include only the caveats below that apply to what the report says, once each, in as few words
   as you can, after the answer:
-  - For a team's over- or under-performance, say it is relative to the prior year. If the prior
-    year went the other way, say plainly that part of it is a rebound, with that year's figure.
-    Apply this to the team: never state it as a general rule.
+  - For a team's result, give the plain change from the season before first. Then give the model result in these words: "X% above what the prior two years of crowds,
+    win rate and market would predict". Never call that a change from the prior year. If the team
+    was below that prediction the year before, say part of this may be a rebound.
   - When reporting viewership, say once that the figures are publicly reported and may differ from
     official Nielsen data, and that they are the national TV audience, excluding streaming add-ons.
   - If a total is marked uncertain, say so. If a figure is marked main-network only, say so.
@@ -387,14 +396,17 @@ you're given. Never add a fact, number or source that is not in them.
     the park's season high, and demand may have been higher. Use this only for those games. Do the same
     for a group of games if most of them were at the ceiling.
   - When you say promotions are not in the data, do it once.
-  - Crowds, TV audiences and the model's effects are correlated, not cause and effect.
+  - Do not use a stock line that crowds and TV audiences are correlated. Say what the numbers show,
+    and that they do not show cause and effect. Effects from the model are associations.
   - Whenever you mention a sample size or call a sample small, give n and the range, as in
-    (n = 26, range -0.14 to 0.59). Round correlations to two decimals.
-  - Only if the question is about crowds and TV audiences: open with both results, using only the
-    rows named 'All networks, within network'. Give how crowds and TV audiences move together
-    within a network, then how much is left after adjusting for what each park normally draws,
-    with n and the range, and say whether the range includes zero. Name each year. Leave out
-    individual networks unless the question asks about them.
+    (n = 40, range 0.10 to 0.50). Round correlations to two decimals.
+  - Only if the question is about crowds and TV audiences: use only the rows named 'All networks,
+    within network'. Say how the two move together within a network, and how strong that is.
+    Then say how much is left after adjusting for what each park normally draws, with n and the
+    range. If the range includes zero, say there is no clear link after adjusting, and let the
+    first sentence reflect that. Explain the adjustment once in a short
+    clause: it compares each game with its own park's usual crowd, so popular teams do not drive
+    the result. Name each year. Leave out individual networks unless the question asks.
   - Use a caveat only if the report covers that subject. Never say the data lacks something the
     question did not ask about.
   - Say team TV averages mostly reflect which networks carried each team.
@@ -409,8 +421,24 @@ you're given. Never add a fact, number or source that is not in them.
 - When the database and an article give the same measure, use the database's number.
 - Use at most three context facts: the ones most tied to crowds or viewership. Leave out jersey
   retirements, player milestones and full lists of moves.
+- If the new question only asks what something in an earlier answer means, explain it plainly from
+  How the numbers work below, in a few sentences. No citation is needed for that.
 - Write plain, specific sentences. No em dashes, no emojis. Don't claim more significance than the
-  findings do: no "profoundly", "pivotal", "paving the way", or "it is worth noting".""",
+  findings do: no "profoundly", "pivotal", "paving the way", or "it is worth noting".
+
+How the numbers work:
+- Expected attendance for a game comes from a model of that park's normal crowd that season, plus
+  the day, month, opponent, weather, home opener and the home team's record.
+- Adjusting for what each park normally draws means comparing each game's crowd with its own park's
+  usual level. Some teams draw big crowds and big TV audiences all year, and this keeps that from
+  driving the result. It asks whether a crowd above or below that park's norm went with a bigger or
+  smaller TV audience.
+- A correlation runs from 0, no link, to 1, a perfect match. The range is where the true figure
+  probably sits. If it includes zero, there may be no link at all.
+- A team's prediction uses its prior two years of crowds, its win rate and its market size, learned
+  from all teams across 2024 to 2026.
+- A game at or near the park's season high may have been limited by the park, so demand may have
+  been higher than the crowd.""",
     model=MODEL,
     model_settings=STEADY_SETTINGS,
 )
@@ -513,6 +541,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
 
     # 3. Write: one call, outside the loop. The Writer sees only the question and the findings.
     findings = "\n\n---\n\n".join(run.findings) or (
+        "No new research was needed. Answer from the conversation so far." if history else
         "The question is outside what the data covers: the 2024 to 2026 regular seasons.")
     prompt = f"Question: {question}\n\nFindings:\n\n{findings}"
     result = await Runner.run(writer, prompt, context=run, hooks=hooks)
@@ -539,7 +568,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
         if not citation_problems(shorter, run.tool_calls) and word_count(shorter) < word_count(run.report):
             run.report = shorter
 
-    run.report = strip_quoted_phrases(run.report)
+    run.report = strip_quoted_phrases(run.report).replace("—", ", ")
     if run.errors:
         run.report += ("\n\n**Incomplete:** part of this research failed for a technical reason, "
                        "not because the data is missing. Try the question again.")

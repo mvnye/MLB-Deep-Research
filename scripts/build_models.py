@@ -6,8 +6,8 @@ Game level: log(attendance) on a venue_id x season term plus day/night, weekday,
 opponent, weather and the home team's pre-game record and games back. Residuals say how a
 game did against its own park's norm for that season.
 
-Team level: log(average attendance) on win rate, metro population, prior-year attendance
-and season. Residuals say how a team-season did against those expectations.
+Team level: log(average attendance) on win rate, metro population, the prior two years'
+attendance and season. Residuals say how a team-season did against those expectations.
 
 Tables written: game_model, team_season_model, team_markets, model_coefficients, model_fit,
 crowd_tv_residual. Views written: games_clean, game_viewership_clean.
@@ -33,6 +33,7 @@ CEILING_REPEATS = 5   # at the venue-season maximum in at least this many games
 SEASON_HIGH_SHARE = 0.90  # ceiling_game: capped, and at least this share of the season high
 PRIOR_GAMES = 10      # pre-game win rate is shrunk toward .500 by this many games
 FOLDS = 5
+PRIOR_SEASONS = [2022, 2023]  # attendance totals only, for the team model's prior crowds
 MIN_CORR_GAMES = 5    # below this a correlation is not computed
 TOO_FEW_GAMES = 10    # below this a correlation should not be read at all
 SMALL_N_GAMES = 30    # below this a correlation is noisy: report it with its range
@@ -44,7 +45,7 @@ GAME_FORMULA = (
 )
 TEAM_FORMULA = (
     "log_avg_attendance ~ win_pct + log_population + shared_market"
-    " + log_prior_avg_attendance + C(season)"
+    " + log_prior_two_year_avg + C(season)"
 )
 
 # Prior-year crowd is not comparable for a team in, or just back from, a temporary park.
@@ -77,15 +78,16 @@ GAME_COLUMN_COMMENTS = {
     "home_games_back_before": "Games behind the division leader at the start of the day.",
 }
 TEAM_COLUMN_COMMENTS = {
-    "residual_pct": "Average attendance against expected. Expected leans on the prior-year "
-                    "crowd, so a rebound after a weak year can look like over-performance. "
-                    "Say relative to the prior year, and give a reason from context research "
-                    "such as roster changes.",
+    "residual_pct": "Average attendance against what the prior two years of crowds, win rate and "
+                    "market would predict. Not a year-over-year change. A rebound after a weak year "
+                    "can still show here, so give a reason from context research if there is one.",
+    "yoy_change_pct": "Plain change in average attendance from the season before. Report this first.",
     "prior_residual_pct": "This team residual_pct one season earlier. NULL when unavailable. "
                           "A negative value followed by a positive one suggests a rebound.",
 }
 TEAM_TABLE_COMMENT = (
-    "Team-season average attendance against win rate, metro population and prior-year crowd. "
+    "Team-season average attendance against win rate, metro population and the prior two years of "
+    "crowds. "
     "Market population is not split in two-team metros. Correlational, not causal."
 )
 CROWD_TV_COMMENT = (
@@ -255,23 +257,32 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
     final["win_pct"] = final["wins"] / (final["wins"] + final["losses"])
 
     avg = con.execute("select team_id, season, home_average from team_season_attendance").df()
-    prior_2023 = [{"team_id": r["team_id"], "season": 2023, "home_average": r["attendanceAverageHome"]}
-                  for r in json.loads((API / "attendance_2023.json").read_text())]
-    avg = pd.concat([avg, pd.DataFrame(prior_2023)])
-    avg["season"] = avg["season"] + 1
-    avg = avg.rename(columns={"home_average": "prior_avg_attendance"})
+    earlier = [{"team_id": r["team_id"], "season": year, "home_average": r["attendanceAverageHome"]}
+               for year in PRIOR_SEASONS
+               for r in json.loads((API / f"attendance_{year}.json").read_text())]
+    avg = pd.concat([avg, pd.DataFrame(earlier)])
+    one_back = avg.assign(season=avg["season"] + 1).rename(columns={"home_average": "prior_avg_attendance"})
+    two_back = avg.assign(season=avg["season"] + 2).rename(columns={"home_average": "two_back_avg"})
 
     team = (team.merge(final[["team_id", "season", "win_pct"]], on=["team_id", "season"])
-            .merge(avg, on=["team_id", "season"], how="left")
+            .merge(one_back, on=["team_id", "season"], how="left")
+            .merge(two_back, on=["team_id", "season"], how="left")
             .merge(markets, on=["team_id", "season"], how="left"))
-    assert team[["prior_avg_attendance", "population"]].notna().all().all()
+    assert team[["prior_avg_attendance", "two_back_avg", "population"]].notna().all().all()
+    # Two years, so one unusual season does not set the whole expectation.
+    team["prior_two_year_avg"] = team[["prior_avg_attendance", "two_back_avg"]].mean(axis=1)
+    last_year = team[["team_id", "season", "avg_attendance"]].assign(season=team["season"] + 1)
+    team = team.merge(last_year.rename(columns={"avg_attendance": "last_year_avg"}),
+                      on=["team_id", "season"], how="left")
+    team["prior_season_avg"] = team["last_year_avg"].fillna(team["prior_avg_attendance"])
+    team["yoy_change_pct"] = team["avg_attendance"] / team["prior_season_avg"] - 1
 
     team["exclusion_reason"] = [TEAM_EXCLUSIONS.get((t, s)) for t, s in zip(team.team_id, team.season)]
     team["in_model"] = team["exclusion_reason"].isna()
     team["shared_market"] = (team["teams_in_market"] > 1).astype(int)
     team["log_avg_attendance"] = np.log(team["avg_attendance"])
     team["log_population"] = np.log(team["population"].astype(float))
-    team["log_prior_avg_attendance"] = np.log(team["prior_avg_attendance"].astype(float))
+    team["log_prior_two_year_avg"] = np.log(team["prior_two_year_avg"].astype(float))
 
     fitted = team[team["in_model"]]
     fit = smf.ols(TEAM_FORMULA, fitted).fit(
@@ -287,7 +298,7 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
              "p_value": fit.pvalues[n]} for n in fit.params.index if n != "Intercept"]
     stats = {"n": int(fit.nobs), "r2": float(fit.rsquared)}
     cols = ["team_id", "home_team", "season", "avg_attendance", "model_games", "near_ceiling_games",
-            "win_pct", "prior_avg_attendance", "market", "population", "population_year",
+            "win_pct", "prior_season_avg", "yoy_change_pct", "prior_two_year_avg", "market", "population", "population_year",
             "teams_in_market", "in_model", "exclusion_reason", "expected_avg_attendance",
             "residual_pct", "prior_residual_pct"]
     return team[cols], pd.DataFrame(rows), stats
@@ -308,15 +319,18 @@ def create_clean_views(con) -> None:
 
 
 def correlation_row(network: str, season: int, crowd, tv, residual) -> dict:
-    """Correlations with TV audience, with a 95% range for the one that removes the baseline."""
+    """Correlations with TV audience, each with a 95% range."""
     n = len(crowd)
     row = {"network": network, "season": season, "n": n, "corr_crowd_tv": None,
+           "crowd_ci_low": None, "crowd_ci_high": None,
            "corr_residual_tv": None, "residual_ci_low": None, "residual_ci_high": None,
            "too_few": n < TOO_FEW_GAMES, "small_n": n < SMALL_N_GAMES}
     if n >= MIN_CORR_GAMES:
-        row["corr_crowd_tv"] = float(np.corrcoef(crowd, tv)[0, 1])
+        raw = float(np.corrcoef(crowd, tv)[0, 1])
         r = float(np.corrcoef(residual, tv)[0, 1])
         margin = 1.96 / np.sqrt(n - 3)
+        row.update(corr_crowd_tv=raw, crowd_ci_low=float(np.tanh(np.arctanh(raw) - margin)),
+                   crowd_ci_high=float(np.tanh(np.arctanh(raw) + margin)))
         row.update(corr_residual_tv=r, residual_ci_low=float(np.tanh(np.arctanh(r) - margin)),
                    residual_ci_high=float(np.tanh(np.arctanh(r) + margin)))
     return row

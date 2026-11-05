@@ -65,8 +65,9 @@ RESULT_NOTES = {
     "crowd_tv_residual": "Correlational, not causal. Give n for every figure. small_n means the "
                          "figure is noisy: give the range. too_few means do not read it. "
                          + VIEWERSHIP_NOTE,
-    "team_season_model": "Results are relative to the prior year, so a rebound can look like "
-                         "over-performance. Check prior_residual_pct and look for the reason.",
+    "team_season_model": "Report yoy_change_pct first. residual_pct is against what the prior two "
+                         "years of crowds, win rate and market predict, not a year-over-year "
+                         "change. Check prior_residual_pct for a rebound and look for the reason.",
     "model_coefficients": "Effects are correlational, not causal. The indoor term partly reflects "
                           "roofs closed for bad weather.",
 }
