@@ -30,6 +30,7 @@ MARKETS = ROOT / "data" / "raw" / "market" / "team_markets.csv"
 
 CEILING_FILL = 0.95   # near_ceiling: at least this share of listed capacity, or
 CEILING_REPEATS = 5   # at the venue-season maximum in at least this many games
+REBOUND_SHARE = 0.05  # a prior-year gap this large counts toward a possible rebound
 SEASON_HIGH_SHARE = 0.90  # ceiling_game: capped, and at least this share of the season high
 PRIOR_GAMES = 10      # pre-game win rate is shrunk toward .500 by this many games
 FOLDS = 5
@@ -62,18 +63,14 @@ GAME_TABLE_COMMENT = (
     "not in the data, so a residual may reflect one: say so. Correlational, not causal."
 )
 GAME_COLUMN_COMMENTS = {
-    "expected_raw": "exp(fitted log attendance), with no ceiling, so it can exceed what the park "
-                    "holds. Do not show this to users. NULL when not in the model.",
     "expected_capped": "expected_raw, capped at the venue-season maximum for near_ceiling games and "
                        "parks with 5+ games at that maximum. Use this for comparisons.",
     "is_capped": "TRUE when expected_capped is below expected_raw. Say the value is capped.",
     "residual_capped": "attendance minus expected_capped.",
     "residual_pct_capped": "Actual over expected_capped, minus 1. 0.10 means 10% above expected.",
-    "residual_pct_raw": "Actual over expected_raw, minus 1. Misleading for capped games.",
     "ceiling_game": "Capped or near_ceiling, and at least 90% of the park season high. Never say "
-                    "this game beat or missed expected: quote expected_text instead.",
-    "expected_text": "The phrase to quote word for word, without quotation marks. For a "
-                     "ceiling_game it replaces any comparison with expected.",
+                    "this game beat or missed expected: use game_result_text instead.",
+    "game_result_text": "A finished sentence about this game. Copy it word for word.",
     "exclusion_reason": "Why the game is not in the model. NULL when it is.",
     "home_games_back_before": "Games behind the division leader at the start of the day.",
 }
@@ -82,6 +79,7 @@ TEAM_COLUMN_COMMENTS = {
                     "market would predict. Not a year-over-year change. A rebound after a weak year "
                     "can still show here, so give a reason from context research if there is one.",
     "yoy_change_pct": "Plain change in average attendance from the season before. Report this first.",
+    "team_result_text": "A finished sentence about this team-season. Copy it word for word.",
     "prior_residual_pct": "This team residual_pct one season earlier. NULL when unavailable. "
                           "A negative value followed by a positive one suggests a rebound.",
 }
@@ -120,6 +118,75 @@ def games_back(games: pd.DataFrame, teams: pd.DataFrame) -> pd.Series:
                 rec = records.setdefault((season, tid), [0, 0])
                 rec[0 if won else 1] += 1
     return games["game_pk"].map(out)
+
+
+def game_text(g) -> str:
+    """A finished sentence for a game, so its figures and labels cannot drift apart in a report."""
+    lead = f"{g.away_team} at {g.home_team} on {g.official_date:%B} {g.official_date.day}, {g.season} drew {int(g.attendance):,}."
+    if g.ceiling_game:
+        return (f"{lead} The crowd was at or near the park's season high of "
+                f"{int(g.venue_season_max):,}, and demand may have been higher.")
+    label = " (capped at the park's season high)" if g.is_capped else ""
+    side = "above" if g.residual_pct_capped >= 0 else "below"
+    return f"{lead} That is {abs(g.residual_pct_capped):.1%} {side} the expected {g.expected_capped:,.0f}{label}."
+
+
+def team_text(t) -> str:
+    """A finished sentence for a team-season, in the wording the reports should use."""
+    side = "up" if t.yoy_change_pct >= 0 else "down"
+    text = (f"The {t.home_team} averaged {t.avg_attendance:,.0f} a game in {t.season}, {side} "
+            f"{abs(t.yoy_change_pct):.1%} from {t.prior_season_avg:,.0f} the season before.")
+    if pd.isna(t.residual_pct):
+        return f"{text} No prediction is given for this season: {t.exclusion_reason}."
+    side = "above" if t.residual_pct >= 0 else "below"
+    text += (f" That is {abs(t.residual_pct):.1%} {side} the {t.expected_avg_attendance:,.0f} that "
+             "the prior two years of crowds, win rate and market would predict.")
+    before = t.prior_residual_pct
+    if pd.notna(before) and abs(before) >= REBOUND_SHARE and before * t.residual_pct < 0:
+        kind = "rebound" if t.residual_pct > 0 else "pullback"
+        was = "below" if before < 0 else "above"
+        text += f" Part of this may be a {kind}: the team was {abs(before):.1%} {was} its prediction the season before."
+    return text
+
+
+EFFECT_LABELS = {
+    "C(day_night)[T.night]": "Night games, compared with day games",
+    "C(month_group)[T.Mar-Apr]": "March and April games, compared with August",
+    "C(month_group)[T.May]": "May games, compared with August",
+    "C(month_group)[T.Jun]": "June games, compared with August",
+    "C(month_group)[T.Jul]": "July games, compared with August",
+    "C(month_group)[T.Sep]": "September games, compared with August",
+    "indoor": "Games with a closed roof or dome, which partly reflects bad weather",
+    "precipitation": "Games with rain, drizzle or snow",
+    "home_opener_term": "Home openers",
+}
+PER_UNIT_LABELS = {  # term: (label, how much of one unit to report)
+    "home_win_pct_shrunk": ("A home win rate .100 higher", 0.1),
+    "home_games_back_before": ("Each game further behind the division leader", 1),
+    "wind_mph": ("Each extra mph of wind", 1),
+    "win_pct": ("A season win rate .100 higher", 0.1),
+    "log_prior_two_year_avg": ("A prior two-year crowd 10% higher", np.log(1.1)),
+    "log_population": ("A metro population 10% larger, after accounting for prior crowds", np.log(1.1)),
+}
+
+
+def effect_text(c) -> str | None:
+    """A finished sentence for a coefficient, with no statistics jargon. None if not reportable."""
+    term = c.term
+    if term in PER_UNIT_LABELS:
+        label, unit = PER_UNIT_LABELS[term]
+        effect = np.exp(c.coef * unit) - 1
+    elif term in EFFECT_LABELS:
+        label, effect = EFFECT_LABELS[term], c.pct_effect
+    elif term.startswith("C(weekday)"):
+        label, effect = f"{term.split('T.')[1].rstrip(']')} games, compared with Friday", c.pct_effect
+    elif term.startswith("opponent: "):
+        label = f"Games against the {term.removeprefix('opponent: ')}, compared with the average opponent"
+        effect = c.pct_effect
+    else:
+        return None
+    clear = "" if c.p_value < 0.05 else " This is not a clear effect."
+    return f"{label}: {effect:+.1%} attendance.{clear}"
 
 
 def exclusion_reason(g) -> str | None:
@@ -204,13 +271,7 @@ def fit_game_model(g: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     # A crowd at or near the season high cannot show whether it beat or missed demand.
     sample["ceiling_game"] = ((sample["near_ceiling"] | sample["is_capped"])
                               & (sample["attendance"] >= SEASON_HIGH_SHARE * sample["venue_season_max"]))
-    # The exact phrase to quote, so a figure and its label cannot drift apart in a report.
-    sample["expected_text"] = [
-        f"The crowd was at or near the park's season high of {int(top):,}, and demand may have been higher." if ceiling
-        else f"{round(value):,} (capped at the park's season high)" if capped
-        else f"{round(value):,}"
-        for value, top, ceiling, capped in zip(sample["expected_capped"], sample["venue_season_max"],
-                                               sample["ceiling_game"], sample["is_capped"])]
+    sample["game_result_text"] = [game_text(g) for g in sample.itertuples()]
 
     within_y = sample["log_attendance"] - sample.groupby("venue_season")["log_attendance"].transform("mean")
     within_e = sample["log_attendance"] - sample["fitted"]
@@ -294,13 +355,15 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
     team = team.merge(prior.rename(columns={"residual_pct": "prior_residual_pct"}),
                       on=["team_id", "season"], how="left")
 
+    team["team_result_text"] = [team_text(t) for t in team.itertuples()]
+
     rows = [{"model": "team", "term": n, "coef": fit.params[n], "std_err": fit.bse[n],
              "p_value": fit.pvalues[n]} for n in fit.params.index if n != "Intercept"]
     stats = {"n": int(fit.nobs), "r2": float(fit.rsquared)}
     cols = ["team_id", "home_team", "season", "avg_attendance", "model_games", "near_ceiling_games",
             "win_pct", "prior_season_avg", "yoy_change_pct", "prior_two_year_avg", "market", "population", "population_year",
             "teams_in_market", "in_model", "exclusion_reason", "expected_avg_attendance",
-            "residual_pct", "prior_residual_pct"]
+            "residual_pct", "prior_residual_pct", "team_result_text"]
     return team[cols], pd.DataFrame(rows), stats
 
 
@@ -308,7 +371,11 @@ def create_clean_views(con) -> None:
     """The researchers' defaults: no special events, no shared-gate doubleheader games."""
     con.execute("""
         CREATE OR REPLACE VIEW games_clean AS
-        SELECT g.*, m.* EXCLUDE (game_pk, expected_raw, residual_raw, residual_pct_raw)
+        SELECT g.*, m.* EXCLUDE (game_pk, expected_capped, residual_capped, residual_pct_capped),
+               -- A crowd at the ceiling has no meaningful gap from expected.
+               CASE WHEN m.ceiling_game THEN NULL ELSE m.residual_pct_capped END AS residual_pct_capped,
+               CASE WHEN m.ceiling_game THEN 'not scored: at or near the park season high'
+                    WHEN m.in_model THEN 'scored' ELSE 'not in the model' END AS expected_status
         FROM games g JOIN game_model m USING (game_pk)
         WHERE g.special_event IS NULL AND NOT g.dh_shared_gate
           AND NOT (g.attendance_api_zero AND g.doubleheader = 'Y')""")
@@ -316,6 +383,29 @@ def create_clean_views(con) -> None:
         CREATE OR REPLACE VIEW game_viewership_clean AS
         SELECT g.*, v.* EXCLUDE (game_pk, season)
         FROM games_clean g JOIN viewership_games v USING (game_pk)""")
+
+
+def strength(r: float) -> str:
+    size = abs(r)
+    return "weakly" if size < 0.2 else "moderately" if size < 0.5 else "strongly"
+
+
+def correlation_text(row: dict) -> str:
+    """A finished sentence for one network and season, or for all networks combined."""
+    where = "Comparing games on the same network" if row["network"].startswith("All") else f"On {row['network']}"
+    n = row["n"]
+    if row["too_few"] or row["corr_crowd_tv"] is None:
+        return f"{where} in {row['season']}, there are too few games to read (n = {n})."
+    raw, low, high = row["corr_crowd_tv"], row["crowd_ci_low"], row["crowd_ci_high"]
+    moved = (f"crowds and national TV audiences moved together {strength(raw)}" if low > 0
+             else "crowds and national TV audiences did not clearly move together")
+    adjusted, a_low, a_high = row["corr_residual_tv"], row["residual_ci_low"], row["residual_ci_high"]
+    link = "so there is no clear link" if a_low <= 0 <= a_high else "so a link remains"
+    size = " This is a small sample." if row["small_n"] else ""
+    return (f"{where} in {row['season']}, {moved} (correlation {raw:.2f}, n = {n}, range {low:.2f} to "
+            f"{high:.2f}). After comparing each game with its own park's usual crowd, so popular teams "
+            f"do not drive the result, the correlation is {adjusted:.2f} (range {a_low:.2f} to "
+            f"{a_high:.2f}), {link}.{size}")
 
 
 def correlation_row(network: str, season: int, crowd, tv, residual) -> dict:
@@ -342,9 +432,9 @@ def crowd_tv_table(con) -> pd.DataFrame:
     All values are in logs. Audiences are only compared within a network, because network
     reach swamps everything else.
     """
-    d = con.execute("""select network, season, attendance, viewers_total, residual_pct_capped
-                       from game_viewership_clean
-                       where viewers_total is not null and residual_pct_capped is not null""").df()
+    d = con.execute("""select v.network, v.season, v.attendance, v.viewers_total, m.residual_pct_capped
+                       from game_viewership_clean v join game_model m using (game_pk)
+                       where v.viewers_total is not null and m.residual_pct_capped is not null""").df()
     d["crowd"] = np.log(d["attendance"].astype(float))
     d["tv"] = np.log(d["viewers_total"].astype(float))
     d["residual"] = np.log1p(d["residual_pct_capped"])
@@ -354,6 +444,71 @@ def crowd_tv_table(con) -> pd.DataFrame:
         within = x[["crowd", "tv", "residual"]] - x.groupby("network")[["crowd", "tv", "residual"]].transform("mean")
         rows.append(correlation_row("All networks, within network", season,
                                     within["crowd"], within["tv"], within["residual"]))
+    for row in rows:
+        row["summary_text"] = correlation_text(row)
+    return pd.DataFrame(rows)
+
+
+def network_audience_table(con) -> pd.DataFrame:
+    """Average audience per network and season, counting only broadcasts with a known total.
+
+    Fox is counted by window, because a window is what its audience figure measures.
+    """
+    d = con.execute("""
+        select network, season, 'games' as unit, count(*) as broadcasts, count(viewers_total) as rated,
+               avg(viewers_total) as average_viewers
+        from viewership_games where network <> 'Fox' group by 1, 2
+        union all
+        select network, season, 'windows', count(*), count(viewers_total), avg(viewers_total)
+        from fox_windows group by 1, 2 order by 2, 6 desc""").df()
+    d["network_text"] = [
+        f"{r.network} averaged {r.average_viewers:,.0f} viewers across {r.rated} {r.unit} with known "
+        f"audiences in {r.season}"
+        + (f", out of {r.broadcasts} {r.unit}." if r.broadcasts > r.rated else ".")
+        for r in d.itertuples()]
+    return d
+
+
+def tv_lookup_table(con) -> pd.DataFrame:
+    """One row per nationally televised game, with a finished sentence about its audience."""
+    single = con.execute("""
+        select g.game_pk, g.official_date, g.season, g.home_team, g.away_team, v.network,
+               v.viewers_total, v.viewers_main, v.viewers_basis, v.total_uncertain
+        from viewership_games v join games g using (game_pk)""").df()
+    window = con.execute("""
+        select g.game_pk, g.official_date, g.season, g.home_team, g.away_team, w.coverage_pct,
+               f.viewers_total, f.window_id
+        from fox_window_games w join fox_windows f using (window_id) join games g using (game_pk)
+        where f.n_games > 1""").df()
+
+    rows = []
+    for g in single.itertuples():
+        name = f"{g.away_team} at {g.home_team}"
+        if pd.notna(g.viewers_total):
+            text = f"{name} drew {int(g.viewers_total):,} viewers on {g.network}."
+            if g.total_uncertain:
+                text += " This total is uncertain: it may not include the simulcast."
+        elif pd.notna(g.viewers_main):
+            text = (f"{name} drew {int(g.viewers_main):,} viewers on {g.network} alone. The simulcast "
+                    "number is missing, so the total is unknown.")
+        else:
+            text = f"No audience figure is available for {name} on {g.network}."
+        rows.append({"game_pk": g.game_pk, "official_date": g.official_date, "season": g.season,
+                     "home_team": g.home_team, "away_team": g.away_team, "network": g.network,
+                     "broadcast": "single game", "viewers_total": g.viewers_total, "tv_text": text})
+    for g in window.itertuples():
+        name = f"{g.away_team} at {g.home_team}"
+        others = window[(window.window_id == g.window_id) & (window.game_pk != g.game_pk)]
+        with_games = " and ".join(f"{o.away_team} at {o.home_team}" for o in others.itertuples())
+        total = (f"the whole window drew {int(g.viewers_total):,} viewers" if pd.notna(g.viewers_total)
+                 else "the window's total audience is not known")
+        text = (f"The data cannot give a number for {name} alone. It aired in a regional Fox window "
+                f"with {with_games}, and {total}.")
+        if pd.notna(g.coverage_pct):
+            text += f" {name} reached {int(g.coverage_pct)}% of the country."
+        rows.append({"game_pk": g.game_pk, "official_date": g.official_date, "season": g.season,
+                     "home_team": g.home_team, "away_team": g.away_team, "network": "Fox",
+                     "broadcast": "regional window", "viewers_total": g.viewers_total, "tv_text": text})
     return pd.DataFrame(rows)
 
 
@@ -367,13 +522,16 @@ def main() -> None:
     sample, game_coefs, game_stats = fit_game_model(g)
     team, team_coefs, team_stats = fit_team_model(con, sample, markets)
 
-    keep = ["game_pk", "expected_raw", "residual_raw", "residual_pct_raw", "expected_capped",
+    keep = ["game_pk", "expected_capped",
             "is_capped", "residual_capped", "residual_pct_capped", "ceiling_game",
-            "expected_text", "venue_season_max", "near_ceiling"]
+            "game_result_text", "venue_season_max", "near_ceiling"]
     game_model = g[["game_pk", "in_model", "exclusion_reason", "home_games_back_before"]].merge(
         sample[keep], on="game_pk", how="left")
+    # Raw values can exceed what a park holds, so they sit apart from what researchers read.
+    raw = sample[["game_pk", "expected_raw", "residual_raw", "residual_pct_raw"]]
     coefs = pd.concat([game_coefs, team_coefs])
     coefs["pct_effect"] = np.exp(coefs["coef"]) - 1
+    coefs["effect_text"] = [effect_text(c) for c in coefs.itertuples()]
     fit_rows = pd.DataFrame([{"model": "game", **game_stats}, {"model": "team", **team_stats}])
 
     def write_table(name: str, df: pd.DataFrame) -> None:
@@ -386,11 +544,13 @@ def main() -> None:
         for (column,) in floats:
             con.execute(f"UPDATE {name} SET {column} = NULL WHERE isnan({column})")
 
-    for name, df in {"game_model": game_model, "team_season_model": team, "team_markets": markets,
+    for name, df in {"game_model": game_model, "game_model_raw": raw, "team_season_model": team, "team_markets": markets,
                      "model_coefficients": coefs, "model_fit": fit_rows}.items():
         write_table(name, df)
     create_clean_views(con)
     write_table("crowd_tv_residual", crowd_tv_table(con))
+    write_table("game_tv_lookup", tv_lookup_table(con))
+    write_table("network_audience", network_audience_table(con))
 
     con.execute(f"COMMENT ON TABLE game_model IS '{GAME_TABLE_COMMENT}'")
     con.execute(f"COMMENT ON TABLE team_season_model IS '{TEAM_TABLE_COMMENT}'")

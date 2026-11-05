@@ -3,6 +3,8 @@
 
 The expected answer is what the data says, so the agent can be checked against it. The agent answer is its real output from a saved run on November 5, 2026, unedited. Wording varies between runs, but the facts should hold. The no-tools baseline is the same model with no tools and no system prompt.
 
+To test the agent against 18 questions with required facts, run `uv run python scripts/eval_agent.py`.
+
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
 **Expected answer:** Yes on the raw numbers, but there is no clear link after adjusting. Comparing games on the same network, smaller crowds tended to come with smaller TV audiences, a moderate correlation of 0.34 in 2025 (n = 82, range 0.14 to 0.52) and 0.47 in 2026 (n = 83, range 0.29 to 0.62), where 0 means no link and 1 means a perfect match. Adjusting compares each game with its own park's usual crowd, so popular teams do not drive the result. After that, the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34). Both ranges include zero, so a crowd below a park's usual level did not clearly mean a smaller TV audience.
@@ -11,7 +13,9 @@ The expected answer is what the data says, so the agent can be checked against i
 
 **Agent answer:**
 
-> Games with smaller crowds coincided with smaller national TV audiences in 2025 and 2026 when looking at raw numbers, but there is no clear link after adjusting for what each park normally draws. In 2025, raw crowd sizes and national TV audiences moved together within a network with a correlation of 0.34 (n = 82, range 0.14 to 0.52) (table: crowd_tv_residual). After adjusting for what each park normally draws, which compares each game with its own park's usual crowd, so popular teams do not drive the result, the correlation was 0.16 (n = 82, range -0.05 to 0.37), meaning there is no clear link after adjusting (table: crowd_tv_residual). In 2026, raw crowds and national TV audiences moved together within a network with a correlation of 0.47 (n = 83, range 0.29 to 0.62) (table: crowd_tv_residual). After adjusting for what each park normally draws, the correlation was 0.14 (n = 83, range -0.08 to 0.34), which also shows no clear link (table: crowd_tv_residual). These numbers show associations and do not show cause and effect. These viewership figures are publicly reported and may differ from official Nielsen data, and they are the national TV audience, excluding streaming add-ons.
+> No, there was no clear link showing that smaller crowds coincided with smaller national TV audiences in 2025 and 2026 once each game was compared to its own park's usual crowd, though raw crowds and TV audiences did move together moderately. Comparing games on the same network in 2025, crowds and national TV audiences moved together moderately (correlation 0.34, n = 82, range 0.14 to 0.52) (table: crowd_tv_residual). After comparing each game with its own park's usual crowd, so popular teams do not drive the result, the correlation is 0.16 (range -0.05 to 0.37), so there is no clear link (table: crowd_tv_residual). Comparing games on the same network in 2026, crowds and national TV audiences moved together moderately (correlation 0.47, n = 83, range 0.29 to 0.62) (table: crowd_tv_residual). After comparing each game with its own park's usual crowd, so popular teams do not drive the result, the correlation is 0.14 (range -0.08 to 0.34), so there is no clear link (table: crowd_tv_residual).
+>
+> *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like. These are associations, not cause and effect.*
 
 **No-tools baseline:**
 
@@ -25,7 +29,9 @@ The expected answer is what the data says, so the agent can be checked against i
 
 **Agent answer:**
 
-> The New York Mets' attendance surge in 2025 coincided with signing outfielder Juan Soto to a 15-year, $765 million contract on December 11, 2024, and opening the season with a league-best 45–24 record through June 12 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). During the 2025 regular season, the team averaged 39,776 fans per home game, compared to an expected average of 32,182 fans (table: team_season_model). This was a 35.9% increase from the season before (table: team_season_model). The crowd was 23.6% above what the prior two years of crowds, win rate and market would predict (table: team_season_model). Since the team was below that prediction the year before, part of this may be a rebound (table: team_season_model). Promotions and giveaways are not in the data to help explain these crowds (table: games_clean, team_season_model).
+> We cannot determine the exact cause of the New York Mets' attendance over-performance in 2025 because our data only tracks coinciding events rather than direct cause and effect. The New York Mets averaged 39,776 a game in 2025, up 35.9% from 29,268 the season before. That is 23.6% above the 32,182 that the prior two years of crowds, win rate and market would predict. Part of this may be a rebound: the team was 18.8% below its prediction the season before. (table: team_season_model) This high turnout coincided with the Mets signing outfielder Juan Soto to a 15-year, $765 million contract in December 2024, representing the largest contract in professional sports history ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). The strong season also coincided with the team opening the year with a 45–24 record through June 12, marking the second-most wins through the first 70 games in franchise history ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). Additionally, the Mets retired David Wright's number 5 and inducted him into the team's Hall of Fame during a pre-game ceremony on July 19 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)).
+>
+> *Promotions are not in the data. These are associations, not cause and effect.*
 
 **No-tools baseline:**
 
@@ -39,9 +45,9 @@ The expected answer is what the data says, so the agent can be checked against i
 
 **Agent answer:**
 
-> We cannot determine the exact number of people who watched the Yankees vs Red Sox game on June 7, 2025, because the data cannot split the total audience between games in a regional Fox window (table: fox_windows, fox_window_games). The regional Fox window had a total audience of 3,094,000 viewers, which included 3,045,000 on the main Fox network and 49,000 on Fox Deportes (table: fox_windows). This window also featured a Padres vs. Brewers game that reached 4% of the country (table: fox_windows, fox_window_games). There is no specific national television viewership data recorded for the Yankees vs. Red Sox game itself (table: game_viewership_clean, viewership_games).
+> The data cannot give a number for Boston Red Sox at New York Yankees alone. It aired in a regional Fox window with San Diego Padres at Milwaukee Brewers, and the whole window drew 3,094,000 viewers. Boston Red Sox at New York Yankees reached 96% of the country. (table: game_tv_lookup)
 >
-> These viewership figures are publicly reported and may differ from official Nielsen data, and they represent the national TV audience, excluding streaming add-ons.
+> *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*
 
 **No-tools baseline:**
 

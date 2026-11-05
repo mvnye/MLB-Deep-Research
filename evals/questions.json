@@ -1,0 +1,233 @@
+[
+ {
+  "id": "sample_crowd_tv",
+  "q": "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
+  "must": [
+   "0.34",
+   "0.47",
+   "0.16",
+   "0.14",
+   "no clear link"
+  ],
+  "must_not": [
+   "raw correlation",
+   "technical"
+  ]
+ },
+ {
+  "id": "sample_mets",
+  "q": "Why did the Mets over-perform on attendance in 2025?",
+  "must": [
+   "39,776",
+   "35.9%",
+   "23.6%",
+   "rebound"
+  ],
+  "context": true,
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "sample_fox",
+  "q": "How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?",
+  "must": [
+   "3,094,000",
+   "96%"
+  ],
+  "must_not": [
+   "converted",
+   "share of viewers",
+   "data cannot answer",
+   "technical"
+  ],
+  "max_researchers": 2
+ },
+ {
+  "id": "capped_game",
+  "q": "How did the Padres vs Dodgers crowd on August 23, 2025 compare with expected?",
+  "must": [
+   "46,326",
+   "season high"
+  ],
+  "must_not": [
+   "65,953",
+   "exceeded",
+   "below expected",
+   "above expected",
+   "65,952",
+   "raw",
+   "47,345 and",
+   "coefficient",
+   "residual",
+   "capped attendance",
+   "technical",
+   "cannot compare",
+   "below the expected",
+   "% below",
+   "% above"
+  ],
+  "context": false
+ },
+ {
+  "id": "rays_game",
+  "q": "How did the Rays crowd on May 1, 2025 compare with expected?",
+  "must": [
+   "8,794"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "postseason",
+  "q": "How did postseason crowds compare in 2025?",
+  "must": [
+   "regular season"
+  ],
+  "max_researchers": 0,
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "out_of_range",
+  "q": "How did the Yankees draw in 2019?",
+  "must": [
+   "2024"
+  ],
+  "max_researchers": 1,
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "vague",
+  "q": "Tell me about attendance",
+  "clarify": true,
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "uncertain_total",
+  "q": "How many people watched Dodgers vs Blue Jays on TBS on April 7, 2026?",
+  "must": [
+   "708,000",
+   "uncertain"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "main_only",
+  "q": "How many people watched Tigers vs Yankees on TBS on June 30, 2026?",
+  "must": [
+   "279,000"
+  ],
+  "must_not": [
+   "676",
+   "technical"
+  ]
+ },
+ {
+  "id": "single_game_tv",
+  "q": "How many people watched Dodgers vs Yankees on NBC on July 19, 2026?",
+  "must": [
+   "3,616,000"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "rsn",
+  "q": "What was the local RSN viewership for Marlins games in 2025?",
+  "must_any": [
+   "cannot",
+   "not available",
+   "not in the data",
+   "does not",
+   "no data"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "held_tigers",
+  "q": "How did Tigers crowds change in 2025, and why?",
+  "must": [
+   "22.9%"
+  ],
+  "context": true,
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "held_cardinals",
+  "q": "Which team under-performed the most on attendance in 2025?",
+  "must": [
+   "Cardinals",
+   "21.7%"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "held_cubs_days",
+  "q": "Do Cubs Sunday games draw better than their Tuesday games?",
+  "must": [
+   "37,140",
+   "35,280"
+  ],
+  "context": false,
+  "must_not": [
+   "37,140.2",
+   "coefficient of",
+   "technical",
+   "ceiling game"
+  ]
+ },
+ {
+  "id": "held_network",
+  "q": "Which network had the biggest national TV audiences in 2026?",
+  "must": [
+   "NBC",
+   "Fox",
+   "2,343,875"
+  ],
+  "context": false,
+  "must_not": [
+   "across 26",
+   "across 25 games",
+   "technical"
+  ]
+ },
+ {
+  "id": "held_speedway",
+  "q": "What was the attendance at the Speedway Classic?",
+  "must": [
+   "91,032"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "held_drivers",
+  "q": "What drives MLB attendance?",
+  "context": false,
+  "must_not": [
+   "coefficient of",
+   "shrunk",
+   "technical"
+  ],
+  "must": [
+   "Home openers"
+  ]
+ }
+]

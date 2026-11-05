@@ -19,13 +19,20 @@ TIMEOUT_SECONDS = 15
 FIRST_SEASON, LAST_SEASON = 2024, 2026
 COVERAGE = "The data covers the 2024 to 2026 regular seasons. The postseason is not included."
 
+# Kept for audit, not listed for researchers: games_clean holds what answers need.
+HIDDEN_TABLES = {"game_model", "game_model_raw"}
+
 TABLE_DOCS = {
     "games_clean": "Default for attendance work. Every played game except special events and "
                    "shared-gate doubleheader games, with the game_model columns included.",
     "game_viewership_clean": "Default for crowd vs TV work. games_clean joined to single-game "
                              "national broadcasts: one row per broadcast.",
-    "crowd_tv_residual": "Precomputed crowd vs TV correlations with n per network and season. Use "
-                         "this first for whether crowds and TV audiences move together.",
+    "crowd_tv_residual": "Crowd vs TV correlations per network and season. summary_text is a finished "
+                         "sentence. Use this first for whether crowds and TV audiences move together.",
+    "network_audience": "Average audience per network and season, counting only known audiences. "
+                        "network_text is a finished sentence. Use this to compare networks.",
+    "game_tv_lookup": "One row per nationally televised game. tv_text is a finished sentence about its "
+                      "audience. Use this first for how many people watched a game.",
     "games": "One row per played regular-season game, 2024 to 2026. Key: game_pk. NULL attendance "
              "means unknown. Includes special events: use games_clean unless asked about them.",
     "teams": "One row per team per season, with league and division. Key: team_id, season.",
@@ -38,7 +45,6 @@ TABLE_DOCS = {
     "fox_window_games": "Games in each Fox window. coverage_pct is the share of the country that "
                         "received the game, not its share of viewers: never turn it into a "
                         "per-game viewer number.",
-    "game_model": "Expected attendance per game. Join to games on game_pk.",
     "team_season_model": "Expected average attendance per team-season. Key: team_id, season.",
     "team_markets": "Metro population per team and season. Two-team metros are not split.",
     "model_coefficients": "Coefficients of both models. model is game or team.",
@@ -47,29 +53,16 @@ TABLE_DOCS = {
 }
 
 # Sent with any result that touches these tables, so the caveat travels with the numbers.
-VIEWERSHIP_NOTE = ("Viewership is publicly reported average audience (P2+) compiled by TV Media "
-                   "Blog and may differ from official Nielsen data. viewers_total is the national "
-                   "TV audience, excluding streaming add-ons. Netflix games are streaming-only. "
-                   "If total_uncertain is true, say the total is uncertain. If viewers_basis is "
-                   "main_only, say so, and compare only within one network.")
-GAME_MODEL_NOTE = ("Use residual_pct_capped for rankings and groups of games. When ceiling_game "
-                   "is true, never say the game beat or missed expected: give expected_text "
-                   "word for word as its own sentence, with no quotation marks or percent gap. Results compare a "
-                   "game with its own park that season. Promotions are not in the data.")
 RESULT_NOTES = {
-    "viewership_games": VIEWERSHIP_NOTE,
-    "game_viewership_clean": VIEWERSHIP_NOTE + " " + GAME_MODEL_NOTE,
-    "fox_windows": VIEWERSHIP_NOTE,
-    "game_model": GAME_MODEL_NOTE,
-    "games_clean": GAME_MODEL_NOTE,
-    "crowd_tv_residual": "Correlational, not causal. Give n for every figure. small_n means the "
-                         "figure is noisy: give the range. too_few means do not read it. "
-                         + VIEWERSHIP_NOTE,
-    "team_season_model": "Report yoy_change_pct first. residual_pct is against what the prior two "
-                         "years of crowds, win rate and market predict, not a year-over-year "
-                         "change. Check prior_residual_pct for a rebound and look for the reason.",
-    "model_coefficients": "Effects are correlational, not causal. The indoor term partly reflects "
-                          "roofs closed for bad weather.",
+    "games_clean": "Copy game_result_text word for word for a single game.",
+    "game_viewership_clean": "Copy game_result_text word for word for a single game. Compare viewers "
+                             "only within one network.",
+    "game_tv_lookup": "Copy tv_text word for word.",
+    "network_audience": "Copy network_text word for word.",
+    "crowd_tv_residual": "Copy summary_text word for word. Use the rows named 'All networks, within "
+                         "network' unless the task names a network.",
+    "team_season_model": "Copy team_result_text word for word.",
+    "model_coefficients": "Copy effect_text word for word. Never report coef.",
 }
 
 
@@ -88,7 +81,7 @@ def _table_names(con) -> list[str]:
     rows = con.execute("""select table_name from duckdb_tables()
                           union select view_name from duckdb_views() where not internal
                           order by 1""").fetchall()
-    return [r[0] for r in rows]
+    return [r[0] for r in rows if r[0] not in HIDDEN_TABLES]
 
 
 def _tables_in(query: str, names: list[str]) -> list[str]:
