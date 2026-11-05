@@ -227,3 +227,6 @@ CLAUDE.md
 
 # R session history
 .Rhistory
+
+# Git bundles
+*.bundle

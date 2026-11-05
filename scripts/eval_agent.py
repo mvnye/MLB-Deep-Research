@@ -28,6 +28,8 @@ def uncited_facts(run: app.Research) -> list[str]:
     body = run.report.split("\n\n*")[0]
     problems = ["inline citation left in the answer" for _ in [1] if "(table:" in body or "](http" in body]
     for line in body.split("\n"):
+        if line.lstrip().startswith("#"):
+            continue  # a heading states no fact
         for sentence in app.sentences(line):
             if run.sources and re.search(r"\d{3}", sentence) and not re.search(r"\[\d+\]", sentence):
                 problems.append(f"no footnote: {sentence[:70]}")
@@ -51,6 +53,16 @@ def check(case: dict, run: app.Research) -> list[str]:
     made = run.chart["type"] if run.chart else None
     if "chart" in case and case["chart"] != "any" and made != case["chart"]:
         failures.append(f"chart should be {case['chart']}, got {made}")
+    if "team_chart" in case and bool(run.team_chart) != case["team_chart"]:
+        failures.append(f"team chart should be {case['team_chart']}")
+    if "season_lines" in case and len((run.chart or {"series": []})["series"]) != case["season_lines"]:
+        failures.append(f"chart should have {case['season_lines']} lines")
+    if "tile" in case and not any(t["value"] == case["tile"] for t in run.tiles):
+        failures.append(f"no tile for {case['tile']}: {run.tiles}")
+    if case.get("no_tiles") and run.tiles:
+        failures.append(f"should have no tiles: {run.tiles}")
+    if "box_score" in case and bool(run.box_score) != case["box_score"]:
+        failures.append(f"box score should be {case['box_score']}")
     failures += app.citation_problems(run.cited, run.tool_calls, case["q"])
     failures += uncited_facts(run)
     if app.word_count(run.report) > app.BROAD_WORD_LIMIT + 60:
@@ -69,7 +81,8 @@ async def run_case(case: dict, gate: asyncio.Semaphore) -> dict:
             failures = [f"crashed: {type(e).__name__}: {str(e)[:200]}"]
         result = {"id": case["id"], "q": case["q"], "passed": not failures, "failures": failures,
                   "seconds": round(time.time() - start), "researchers": run.researchers,
-                  "retries": run.retries, "errors": run.errors, "chart": run.chart,
+                  "retries": run.retries, "errors": run.errors, "chart": run.chart, "team_chart": run.team_chart,
+                  "tiles": run.tiles, "box_score": run.box_score,
                   "report": run.report, "sources": run.sources, "data_note": run.data_note}
         print(f"{'PASS' if not failures else 'FAIL'} {case['id']} ({result['seconds']}s) {failures}", flush=True)
         return result

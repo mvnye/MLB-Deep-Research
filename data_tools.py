@@ -266,12 +266,21 @@ def _rows(con, sql: str) -> list[dict]:
     return [dict(zip(columns, r)) for r in cursor.fetchall()]
 
 
-def chart_data() -> dict:
-    """Rows for the page's fixed team chart."""
+def team_seasons(team_id: int) -> list[dict]:
+    """One team's actual and expected average by season, for its chart."""
     con = _connect()
     try:
-        return {"teams": _rows(con, """select team_id, home_team, season, avg_attendance,
-                expected_avg_attendance, exclusion_reason from team_season_model order by home_team, season""")}
+        return _rows(con, f"""select home_team, season, avg_attendance, expected_avg_attendance, exclusion_reason
+                from team_season_model where team_id = {int(team_id)} order by season""")
+    finally:
+        con.close()
+
+
+def team_aliases() -> list[tuple[str, int, str]]:
+    """Every name for a team: (alias_key, team_id, team). Read by code, not by the model."""
+    con = _connect()
+    try:
+        return con.execute("select alias_key, team_id, team from team_aliases").fetchall()
     finally:
         con.close()
 

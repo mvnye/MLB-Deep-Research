@@ -4,115 +4,150 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="light" />
-        <title>MLB Attendance and TV Research</title>
+        <title>MLB Attendance and Viewership Research</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@400;500;600&display=swap" />
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
-            :root { color-scheme: light; }
-            html { background: #fff; }
-            body { font-family: system-ui, sans-serif; padding: 2rem; color: #111; line-height: 1.5; }
-            main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 0.5rem; }
-            section { border: 1px solid #e0e0e0; padding: 1.25rem 1.5rem; }
-            .intro p + p { margin-top: 0.5rem; }
-            .limits { color: #555; font-size: 0.9rem; }
-            form { display: flex; gap: 0.5rem; }
-            input { flex: 1; padding: 0.6rem; font: inherit; border: 1px solid #bbb; }
-            button { padding: 0.6rem 1rem; font: inherit; cursor: pointer; background: #111; color: #fff; border: 1px solid #111; }
-            button:disabled { opacity: 0.5; cursor: wait; }
-            button.plain { background: #fff; color: #111; border-color: #bbb; }
-            #samples { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; margin-top: 0.75rem; }
-            #samples button { background: none; color: #0645ad; border: none; padding: 0; text-align: left; font-size: 0.9rem; }
+            :root {
+                color-scheme: light;
+                --green: #12402e; --green-2: #0c3122; --cream: #f6efdc; --chalk: #fbf8f0; --clay: #a8501f; --red: #c8102e;
+                --ink: #1d2a24; --muted: #56625b; --line: #ddd6c5; --page: #efe9da; --link: #1a5c43;
+                --display: "Oswald", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+                --body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            }
+            html { background: var(--page); }
+            body { font-family: var(--body); color: var(--ink); line-height: 1.55; padding: 1.5rem; font-size: 16px; }
+            main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+            h1 { font-family: var(--display); font-size: 2.1rem; line-height: 1.15; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--cream); }
+            h2 { font-family: var(--display); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--clay); margin-bottom: 0.2rem; }
+            a { color: var(--link); }
+            section { background: var(--chalk); border: 1px solid var(--line); border-radius: 6px; padding: 1.25rem 1.5rem; }
+            .top { padding: 0; overflow: hidden; border-color: var(--green); }
+            .board { background: var(--green); color: var(--cream); padding: 1.5rem; box-shadow: inset 0 0 0 4px var(--green-2), inset 0 0 0 5px #2c5c48; }
+            .about { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; padding: 0 1.5rem; font-size: 0.92rem; }
+            .limits { color: var(--muted); font-size: 0.88rem; }
+            .top .limits { padding: 0.75rem 1.5rem 1.1rem; }
+            .stitch { display: block; width: 100%; height: auto; margin: 0.35rem 0; }
+            form { display: flex; gap: 0.5rem; margin-top: 1rem; }
+            input { flex: 1; min-width: 0; padding: 0.8rem 0.9rem; font: inherit; font-size: 1.05rem; border: 2px solid var(--cream); border-radius: 4px; background: #fffdf7; color: var(--ink); }
+            input:focus-visible, button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--clay); outline-offset: 2px; }
+            button { font-family: var(--body); cursor: pointer; }
+            #send { font-family: var(--display); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 1.6rem; background: var(--clay); color: #fff; border: 2px solid var(--clay); border-radius: 4px; }
+            button:disabled { opacity: 0.6; cursor: wait; }
+            button.plain { padding: 0.5rem 0.9rem; font-size: 0.92rem; font-weight: 500; background: var(--chalk); color: var(--green); border: 1px solid #b9b19c; border-radius: 4px; }
+            #progress { list-style: none; color: #d9e2d8; font-size: 0.9rem; margin-top: 0.75rem; }
+            #progress:empty { display: none; }
+            /* Moving dots on the latest line, so a long step does not look frozen. */
+            #progress li:last-child::after { content: "..."; display: inline-block; width: 1.4em; text-align: left; animation: dots 1.2s steps(1) infinite; }
+            @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+            @media (prefers-reduced-motion: reduce) { #progress li:last-child::after { animation: none; } }
+            #samples { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.6rem; margin-top: 1rem; }
+            /* A ticket: notches on both edges, and a perforated line beside the stub. */
+            .ticket { display: flex; align-items: stretch; text-align: left; border: none; background: var(--cream); color: var(--green-2); font-size: 0.9rem; line-height: 1.35;
+                -webkit-mask: radial-gradient(circle 7px at 0 50%, transparent 96%, #000) left / 51% 100% no-repeat, radial-gradient(circle 7px at 100% 50%, transparent 96%, #000) right / 51% 100% no-repeat;
+                mask: radial-gradient(circle 7px at 0 50%, transparent 96%, #000) left / 51% 100% no-repeat, radial-gradient(circle 7px at 100% 50%, transparent 96%, #000) right / 51% 100% no-repeat; }
+            .ticket:hover:not(:disabled) { background: #fffaf0; }
+            .stub { font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clay); writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; padding: 0.5rem 0.55rem 0.5rem 0.4rem; border-left: 2px dotted #a79f88; margin-left: 0.5rem; }
+            .q { padding: 0.6rem 1rem 0.6rem 0.7rem; align-self: center; }
             #thread { display: flex; flex-direction: column; gap: 1rem; }
             #thread:empty { display: none; }
-            .asked { font-weight: 600; }
-            .answer h2, .answer h3 { font-size: 1rem; color: #111; text-transform: none; letter-spacing: 0; margin: 0.75rem 0 0.25rem; }
+            .asked { font-family: var(--display); font-weight: 500; font-size: 1.25rem; line-height: 1.3; color: var(--green); letter-spacing: 0.01em; }
+            .answer h2, .answer h3 { font-family: var(--display); font-weight: 500; font-size: 1.05rem; color: var(--green); text-transform: none; letter-spacing: 0.01em; margin: 0.75rem 0 0.25rem; }
             .answer p { margin-top: 0.5rem; }
             .answer ul { margin: 0.5rem 0 0 1.25rem; }
-            .answer em { color: #555; font-size: 0.9rem; }
+            .answer em { color: var(--muted); font-size: 0.9rem; }
+            /* Scoreboard tiles: cream numbers on dark plates, like a hand-hung board. */
+            .tiles { display: flex; flex-wrap: wrap; gap: 0.5rem; background: var(--green); padding: 0.6rem; border-radius: 4px; margin: 0.5rem 0 0.75rem; }
+            .tile { flex: 1 1 8rem; background: var(--green-2); border: 1px solid #2c5c48; border-radius: 3px; padding: 0.35rem 0.6rem 0.4rem; text-align: center; }
+            .tile b { display: block; font-family: var(--display); font-weight: 600; font-size: 1.8rem; line-height: 1.15; color: #fffaf0; letter-spacing: 0.02em; }
+            .tile span { font-family: var(--display); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: #cfdccf; }
+            .box-score { margin-top: 1rem; overflow-x: auto; }
+            .box-score table { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.3; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+            .box-score th { font-weight: 700; border-bottom: 1px solid var(--ink); }
+            .box-score th, .box-score td { padding: 0.1rem 1.2rem 0.1rem 0; white-space: nowrap; text-align: left; }
+            .box-score .num { text-align: right; }
+            .box-score tr td { border-bottom: none; }
             sup.fn { font-size: 0.7em; line-height: 0; }
             sup.fn a { text-decoration: none; padding: 0 1px; }
             .sources { margin-top: 0.75rem; font-size: 0.85rem; }
             .sources ol { list-style: none; margin-top: 0.5rem; }
             .sources li { margin-top: 0.35rem; }
-            .sources code { display: block; white-space: pre-wrap; word-break: break-word; background: #f5f5f3; padding: 0.4rem; margin-top: 0.25rem; font-size: 0.8rem; }
-            .data-note { font-size: 0.8rem; color: #52514e; margin-top: 0.5rem; }
+            .sources code { display: block; white-space: pre-wrap; word-break: break-word; background: #f0ead9; padding: 0.4rem; margin-top: 0.25rem; font-size: 0.8rem; }
+            .data-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
             .error { color: #b00020; }
-            #status { color: #666; font-size: 0.9rem; min-height: 1.4rem; }
             .row { display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; }
-            #progress { list-style: none; color: #555; font-size: 0.9rem; }
-            #progress:empty { display: none; }
-            .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; align-items: center; font-size: 0.9rem; }
-            select { font: inherit; padding: 0.25rem; border: 1px solid #bbb; background: #fff; }
             svg { width: 100%; height: auto; display: block; }
-            svg text { font-size: 11px; fill: #52514e; font-family: inherit; }
-            .grid { stroke: #e5e5e2; stroke-width: 1; }
-            .axis0 { stroke: #a8a7a2; stroke-width: 1; }
-            #tooltip { position: fixed; display: none; pointer-events: none; z-index: 5; background: #111; color: #fff; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 4px; max-width: 16rem; }
-            .legend { display: flex; gap: 1rem; font-size: 0.85rem; margin: 0.25rem 0 0.5rem; }
-            .legend span::before { content: ""; display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: 2px; margin-right: 0.3rem; background: var(--key); vertical-align: -1px; }
+            svg text { font-size: 11px; fill: var(--muted); font-family: var(--body); }
+            .grid { stroke: #e7e1d2; stroke-width: 1; }
+            .axis0 { stroke: #a39c8a; stroke-width: 1; }
+            #tooltip { position: fixed; display: none; pointer-events: none; z-index: 5; background: var(--green-2); color: #fff; font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 4px; max-width: 16rem; }
+            .legend { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.85rem; margin: 0.25rem 0 0.5rem; align-items: center; }
+            .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+            .legend i { display: inline-block; width: 1.1rem; height: 0.75rem; border-radius: 2px; }
+            .legend i.line { height: 0; border-radius: 0; border-top: 2.5px solid; background: none; }
             details { margin-top: 0.75rem; font-size: 0.85rem; }
             table { border-collapse: collapse; margin-top: 0.5rem; width: 100%; }
-            th, td { text-align: right; padding: 0.15rem 0.5rem; border-bottom: 1px solid #eee; }
+            th, td { text-align: right; padding: 0.15rem 0.5rem; border-bottom: 1px solid #e9e3d4; }
             th:first-child, td:first-child { text-align: left; }
-            .scroll { max-height: 16rem; overflow-y: auto; }
-            .answer-chart { margin-top: 1rem; }
-            .answer-chart h3 { font-size: 0.95rem; margin: 0 0 0.25rem; }
-            .chart-source { font-size: 0.8rem; color: #52514e; margin-top: 0.25rem; }
+            .answer-chart, .team-chart { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+            .answer-chart h3, .team-chart h3 { font-family: var(--display); font-weight: 500; font-size: 1.05rem; color: var(--green); margin: 0 0 0.25rem; }
+            .chart-source { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
             /* The context panel stays hidden until the toggle opens it. */
             body:not(.show-work) { margin-right: 0 !important; }
             body:not(.show-work) #context-panel { display: none !important; }
         </style>
     </head>
     <body>
+        <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+            <defs>
+                <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect width="6" height="6" fill="#dfe2e6"></rect>
+                    <rect width="3" height="6" fill="#8a8f98"></rect>
+                </pattern>
+            </defs>
+        </svg>
         <main>
-            <h1>MLB Attendance and TV Research</h1>
-
-            <section class="intro">
-                <h2>What this explores</h2>
-                <p>What drives MLB attendance, why specific teams and games beat or miss expectations, and whether smaller crowds went with smaller national TV audiences.</p>
-                <h2 style="margin-top: 0.75rem">Who it is for</h2>
-                <p>Sports media and sponsorship sellers preparing team pitches.</p>
-                <h2 style="margin-top: 0.75rem">How to use it</h2>
-                <p>Ask about a team, season, game or comparison, then ask follow-ups in the same conversation. A vague question gets one clarifying question first. Answers take up to about 2 minutes, and every fact shows its source.</p>
+            <section class="top">
+                <div class="board">
+                    <h1>MLB Attendance and Viewership Research</h1>
+                    <form id="ask">
+                        <input id="question" placeholder="Ask about a team, season, game, or comparison" autocomplete="off" aria-label="Your question" />
+                        <button id="send" type="submit">Ask</button>
+                    </form>
+                    <ul id="progress" role="status"></ul>
+                    <div id="samples">
+                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?</span></button>
+                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Why did the Mets over-perform on attendance in 2025?</span></button>
+                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?</span></button>
+                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">How did the Oakland A's viewership change in their final season before moving?</span></button>
+                    </div>
+                </div>
+                <div id="topStitch"></div>
+                <div class="about">
+                    <div>
+                        <h2>What this explores</h2>
+                        <p>What drives MLB attendance, why teams and games beat or miss expectations, and whether smaller crowds went with smaller national TV audiences.</p>
+                    </div>
+                    <div>
+                        <h2>Who it is for</h2>
+                        <p>Sports media and sponsorship sellers preparing team pitches.</p>
+                    </div>
+                    <div>
+                        <h2>How to use it</h2>
+                        <p>Ask about a team, season, game, or comparison, then ask follow-ups. A vague question gets one clarifying question first. Every fact shows its source.</p>
+                    </div>
+                </div>
                 <p class="limits">Attendance covers the 2024 to 2026 regular seasons. National TV audiences cover 2025 and 2026, and the 2025 figures end in early September. Local TV viewership and the postseason are not included.</p>
             </section>
-
-            <section>
-                <form id="ask">
-                    <input id="question" placeholder="Ask about a team, season, game or comparison" autocomplete="off" aria-label="Your question" />
-                    <button id="send" type="submit">Ask</button>
-                </form>
-                <div id="samples">
-                    <button type="button">Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?</button>
-                    <button type="button">Why did the Mets over-perform on attendance in 2025?</button>
-                    <button type="button">How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?</button>
-                    <button type="button">How did the Oakland A's viewership change in their final season before moving?</button>
-                </div>
-            </section>
-
-            <div id="thread"></div>
-            <div id="status" role="status"></div>
-            <ul id="progress"></ul>
 
             <div class="row">
                 <button id="toggle" class="plain" type="button" aria-expanded="false">Show the agents' work</button>
                 <button id="reset" class="plain" type="button">New conversation</button>
             </div>
 
-            <section>
-                <h2>Team attendance: actual and expected</h2>
-                <div class="controls"><label>Team <select id="team"></select></label></div>
-                <p id="teamTitle" style="font-weight: 600; font-size: 0.95rem"></p>
-                <div class="legend">
-                    <span style="--key: #2a78d6">Actual average</span>
-                    <span style="--key: #eb6834">Expected average</span>
-                </div>
-                <svg id="teamChart" viewBox="0 0 680 240" role="img" aria-label="Actual and expected average attendance by season"></svg>
-                <p class="limits" id="teamNote"></p>
-                <p class="chart-source">Source: team_season_model</p>
-                <details><summary>Show as a table</summary><table id="teamTable"></table></details>
-            </section>
+            <div id="thread"></div>
             <div id="tooltip"></div>
         </main>
 
@@ -205,6 +240,66 @@
                 item.scrollIntoView({ block: "center" });
             });
 
+            // A curved seam with V stitches, drawn along the curve like the stitching on a ball.
+            function stitch() {
+                const W = 800, H = 30, svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+                svg.setAttribute("class", "stitch");
+                svg.setAttribute("aria-hidden", "true");
+                const point = (t) => [W * t, 25 - 72 * t * (1 - t)];
+                const add = (d, width, opacity) => {
+                    const path = document.createElementNS(svg.namespaceURI, "path");
+                    path.setAttribute("d", d);
+                    path.setAttribute("fill", "none");
+                    path.setAttribute("stroke", "#c8102e");
+                    path.setAttribute("stroke-width", width);
+                    path.setAttribute("stroke-linecap", "round");
+                    path.setAttribute("opacity", opacity);
+                    svg.appendChild(path);
+                };
+                const steps = 100;
+                add(Array.from({ length: steps + 1 }, (_, i) => (i ? "L" : "M") + point(i / steps).join(",")).join(" "), 1, 0.35);
+                let marks = "";
+                for (let i = 1; i < 46; i++) {
+                    const t = i / 46, [x, y] = point(t), [x2, y2] = point(t + 0.001);
+                    const length = Math.hypot(x2 - x, y2 - y), tx = (x2 - x) / length, ty = (y2 - y) / length, nx = -ty, ny = tx;
+                    marks += `M${x + nx * 5 - tx * 5},${y + ny * 5 - ty * 5} L${x},${y} L${x - nx * 5 - tx * 5},${y - ny * 5 - ty * 5} `;
+                }
+                add(marks, 1.7, 1);
+                return svg;
+            }
+            $("topStitch").appendChild(stitch());
+
+            function scoreTiles(tiles) {
+                const board = document.createElement("div");
+                board.className = "tiles";
+                for (const t of tiles) {
+                    const tile = document.createElement("div");
+                    tile.className = "tile";
+                    const value = document.createElement("b");
+                    value.textContent = t.value;
+                    const label = document.createElement("span");
+                    label.textContent = t.label;
+                    tile.append(value, label);
+                    board.appendChild(tile);
+                }
+                return board;
+            }
+
+            function boxScore(box) {
+                const wrap = document.createElement("div");
+                wrap.className = "box-score";
+                const table = document.createElement("table");
+                const numeric = box.columns.map((c) => ["ATT", "EXP", "% CAP", "VIEWERS"].includes(c) ? ' class="num"' : "");
+                table.innerHTML = "<tr>" + box.columns.map((c, i) => `<th${numeric[i]}>${escapeHtml(c)}</th>`).join("") + "</tr>" +
+                    box.rows.map((r) => "<tr>" + r.map((v, i) => `<td${numeric[i]}>${escapeHtml(v)}</td>`).join("") + "</tr>").join("");
+                const source = document.createElement("p");
+                source.className = "chart-source";
+                source.textContent = "Source: " + (box.source.join(", ") || "database query");
+                wrap.append(table, source);
+                return wrap;
+            }
+
             function addTurn(question) {
                 const turn = document.createElement("section");
                 const asked = document.createElement("p");
@@ -212,38 +307,52 @@
                 asked.textContent = question;
                 const answer = document.createElement("div");
                 answer.className = "answer";
-                turn.append(asked, answer);
-                $("thread").appendChild(turn);
+                turn.append(asked, stitch(), answer);
+                $("thread").prepend(turn);  // newest first
                 return answer;
             }
 
             // Short, plain progress lines. The full timeline lives only in the side panel.
-            const ROLE_WORK = { Attendance: "game data", Viewership: "TV audience data" };
+            const ROLE_WORK = { "Attendance Researcher": "game data", "Viewership Researcher": "TV audience data" };
             function progressLine(agent, text) {
                 const name = agent.replace(/ \d+$/, "");
-                if (text.startsWith("called run_sql")) return `${name} is querying ${ROLE_WORK[name.split(" ")[0]] || "the data"}`;
+                if (text.startsWith("called run_sql")) return `${name} is querying ${ROLE_WORK[name] || "the data"}`;
                 if (text.startsWith("called describe_schema")) return `${name} is checking what data is available`;
                 if (text.startsWith("called search_wikipedia")) return `${name} is searching Wikipedia`;
                 if (text.startsWith("called read_wikipedia")) return `${name} is reading a Wikipedia article`;
-                if (text.startsWith("called research")) return "Lead is sending a researcher";
                 if (text === "started" && name === "Lead") return "Lead is planning the research";
                 if (text === "started" && name === "Writer") return "Writer is writing the answer";
                 if (text === "started" && name === "Clarifier") return "Checking the question";
                 return null;
             }
 
-            function addProgress(agent, text) {
-                const line = progressLine(agent, text);
+            // Researchers sent in the same moment share one line: "Lead is sending 2 researchers".
+            const SEND_WINDOW_MS = 3000;
+            let sending = null;
+
+            function addLine(line) {
                 const list = $("progress");
-                if (!line || list.lastElementChild?.textContent === line) return;
+                if (list.lastElementChild?.textContent === line) return null;
                 const li = document.createElement("li");
                 li.textContent = line;
                 list.appendChild(li);
                 while (list.children.length > 5) list.firstElementChild.remove();
+                return li;
+            }
+
+            function addProgress(agent, text) {
+                if (text.startsWith("called research")) {
+                    const fresh = !sending || Date.now() - sending.at > SEND_WINDOW_MS || !sending.li.isConnected;
+                    sending = fresh ? { count: 1, li: addLine("Lead is sending 1 researcher") } : { ...sending, count: sending.count + 1 };
+                    if (sending.li) sending.li.textContent = `Lead is sending ${sending.count} researcher${sending.count > 1 ? "s" : ""}`;
+                    sending.at = Date.now();
+                    return;
+                }
+                const line = progressLine(agent, text);
+                if (line) addLine(line);
             }
 
             function finish() {
-                $("status").textContent = "";
                 $("progress").replaceChildren();
                 $("send").disabled = false;
                 document.querySelectorAll("#samples button").forEach((b) => (b.disabled = false));
@@ -256,7 +365,7 @@
                 $("question").value = "";
                 $("send").disabled = true;
                 document.querySelectorAll("#samples button").forEach((b) => (b.disabled = true));
-                $("status").textContent = "Researching. This can take up to about 2 minutes.";
+                scrollTo({ top: 0, behavior: "smooth" });  // progress shows in the top box
                 $("progress").replaceChildren();
                 resetContext();
 
@@ -272,7 +381,10 @@
                         sessionId = event.session_id;
                         const turn = ++turnCount;
                         answer.innerHTML = renderMarkdown(event.markdown, turn);
+                        if (event.tiles?.length) answer.prepend(scoreTiles(event.tiles));
+                        if (event.box_score) answer.appendChild(boxScore(event.box_score));
                         if (event.chart) answer.appendChild(answerChart(event.chart));
+                        if (event.team_chart) answer.appendChild(teamChart(event.team_chart));
                         if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
                         if (event.data_note) {
                             const note = document.createElement("p");
@@ -294,7 +406,7 @@
                 e.preventDefault();
                 ask($("question").value.trim());
             });
-            document.querySelectorAll("#samples button").forEach((b) => b.addEventListener("click", () => ask(b.textContent)));
+            document.querySelectorAll("#samples button").forEach((b) => b.addEventListener("click", () => ask(b.querySelector(".q").textContent)));
             $("toggle").addEventListener("click", () => {
                 const open = document.body.classList.toggle("show-work");
                 $("toggle").textContent = open ? "Hide the agents' work" : "Show the agents' work";
@@ -310,8 +422,8 @@
 
             // --- Charts ---
             const SVG = "http://www.w3.org/2000/svg";
-            const BLUE = "#2a78d6", ORANGE = "#eb6834";
-            let chartData = null;
+            const DASHES = { dashed: "7 4", dotted: "2 4" };
+            const paintOf = (s) => (s.style === "hatch" ? "url(#hatch)" : s.color);
 
             function el(tag, attrs, parent, text) {
                 const node = document.createElementNS(SVG, tag);
@@ -349,10 +461,12 @@
             }
 
             function lineChart(svg, c) {
-                const W = 680, H = 300, m = { l: 74, r: 36, t: 16, b: 48 }, w = W - m.l - m.r, h = H - m.t - m.b;
+                const many = c.series.length > 1;
+                const W = 680, H = 300, m = { l: 74, r: many ? 52 : 36, t: 16, b: 48 }, w = W - m.l - m.r, h = H - m.t - m.b;
                 svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-                const values = c.series[0].values, top = niceMax(Math.max(...values)), low = Math.min(0, ...values);
-                const x = (i) => m.l + (values.length === 1 ? w / 2 : (i / (values.length - 1)) * w);
+                const all = c.series.flatMap((s) => s.values).filter((v) => v !== null);
+                const count = c.labels.length, top = niceMax(Math.max(...all)), low = Math.min(0, ...all);
+                const x = (i) => m.l + (count === 1 ? w / 2 : (i / (count - 1)) * w);
                 const y = (v) => m.t + h - ((v - low) / (top - low)) * h;
                 for (let i = 0; i <= 4; i++) {
                     const v = low + ((top - low) * i) / 4;
@@ -360,10 +474,28 @@
                     el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg, short(v) + (c.unit === "%" ? "%" : ""));
                 }
                 c.labels.forEach((label, i) => el("text", { x: x(i), y: m.t + h + 16, "text-anchor": "middle" }, svg, label));
-                el("path", { d: values.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join(" "), fill: "none", stroke: BLUE, "stroke-width": 2 }, svg);
-                values.forEach((v, i) => {
-                    el("circle", { cx: x(i), cy: y(v), r: 4, fill: BLUE, stroke: "#fff", "stroke-width": 2 }, svg);
-                    tip(el("circle", { cx: x(i), cy: y(v), r: 12, fill: "transparent" }, svg), `${c.labels[i]}: ${fmt(v, c.unit)}`);
+                const ends = [];
+                c.series.forEach((s) => {
+                    // A month with no games leaves a gap, not a line across it.
+                    let d = "", pen = false;
+                    s.values.forEach((v, i) => {
+                        if (v === null) { pen = false; return; }
+                        d += `${pen ? "L" : "M"}${x(i)},${y(v)} `;
+                        pen = true;
+                    });
+                    el("path", { d, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-dasharray": DASHES[s.style] || "none" }, svg);
+                    s.values.forEach((v, i) => {
+                        if (v === null) return;
+                        el("circle", { cx: x(i), cy: y(v), r: 4, fill: s.color, stroke: "#fff", "stroke-width": 2 }, svg);
+                        tip(el("circle", { cx: x(i), cy: y(v), r: 12, fill: "transparent" }, svg), `${c.labels[i]}${many ? " " + s.name : ""}: ${fmt(v, c.unit)}`);
+                    });
+                    const last = s.values.findLastIndex((v) => v !== null);
+                    if (many) ends.push({ name: s.name, x: x(last), y: y(s.values[last]) });
+                });
+                // Name each line at its end, nudged apart so close lines stay readable.
+                ends.sort((a, b) => a.y - b.y).forEach((e, i) => {
+                    if (i && e.y - ends[i - 1].y < 13) e.y = ends[i - 1].y + 13;
+                    el("text", { x: e.x + 9, y: e.y + 4 }, svg, e.name);
                 });
                 axisTitles(svg, c.x_label, c.y_label, W, H, true);
             }
@@ -387,12 +519,33 @@
                     c.series.forEach((s, k) => {
                         const v = s.values[i], top2 = center - (pair ? thick + 1 - k * (thick + 2) : thick / 2);
                         const left = Math.min(x(0), x(v)), width = Math.max(Math.abs(x(v) - x(0)), 1);
-                        const bar = el("rect", { x: left, y: top2, width, height: thick, rx: 3, fill: k ? ORANGE : BLUE }, svg);
+                        const bar = el("rect", { x: left, y: top2, width, height: thick, rx: 3, fill: k === 0 && c.item_colors ? c.item_colors[i] : paintOf(s) }, svg);
                         tip(bar, `${label}, ${s.name}: ${fmt(v, c.unit)}`);
                         if (!pair) el("text", { x: left + width + 5, y: center + 4 }, svg, short(v) + (c.unit === "%" ? "%" : ""));
                     });
                 });
                 axisTitles(svg, c.x_label, c.y_label, W, H, false);
+            }
+
+            function legend(series, lines) {
+                const box = document.createElement("div");
+                box.className = "legend";
+                series.forEach((s) => {
+                    const item = document.createElement("span");
+                    const key = document.createElement("i");
+                    if (lines) {
+                        key.className = "line";
+                        key.style.borderTopColor = s.color;
+                        key.style.borderTopStyle = s.style === "solid" ? "solid" : s.style;
+                    } else if (s.style === "hatch") {
+                        key.style.background = "repeating-linear-gradient(45deg, #8a8f98 0 3px, #dfe2e6 3px 6px)";
+                    } else {
+                        key.style.background = s.color;
+                    }
+                    item.append(key, s.name);
+                    box.appendChild(item);
+                });
+                return box;
             }
 
             function answerChart(c) {
@@ -401,16 +554,9 @@
                 const title = document.createElement("h3");
                 title.textContent = c.title;
                 wrap.appendChild(title);
-                if (c.series.length === 2) {
-                    const legend = document.createElement("div");
-                    legend.className = "legend";
-                    c.series.forEach((s, k) => {
-                        const key = document.createElement("span");
-                        key.style.setProperty("--key", k ? ORANGE : BLUE);
-                        key.textContent = s.name;
-                        legend.appendChild(key);
-                    });
-                    wrap.appendChild(legend);
+                if (c.series.length > 1) {
+                    const names = c.item_colors ? c.series.map((s, k) => (k ? s : { ...s, name: `${s.name} (team colors)` })) : c.series;
+                    wrap.appendChild(legend(names, c.type === "line"));
                 }
                 const svg = document.createElementNS(SVG, "svg");
                 svg.setAttribute("role", "img");
@@ -424,12 +570,19 @@
                 return wrap;
             }
 
-            function drawTeamChart() {
-                const rows = chartData.teams.filter((t) => t.team_id === Number($("team").value));
-                const svg = $("teamChart");
-                svg.replaceChildren();
+            // One team's actual and expected average by season, under an answer about that team.
+            function teamChart(t) {
+                const rows = t.seasons;
+                const wrap = document.createElement("figure");
+                wrap.className = "team-chart";
+                const title = document.createElement("h3");
+                title.textContent = `${t.team}: actual and expected average attendance by season`;
+                const svg = document.createElementNS(SVG, "svg");
+                svg.setAttribute("viewBox", "0 0 680 240");
+                svg.setAttribute("role", "img");
+                svg.setAttribute("aria-label", title.textContent);
                 const m = { l: 74, r: 10, t: 22, b: 44 }, w = 680 - m.l - m.r, h = 240 - m.t - m.b;
-                const max = Math.max(...rows.flatMap((t) => [t.avg_attendance, t.expected_avg_attendance || 0])) * 1.1;
+                const max = Math.max(...rows.flatMap((r) => [r.avg_attendance, r.expected_avg_attendance || 0])) * 1.1;
                 const y = (v) => m.t + h - (v / max) * h;
                 const step = max > 30000 ? 10000 : 5000;
                 for (let v = 0; v <= max; v += step) {
@@ -437,42 +590,32 @@
                     el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg, v.toLocaleString());
                 }
                 const group = w / rows.length, bar = Math.min(56, group / 3);
-                const column = (cx, value, color, label) => {
+                const column = (cx, value, fill, label) => {
                     const top = y(value), base = m.t + h;
                     const path = `M${cx},${base} V${top + 4} Q${cx},${top} ${cx + 4},${top} H${cx + bar - 4} Q${cx + bar},${top} ${cx + bar},${top + 4} V${base} Z`;
-                    tip(el("path", { d: path, fill: color }, svg), label);
+                    tip(el("path", { d: path, fill }, svg), label);
                     el("text", { x: cx + bar / 2, y: top - 5, "text-anchor": "middle" }, svg, Math.round(value).toLocaleString());
                 };
-                rows.forEach((t, i) => {
+                rows.forEach((r, i) => {
                     const center = m.l + group * (i + 0.5);
-                    column(center - bar - 1, t.avg_attendance, BLUE, `${t.season} actual: ${Math.round(t.avg_attendance).toLocaleString()}`);
-                    if (t.expected_avg_attendance) column(center + 1, t.expected_avg_attendance, ORANGE, `${t.season} expected: ${Math.round(t.expected_avg_attendance).toLocaleString()}`);
-                    el("text", { x: center, y: m.t + h + 15, "text-anchor": "middle" }, svg, t.season);
+                    column(center - bar - 1, r.avg_attendance, t.color, `${r.season} actual: ${Math.round(r.avg_attendance).toLocaleString()}`);
+                    if (r.expected_avg_attendance) column(center + 1, r.expected_avg_attendance, "url(#hatch)", `${r.season} expected: ${Math.round(r.expected_avg_attendance).toLocaleString()}`);
+                    el("text", { x: center, y: m.t + h + 15, "text-anchor": "middle" }, svg, r.season);
                 });
                 axisTitles(svg, "Season", "Average attendance (fans per game)", 680, 240, true);
-                $("teamTitle").textContent = `${rows[rows.length - 1].home_team}: actual and expected average attendance by season`;
-                const missing = rows.filter((t) => !t.expected_avg_attendance);
-                $("teamNote").textContent = "Expected is what the prior two years of crowds, win rate and market would predict. " +
-                    missing.map((t) => `${t.season}: no prediction (${t.exclusion_reason}).`).join(" ");
-                $("teamTable").innerHTML = "<tr><th>Season</th><th>Actual</th><th>Expected</th></tr>" + rows.map((t) =>
-                    `<tr><td>${t.season}</td><td>${Math.round(t.avg_attendance).toLocaleString()}</td><td>${t.expected_avg_attendance ? Math.round(t.expected_avg_attendance).toLocaleString() : "None"}</td></tr>`).join("");
+                const note = document.createElement("p");
+                note.className = "limits";
+                note.textContent = "Expected is what the prior two years of crowds, win rate, and market would predict. " +
+                    rows.filter((r) => !r.expected_avg_attendance).map((r) => `${r.season}: no prediction (${r.exclusion_reason}).`).join(" ");
+                const source = document.createElement("p");
+                source.className = "chart-source";
+                source.textContent = "Source: team_season_model";
+                const table = document.createElement("details");
+                table.innerHTML = "<summary>Show as a table</summary><table><tr><th>Season</th><th>Actual</th><th>Expected</th></tr>" + rows.map((r) =>
+                    `<tr><td>${r.season}</td><td>${Math.round(r.avg_attendance).toLocaleString()}</td><td>${r.expected_avg_attendance ? Math.round(r.expected_avg_attendance).toLocaleString() : "None"}</td></tr>`).join("") + "</table>";
+                wrap.append(title, legend([{ name: "Actual average", color: t.color }, { name: "Expected average", style: "hatch" }], false), svg, note, source, table);
+                return wrap;
             }
-
-            function option(select, value, label) {
-                const o = document.createElement("option");
-                o.value = value;
-                o.textContent = label;
-                select.appendChild(o);
-            }
-
-            fetch("/charts").then((r) => r.json()).then((data) => {
-                chartData = data;
-                const teams = new Map(data.teams.map((t) => [t.team_id, t.home_team]));
-                [...teams].sort((a, b) => a[1].localeCompare(b[1])).forEach(([id, name]) => option($("team"), id, name));
-                $("team").value = 121;
-                $("team").addEventListener("change", drawTeamChart);
-                drawTeamChart();
-            });
         </script>
     </body>
 </html>

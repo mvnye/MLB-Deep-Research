@@ -22,6 +22,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 import charts
+import scoreboard
 import citations
 import data_tools
 from context_panel import AgentContexts, PanelHooks, add_context_panel
@@ -71,6 +72,9 @@ class Research:
     retries: int = 0  # researchers rerun after a malformed tool call
     report: str = ""
     chart: dict | None = None  # built from query rows in charts.py, never from the report's text
+    team_chart: dict | None = None  # one team's actual and expected by season, if it is about one team
+    tiles: list[dict] = field(default_factory=list)  # key numbers shown above the answer
+    box_score: dict | None = None  # a table of games, when the answer lists them
     cited: str = ""  # the report with inline citations, as the checks saw it
     sources: list[dict] = field(default_factory=list)  # footnotes, numbered as in the report
     data_note: str = ""
@@ -112,6 +116,9 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
   only for special events and shared-gate doubleheader games.
 - One team-season: from team_season_model, report avg_attendance, prior_season_avg, yoy_change_pct,
   expected_avg_attendance, residual_pct, prior_residual_pct, possible_rebound and exclusion_reason.
+- A team across seasons: also run one query on games_clean returning season, month(official_date) as
+  month and avg(attendance) as avg_attendance, one row per season and month, for a chart. Do not list
+  the months in your findings unless the task asks for them.
 - Comparing games or teams: use games_clean. Your query must return each value, fill_pct, and a
   column named difference with the gap worked out in SQL. Do not add expected attendance unless the
   task asks for it.
@@ -195,7 +202,6 @@ ROLES = {
 VIEWERSHIP_TABLES = {"viewership_games", "game_viewership_clean", "fox_windows", "fox_window_games",
                      "crowd_tv_residual", "crowd_tv_headline", "game_tv_lookup", "team_tv_summary",
                      "team_crowd_tv", "network_audience"}
-ATTENDANCE_MODEL_TABLES = {"games_clean", "game_viewership_clean", "team_season_model"}
 
 
 def fixed_notes(report: str, tool_calls: list[dict]) -> str:
@@ -208,10 +214,6 @@ def fixed_notes(report: str, tool_calls: list[dict]) -> str:
         if "2025" in report and "2026" in report:
             notes.append("Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures "
                          "are not like-for-like.")
-    if queried & ATTENDANCE_MODEL_TABLES and re.search(r"expected|predict", report, re.I):
-        notes.append("Promotions are not in the data.")
-    if re.search(r"correlation|coincid|expected|predict", report, re.I):
-        notes.append("These are associations, not cause and effect.")
     return f"\n\n*{' '.join(notes)}*" if notes else ""
 
 
@@ -221,6 +223,13 @@ NETWORK_NAMES = re.compile(r"\b(ESPN|FS1|TBS|NBC|ABC|Fox|Netflix|truTV)\b", re.I
 HEADLINE_END = "both ranges include zero"
 OPENING_CHARS = 120
 GAME_DATE = re.compile(r"\b(March|April|May|June|July|August|September|October) \d{1,2}\b")
+ATTENDANCE_WORDS = re.compile(r"attend|crowd|\bdr[ae]w|turnout|\bfans\b|\bfill|perform|\bsell|\bsold|ticket|\bexpected\b", re.I)
+SEASON_CHANGE = re.compile(r"\b(change[ds]?|year over year|rise|rose|risen|f[ae]ll|fallen|drop(ped)?|gr[oe]w|grown|"
+                           r"increased?|declined?|across seasons|each season|by season|season to season)\b", re.I)
+WITHIN_SEASON = re.compile(r"\b(by|each|per) month\b|\bmonthly\b|\bmonth by month\b", re.I)
+ALL_SEASONS = (2024, 2025, 2026)
+MIN_ALIAS_CHARS = 4
+ATHLETICS_ID = 133
 SEVERAL_TEAMS = re.compile(r"\bteams\b|\bcompare\b|\b(by|each) (month|weekday|day|network)\b", re.I)
 SIMPLE_LOOKUP = re.compile(r"^(how many|how much|what was|what were)\b", re.I)
 STATED_CAUSE = re.compile(r"by-?product|stems? from|as a result of|attributable|(is|are) linked to|"
@@ -308,6 +317,23 @@ def fix_units(report: str) -> str:
     report = re.sub(r"(fill.{0,70}?\b)(\d+(?:\.\d+)?)%( higher| lower| more| less)", r"\1\2 percentage points\3",
                     report, flags=re.I)
     return re.sub(r"(fill.{0,90}?difference of )(\d+(?:\.\d+)?)%", r"\1\2 percentage points", report, flags=re.I)
+
+
+def capacity_wording(report: str) -> str:
+    """'a 95.7% fill rate' -> '95.7% of capacity'. Reported crowds can pass 100%, so a park is not 'filled'."""
+    kinds = r"(?:average |actual )?"
+    # The Writer may already say 'of capacity', so these patterns must not add it twice.
+    report = re.sub(r"(fill (?:rate|percentage) of \d+(?:\.\d+)?%) of capacity", r"\1", report)
+    report = re.sub(r"(\d+(?:\.\d+)?% (?:average )?fill (?:rate|percentage)) of capacity", r"\1", report)
+    report = re.sub(rf"\ban? (20\d\d) {kinds}fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"\2% of capacity in \1", report)
+    report = re.sub(rf"\bwith an? {kinds}(\d+(?:\.\d+)?)% {kinds}fill (?:rate|percentage)", r"at \1% of capacity", report)
+    report = re.sub(r"\bwith an average fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"at an average of \1% of capacity", report)
+    report = re.sub(rf"\bwith an? {kinds}fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"at \1% of capacity", report)
+    report = re.sub(r"\ban average fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"an average of \1% of capacity", report)
+    report = re.sub(rf"\ban? {kinds}fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"\1% of capacity", report)
+    report = re.sub(rf"\ban? {kinds}(\d+(?:\.\d+)?)% {kinds}fill (?:rate|percentage)", r"\1% of capacity", report)
+    report = re.sub(r"\bfill rates of (\d+(?:\.\d+)?)% and (\d+(?:\.\d+)?)%", r"\1% and \2% of capacity", report)
+    return re.sub(r"(of capacity)(?: of capacity)+", r"\1", report)
 
 
 def team_level_sentence(fact: dict) -> str:
@@ -401,14 +427,98 @@ def answer_team_season(report: str, question: str) -> dict | None:
     return next((t for t in rows if club_name(t["home_team"]).lower() in opening.lower()), None)
 
 
+def teams_named(question: str) -> dict[int, str]:
+    """The teams a question names. Short aliases are skipped: 'sea', 'min' and 'as' are also words."""
+    text = re.sub(r"[^a-z0-9 ]", "", question.lower())
+    found = {team_id: team for alias, team_id, team in data_tools.team_aliases()
+             if len(alias) >= MIN_ALIAS_CHARS and re.search(rf"\b{re.escape(alias)}\b", text)}
+    if re.search(r"\ba's\b", question, re.I):
+        found[ATHLETICS_ID] = "Athletics"
+    return found
+
+
+def attendance_team(question: str, report: str, answered: dict | None) -> tuple[int, str] | None:
+    """The one team whose attendance this is about, or None. answered is the team a 'which team'
+    answer settled on. A single game, several teams, TV only or a can't-answer is not about one."""
+    if GAME_DATE.search(question) or charts.NO_ANSWER.search(report[:200]) or not ATTENDANCE_WORDS.search(question):
+        return None
+    named = teams_named(question)
+    if len(named) == 1:
+        return next(iter(named.items()))
+    if not named and answered:
+        return next(((i, t) for _, i, t in data_tools.team_aliases() if t == answered["home_team"]), None)
+    return None
+
+
+def compared_seasons(question: str) -> list[int]:
+    """The seasons a question compares, or none. 'by month in 2025' stays within one season."""
+    years = sorted({int(y) for y in re.findall(r"\b(202[4-6])\b", question)})
+    if len(years) >= 2:
+        return years
+    if WITHIN_SEASON.search(question) or not SEASON_CHANGE.search(question):
+        return []
+    if not years:
+        return list(ALL_SEASONS)
+    return [years[0] - 1, years[0]] if years[0] > ALL_SEASONS[0] else []
+
+
+def monthly_rows_query(team_id: int, seasons: list[int]) -> str:
+    return (f"select season, month(official_date) as month, avg(attendance) as avg_attendance from games_clean "
+            f"where home_team_id = {team_id} and season in ({', '.join(map(str, seasons))}) "
+            "group by 1, 2 order by 1, 2")
+
+
+def answer_tiles(report: str, question: str, team: tuple[int, str] | None) -> list[dict]:
+    """The key numbers for the scoreboard, each one already stated in the answer."""
+    if charts.NO_ANSWER.search(report[:200]):
+        return []
+    text = citations.CITATION.sub("", report)
+    years = set(re.findall(r"\b(20\d\d)\b", question))
+    if team and len(years) == 1:
+        fact = next((t for t in data_tools.team_season_facts() if t["season"] == int(next(iter(years)))
+                     and club_name(t["home_team"]) == club_name(team[1])), None)
+        if fact and f"{fact['avg_attendance']:,.0f}" in text:
+            return scoreboard.team_tiles(fact)
+    if HEADLINE_END in text:
+        return scoreboard.headline_tiles(text)
+    return scoreboard.sentence_tiles(sentences(text.strip().split("\n")[0])[0])[:scoreboard.MAX_TILES]
+
+
+def add_charts(run: Research, asked: str, answered: dict | None) -> None:
+    """Choose this answer's charts. A team compared across seasons gets one line per season, using
+    the researcher's rows, or a query made here if the researcher did not pull them."""
+    tables = list(data_tools.TABLE_DOCS)
+    run.chart = charts.pick_chart(run.report, run.question, run.tool_calls, tables)
+    team = attendance_team(asked, run.report, answered)
+    seasons = compared_seasons(asked) if team else []
+    if seasons:
+        run.chart = charts.monthly_chart(run.tool_calls, tables, seasons)
+        if not run.chart:
+            query = monthly_rows_query(team[0], seasons)
+            run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "result": data_tools.run_sql(query),
+                                   "agent": "Required facts check"})
+            run.chart = charts.monthly_chart(run.tool_calls, tables, seasons)
+    run.box_score = scoreboard.box_score(run.report, run.tool_calls, lambda q: charts.tables_in(q, tables))
+    if run.chart:
+        run.box_score = None  # the chart is the answer: the games were a side note
+    run.tiles = [] if run.box_score else answer_tiles(run.report, asked, team)
+    named = teams_named(asked)
+    if run.chart:
+        one_team = team[1] if team else next(iter(named.values())) if len(named) == 1 else None
+        charts.paint(run.chart, one_team)
+    if team:
+        run.team_chart = {"team": team[1], "color": charts.team_color(team[1]), "expected_color": charts.GRAY,
+                          "seasons": data_tools.team_seasons(team[0])}
+
+
 def team_opening(t: dict) -> str:
     """The conclusion of a team answer, with its key numbers, for when the Writer's opening lacks them."""
     change, gap = t["yoy_change_pct"], t["residual_pct"]
-    text = f"The {t['home_team']} averaged {t['avg_attendance']:,.0f} a game in {t['season']}"
+    text = f"The {t['home_team']} averaged {t['avg_attendance']:,.0f} fans a game in {t['season']}"
     if gap is not None:
         side = "above" if gap >= 0 else "below"
         text += (f", {abs(gap):.1%} {side} the {t['expected_avg_attendance']:,.0f} their prior two years "
-                 "of crowds, win rate and market would predict,")
+                 "of crowds, win rate, and market would predict,")
     text += f" {'up' if change >= 0 else 'down'} {abs(change):.1%} from {t['prior_season_avg']:,.0f} the season before"
     if t["possible_rebound"]:
         was = "below" if t["prior_residual_pct"] < 0 else "above"
@@ -463,7 +573,6 @@ def round_counts(report: str) -> str:
         if value >= 100:
             return f"{round(value):,}"
         return f"{value:.1f}" if len(m[0].split(".")[1]) > 2 else m[0]  # 8.9333 reads as noise
-    report = re.sub(r"\b\d+\.\d{2,}(?= percentage points)", lambda m: f"{float(m[0]):.1f}", report)
     return re.sub(r"(?<![\d.])\d[\d,]*\.\d+(?![\d%]| percent| percentage)", whole, report)
 
 
@@ -657,10 +766,10 @@ you're given.
    average of a count, such as appearances per team, is one decimal and must be called an average.
    Never work out a difference or an average yourself: use the one in the findings.
 4. When comparing, say the result directly: who was higher, by how much, and both fill rates. Give
-   only the compared values, the difference and the fill rates. A gap between fill rates is in
+   only the compared values, the difference, and the fill rates. A gap between fill rates is in
    percentage points. Do not say why a gap exists: the data shows what coincided, not the reason.
 5. A team result: the first sentence states the conclusion with the key numbers: the average, how
-   far it was from what the prior two years of crowds, win rate and market would predict, the
+   far it was from what the prior two years of crowds, win rate, and market would predict, the
    change from the season before, and part of this may be a rebound if possible_rebound is true.
    Context comes after.
 6. A game in a regional Fox window: say the data has no number for that game alone, give the whole
@@ -689,17 +798,21 @@ you're given.
 14. A chart is added automatically when it fits: do not mention one.
 15. If the question only asks what something in an earlier answer means, explain it from How the
     numbers work, in a few sentences, with no citation.
+16. Use the Oxford comma in every list of three or more: "Fox, NBC, and ABC".
+    Name the unit of every count the first time it appears: fans or viewers.
+17. Give a fill rate as a share of capacity, such as "99.3% of capacity". Never say a park was
+    "filled", because reported crowds can pass 100%.
 
 How the numbers work:
 - Expected attendance for a game comes from a model of that park's normal crowd that season, plus
-  the day, month, opponent, weather, home opener and the home team's record.
+  the day, month, opponent, weather, home opener, and the home team's record.
 - Adjusting for what each park normally draws means comparing each game's crowd with its own park's
   usual level. Some teams draw big crowds and big TV audiences all year, and this keeps that from
   driving the result. It asks whether a crowd above or below that park's norm went with a bigger or
   smaller TV audience.
 - A correlation runs from 0, no link, to 1, a perfect match. The range is where the true figure
   probably sits. If it includes zero, there may be no link at all.
-- A team's prediction uses its prior two years of crowds, its win rate and its market size, learned
+- A team's prediction uses its prior two years of crowds, its win rate, and its market size, learned
   from all teams across 2024 to 2026.
 - A game at or near the park's season high may have been limited by the park, so demand may have
   been higher than the crowd.""",
@@ -738,8 +851,9 @@ def unverified_numbers(report: str, tool_calls: list[dict], sources: list[float]
         if decimals == 0 and (value < 100 or 1900 <= value <= 2100):
             continue  # counts, ranks and years
         scale = {"m": 1e6, "k": 1e3}.get((match[1] or " ")[0].lower(), 1)
-        # A count can be a rounding step away from a query's average.
-        tolerance = 1.0 if value >= 1000 else 0.5 * 10 ** -decimals + 1e-9
+        # A count can be a rounding step away from a query's average, and a gap between two rounded
+        # numbers can be one away from the exact gap.
+        tolerance = 1.0 if value >= 100 and decimals == 0 else 0.5 * 10 ** -decimals + 1e-9
         targets = [(value, tolerance), (value / 100, tolerance / 100), (value * scale, tolerance * scale)]
         hit = any(abs(s - t) <= tol for t, tol in targets
                   for s in sources[bisect_left(sources, t - tol):bisect_left(sources, t + tol) + 1])
@@ -866,7 +980,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     team = (opening_gaps(run.report, asked, run.tool_calls)[0]
             or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
     run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
-    run.report = fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question))))
+    run.report = capacity_wording(fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question)))))
     if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):
         fact = data_tools.team_crowd_tv_fact()
         run.report += f" {team_level_sentence(fact)}"
@@ -882,7 +996,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
                  f"and season = {team['season']}")
         run.tool_calls.append({"name": "run_sql", "args": {"query": query},
                                "result": json.dumps(team, default=str), "agent": "Required facts check"})
-    run.chart = charts.pick_chart(run.report, run.question, run.tool_calls, list(data_tools.TABLE_DOCS))
+    add_charts(run, asked, team)
     run.cited = run.report
     run.report, run.sources, run.data_note = citations.apply(
         run.report, run.tool_calls, read_urls(run.tool_calls), list(data_tools.TABLE_DOCS), sentences)
@@ -976,12 +1090,6 @@ def index():
     return FileResponse(HERE / "index.html", headers={"Cache-Control": "no-cache"})
 
 
-@app.get("/charts")
-def team_chart_rows():
-    return JSONResponse(json.loads(json.dumps(data_tools.chart_data(), default=str)),
-                        headers={"Cache-Control": "max-age=3600"})
-
-
 @app.post("/chat")
 async def chat(request: ChatRequest):
     """Answer one message. tool_calls lists every call made, by every agent, for this message."""
@@ -991,7 +1099,8 @@ async def chat(request: ChatRequest):
     hooks = PanelHooks(sessions[run_id], lambda event: None)
     result = await answer(chats.setdefault(session_id, ChatSession()), request.message, hooks)
     return {"response": citations.to_markdown(result.report, result.sources, result.data_note),
-            "session_id": session_id, "tool_calls": result.tool_calls, "chart": result.chart}
+            "session_id": session_id, "tool_calls": result.tool_calls, "chart": result.chart,
+            "team_chart": result.team_chart, "tiles": result.tiles, "box_score": result.box_score}
 
 
 @app.get("/run")
@@ -1014,7 +1123,8 @@ async def run(question: str, session_id: str | None = None):
     async def work():
         result = await answer(chats.setdefault(session_id, ChatSession()), question, hooks)
         queue.put_nowait({"type": "done", "markdown": result.report, "session_id": session_id,
-                          "chart": result.chart, "sources": result.sources, "data_note": result.data_note})
+                          "chart": result.chart, "team_chart": result.team_chart,
+                          "tiles": result.tiles, "box_score": result.box_score, "sources": result.sources, "data_note": result.data_note})
 
     task = asyncio.create_task(work())
 

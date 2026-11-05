@@ -4,12 +4,32 @@
   "q": "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 47,
-  "researchers": 1,
+  "seconds": 51,
+  "researchers": 3,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero[2]. Across team-seasons, teams with bigger average crowds also had bigger average national TV audiences (correlation 0.52, n = 56, range 0.30 to 0.69), which is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause[3].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like. These are associations, not cause and effect.*",
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "Raw link 2025",
+    "value": "0.34"
+   },
+   {
+    "label": "Raw link 2026",
+    "value": "0.47"
+   },
+   {
+    "label": "Adjusted link 2025",
+    "value": "0.16"
+   },
+   {
+    "label": "Adjusted link 2026",
+    "value": "0.14"
+   }
+  ],
+  "box_score": null,
+  "report": "Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero[2]. At the team level, the correlation between crowd size and TV audience is 0.52 across 2025 and 2026, with an n of 56 and a range of 0.3 to 0.69[3]. This pattern is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause[3].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*",
   "sources": [
    {
     "n": 1,
@@ -17,7 +37,7 @@
     "tables": [
      "crowd_tv_residual"
     ],
-    "query": "SELECT network, season, n, corr_crowd_tv, crowd_ci_low, crowd_ci_high, corr_residual_tv, residual_ci_low, residual_ci_high, too_few, small_n FROM crowd_tv_residual",
+    "query": "SELECT * FROM crowd_tv_residual",
     "columns": [
      "network",
      "season",
@@ -95,7 +115,7 @@
     "tables": [
      "team_crowd_tv"
     ],
-    "query": "select * from team_crowd_tv where scope = '2025 and 2026'",
+    "query": "SELECT scope, n, corr_team_crowd_tv, ci_low, ci_high FROM team_crowd_tv WHERE scope = '2025 and 2026'",
     "columns": [
      "scope",
      "n",
@@ -121,12 +141,91 @@
   "q": "Why did the Mets over-perform on attendance in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 65,
+  "seconds": 53,
   "researchers": 2,
   "retries": 0,
   "errors": [],
-  "chart": null,
-  "report": "The New York Mets averaged 39,776 a game in 2025, 23.6% above the 32,182 their prior two years of crowds, win rate and market would predict, up 35.9% from 29,268 the season before, and part of this may be a rebound from 18.8% below prediction[1]. This strong turnout achieved a 94.9% average fill rate[2]. This high attendance coincided with the historic signing of outfielder Juan Soto to a 15-year, $765 million contract in December 2024[3]. The team also brought back several key players prior to the season, re-signing starting pitcher Sean Manaea, outfielder Jesse Winker, relief pitcher Ryne Stanek, and first baseman Pete Alonso[3]. Additionally, the Mets opened the season with a strong 45\u201324 record through June 12[3].\n\n*Promotions are not in the data. These are associations, not cause and effect.*",
+  "chart": {
+   "type": "paired",
+   "title": "Actual and expected attendance by season",
+   "x_label": "Season",
+   "y_label": "Average attendance (fans per game)",
+   "unit": "fans",
+   "labels": [
+    "2024",
+    "2025",
+    "2026"
+   ],
+   "series": [
+    {
+     "name": "Actual",
+     "values": [
+      29268.1,
+      39775.7,
+      33847.7
+     ],
+     "color": "#002D72",
+     "style": "solid"
+    },
+    {
+     "name": "Expected",
+     "values": [
+      36022.7,
+      32181.9,
+      33247.7
+     ],
+     "color": "#8A8F98",
+     "style": "hatch"
+    }
+   ],
+   "source": [
+    "team_season_model"
+   ]
+  },
+  "team_chart": {
+   "team": "New York Mets",
+   "color": "#002D72",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "New York Mets",
+     "season": 2024,
+     "avg_attendance": 29268.105263157893,
+     "expected_avg_attendance": 36022.74763088014,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "New York Mets",
+     "season": 2025,
+     "avg_attendance": 39775.65,
+     "expected_avg_attendance": 32181.938084136073,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "New York Mets",
+     "season": 2026,
+     "avg_attendance": 33847.6582278481,
+     "expected_avg_attendance": 33247.694626892,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [
+   {
+    "label": "Avg crowd",
+    "value": "39,776"
+   },
+   {
+    "label": "Vs expected",
+    "value": "+23.6%"
+   },
+   {
+    "label": "Vs last year",
+    "value": "+35.9%"
+   }
+  ],
+  "box_score": null,
+  "report": "The New York Mets averaged 39,776 a game in 2025, 23.6% above the 32,182 their prior two years of crowds, win rate, and market would predict, up 35.9% from 29,268 the season before, and part of this may be a rebound from 18.8% below prediction[1]. The 2025 average was higher than the 2024 average by 35.9%, with the team reaching 94.9% of capacity in 2025 and 69.8% of capacity in 2024[1][2]. This strong attendance coincided with the offseason signing of outfielder Juan Soto to a 15-year, $765 million contract, the largest in professional sports history[3]. Additionally, the Mets opened the season with a 45\u201324 record through June 12, the best record in baseball at the time, and retired former captain David Wright's number 5 on July 19[3].",
   "sources": [
    {
     "n": 1,
@@ -134,53 +233,47 @@
     "tables": [
      "team_season_model"
     ],
-    "query": "SELECT * FROM team_season_model WHERE team_id = 121 AND season = 2025",
+    "query": "SELECT season, avg_attendance, expected_avg_attendance, residual_pct, yoy_change_pct, prior_season_avg, possible_rebound, exclusion_reason FROM team_season_model WHERE team_id = 121 AND season BETWEEN 2024 AND 2026 ORDER BY season",
     "columns": [
-     "team_id",
-     "home_team",
      "season",
      "avg_attendance",
-     "model_games",
-     "near_ceiling_games",
-     "win_pct",
-     "prior_season_avg",
-     "yoy_change_pct",
-     "prior_two_year_avg",
-     "market",
-     "population",
-     "population_year",
-     "teams_in_market",
-     "in_model",
-     "exclusion_reason",
      "expected_avg_attendance",
      "residual_pct",
-     "prior_residual_pct",
+     "yoy_change_pct",
+     "prior_season_avg",
      "possible_rebound",
-     "official_home_total"
+     "exclusion_reason"
     ],
     "rows": [
      [
-      121,
-      "New York Mets",
+      2024,
+      29268.105263157893,
+      36022.74763088014,
+      -0.18751047079851002,
+      -0.10157149942726795,
+      32577.0,
+      null,
+      null
+     ],
+     [
       2025,
       39775.65,
-      80,
-      50,
-      0.5123456790123457,
-      29268.105263157893,
-      0.3590100774329521,
-      31031.0,
-      "New York-Newark-Jersey City, NY-NJ",
-      20112448,
-      2025,
-      2,
-      true,
-      null,
       32181.938084136073,
       0.23596192050370046,
-      -0.18751047079851002,
+      0.3590100774329521,
+      29268.105263157893,
       true,
-      3184570
+      null
+     ],
+     [
+      2026,
+      33847.6582278481,
+      33247.694626892,
+      0.018045269234120864,
+      -0.14903569827650587,
+      39775.65,
+      false,
+      null
      ]
     ]
    },
@@ -190,19 +283,23 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT avg(attendance) AS actual_avg, avg(fill_pct) AS avg_fill_pct, avg(expected_attendance) AS expected_avg, avg(residual_pct_capped) AS avg_residual_pct_capped FROM games_clean WHERE home_team_id = 121 AND season = 2025",
+    "query": "SELECT season, AVG(fill_pct) AS model_avg_fill_pct FROM games_clean WHERE home_team_id = 121 AND in_model = true AND season BETWEEN 2024 AND 2026 GROUP BY season ORDER BY season",
     "columns": [
-     "actual_avg",
-     "avg_fill_pct",
-     "expected_avg",
-     "avg_residual_pct_capped"
+     "season",
+     "model_avg_fill_pct"
     ],
     "rows": [
      [
-      39775.65,
-      94.88375000000002,
-      34433.2290711956,
-      0.05848702086742206
+      2024,
+      69.80921052631578
+     ],
+     [
+      2025,
+      94.88375000000002
+     ],
+     [
+      2026,
+      80.74430379746833
      ]
     ]
    },
@@ -218,14 +315,19 @@
  {
   "id": "sample_fox",
   "q": "How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?",
-  "passed": true,
-  "failures": [],
-  "seconds": 25,
+  "passed": false,
+  "failures": [
+   "no tile for 3,094,000: []"
+  ],
+  "seconds": 36,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The exact viewership for the Yankees vs Red Sox game on June 7, 2025, is uncertain because the data has no number for that game alone, but the regional Fox window drew a total of 3,094,000 viewers[1]. This broadcast window also featured the San Diego Padres at Milwaukee Brewers game, and the Yankees vs Red Sox matchup reached 96% of the country[2].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "The data has no viewership number for the Yankees vs Red Sox game alone on June 7, 2025, because it aired as part of a regional Fox window[1]. The entire regional window drew a total of 3,094,000 viewers and reached 96% of the country[2]. This broadcast window featured both the Yankees vs Red Sox game and the San Diego Padres at Milwaukee Brewers game[2].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -233,7 +335,7 @@
     "tables": [
      "game_tv_lookup"
     ],
-    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2025-06-07' AND (home_team LIKE '%Red Sox%' OR away_team LIKE '%Red Sox%' OR home_team LIKE '%Yankees%' OR away_team LIKE '%Yankees%')",
+    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2025-06-07' AND (home_team_id IN (111, 147) AND away_team_id IN (111, 147))",
     "columns": [
      "game_pk",
      "official_date",
@@ -315,12 +417,15 @@
   "q": "How did the Padres vs Dodgers crowd on August 23, 2025 compare with expected?",
   "passed": true,
   "failures": [],
-  "seconds": 37,
-  "researchers": 2,
+  "seconds": 40,
+  "researchers": 3,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The crowd was at or near the park's season high of 47,345, and demand may have been higher[1]. This was for the San Diego Padres game against the Dodgers at Petco Park on August 23, 2025, which had an attendance of 46,326 and a 116.1% fill rate[2].",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "The crowd was at or near the park's season high of 47,345, and demand may have been higher[1]. This Saturday night game on August 23, 2025, drew 46,326 fans to see the host San Diego Padres defeat the Los Angeles Dodgers by a score of 5-1, representing 116.1% of capacity[2].",
   "sources": [
    {
     "n": 1,
@@ -328,27 +433,29 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT capacity_api, capacity_used, fill_pct, is_capped, ceiling_game, capped_text, venue_season_max, expected_status FROM games_clean WHERE official_date = '2025-08-23' AND home_team = 'San Diego Padres' AND away_team = 'Los Angeles Dodgers'",
+    "query": "SELECT special_event, temporary_park, capped_text, weekday, day_night, home_score, away_score, home_team, away_team FROM games_clean WHERE official_date = '2025-08-23' AND ((home_team LIKE '%Padres%' AND away_team LIKE '%Dodgers%') OR (home_team LIKE '%Dodgers%' AND away_team LIKE '%Padres%'))",
     "columns": [
-     "capacity_api",
-     "capacity_used",
-     "fill_pct",
-     "is_capped",
-     "ceiling_game",
+     "special_event",
+     "temporary_park",
      "capped_text",
-     "venue_season_max",
-     "expected_status"
+     "weekday",
+     "day_night",
+     "home_score",
+     "away_score",
+     "home_team",
+     "away_team"
     ],
     "rows": [
      [
-      39909,
-      39909,
-      116.1,
-      true,
-      true,
+      null,
+      false,
       "The crowd was at or near the park's season high of 47,345, and demand may have been higher.",
-      47345,
-      "not scored: at or near the park season high"
+      "Saturday",
+      "night",
+      5,
+      1,
+      "San Diego Padres",
+      "Los Angeles Dodgers"
      ]
     ]
    },
@@ -358,19 +465,31 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT attendance, expected_attendance, fill_pct, (attendance - expected_attendance) AS difference FROM games_clean WHERE official_date = '2025-08-23' AND home_team LIKE '%Padres%'",
+    "query": "SELECT game_pk, official_date, home_team, away_team, attendance, expected_attendance, attendance - expected_attendance AS difference, fill_pct, ceiling_game, capped_text FROM games_clean WHERE game_pk = 776617",
     "columns": [
+     "game_pk",
+     "official_date",
+     "home_team",
+     "away_team",
      "attendance",
      "expected_attendance",
+     "difference",
      "fill_pct",
-     "difference"
+     "ceiling_game",
+     "capped_text"
     ],
     "rows": [
      [
+      776617,
+      "2025-08-23",
+      "San Diego Padres",
+      "Los Angeles Dodgers",
       46326,
       null,
+      null,
       116.1,
-      null
+      true,
+      "The crowd was at or near the park's season high of 47,345, and demand may have been higher."
      ]
     ]
    }
@@ -382,28 +501,101 @@
   "q": "How did the Rays crowd on May 1, 2025 compare with expected?",
   "passed": true,
   "failures": [],
-  "seconds": 29,
-  "researchers": 2,
+  "seconds": 43,
+  "researchers": 3,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "On May 1, 2025, the Tampa Bay Rays drew an actual crowd of 8,794 spectators, which was higher than the expected attendance of 8,623 by 171 spectators, representing a fill rate of 79.8%[1]. This game against the Kansas City Royals was held at George M. Steinbrenner Field, a temporary park with a capacity of 11,026[1]. The move to this temporary stadium was announced on November 14, 2024, after Tropicana Field was heavily damaged during Hurricane Milton and rendered unusable for the entire 2025 season[2].\n\n*Promotions are not in the data. These are associations, not cause and effect.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "The Tampa Bay Rays drew 8,794 fans for their game against the Kansas City Royals on May 1, 2025, which was 171 above the expected attendance of 8,623[1][2]. This crowd represented 79.8% of capacity at their temporary home[3]. The game coincided with the Rays playing at George M. Steinbrenner Field in Tampa, which they announced as their home for the season on November 14, 2024, after Tropicana Field was heavily damaged by Hurricane Milton and rendered unusable for all of 2025[4].",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
+     "team_aliases",
+     "games"
+    ],
+    "query": "SELECT g.game_pk, g.official_date, g.home_team_id, g.away_team_id, ta.alias_key as away_alias, ta2.alias_key as home_alias FROM games g JOIN team_aliases ta ON g.away_team_id = ta.team_id JOIN team_aliases ta2 ON g.home_team_id = ta2.team_id WHERE g.home_team_id = 139 AND g.official_date = '2025-05-01' LIMIT 5",
+    "columns": [
+     "game_pk",
+     "official_date",
+     "home_team_id",
+     "away_team_id",
+     "away_alias",
+     "home_alias"
+    ],
+    "rows": [
+     [
+      778097,
+      "2025-05-01",
+      139,
+      118,
+      "royals",
+      "rays"
+     ],
+     [
+      778097,
+      "2025-05-01",
+      139,
+      118,
+      "royals",
+      "tampa bay rays"
+     ],
+     [
+      778097,
+      "2025-05-01",
+      139,
+      118,
+      "royals",
+      "tb"
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
      "games_clean"
     ],
-    "query": "SELECT attendance, expected_attendance, (attendance - expected_attendance) AS difference, fill_pct, away_team AS opponent, venue_name AS venue, capacity_used AS capacity, temporary_park FROM games_clean WHERE home_team LIKE '%Rays%' AND official_date = '2025-05-01'",
+    "query": "SELECT g.official_date, g.home_team_id, g.attendance, g.expected_attendance, (g.attendance - g.expected_attendance) AS difference, g.fill_pct, g.ceiling_game, g.capped_text FROM games_clean g WHERE g.home_team_id = 139 AND g.official_date = '2025-05-01'",
+    "columns": [
+     "official_date",
+     "home_team_id",
+     "attendance",
+     "expected_attendance",
+     "difference",
+     "fill_pct",
+     "ceiling_game",
+     "capped_text"
+    ],
+    "rows": [
+     [
+      "2025-05-01",
+      139,
+      8794,
+      8623.310612523672,
+      170.6893874763282,
+      79.8,
+      false,
+      null
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT g.attendance, g.expected_attendance, (g.attendance - g.expected_attendance) AS difference, g.fill_pct, g.temporary_park FROM games_clean g WHERE g.home_team_id = 139 AND g.official_date = '2025-05-01'",
     "columns": [
      "attendance",
      "expected_attendance",
      "difference",
      "fill_pct",
-     "opponent",
-     "venue",
-     "capacity",
      "temporary_park"
     ],
     "rows": [
@@ -412,15 +604,12 @@
       8623.310612523672,
       170.6893874763282,
       79.8,
-      "Kansas City Royals",
-      "George M. Steinbrenner Field",
-      11026,
       true
      ]
     ]
    },
    {
-    "n": 2,
+    "n": 4,
     "kind": "article",
     "title": "2025 Tampa Bay Rays season",
     "url": "https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season"
@@ -438,7 +627,10 @@
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "We cannot compare postseason crowds in 2025 because our attendance data only covers the regular seasons from 2024 to 2026.",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "We cannot compare postseason crowds for 2025 because our attendance data only covers the regular seasons from 2024 to 2026.",
   "sources": [],
   "data_note": ""
  },
@@ -447,12 +639,15 @@
   "q": "How did the Yankees draw in 2019?",
   "passed": true,
   "failures": [],
-  "seconds": 10,
+  "seconds": 9,
   "researchers": 0,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "We cannot show how the Yankees drew in 2019 because that season is not in our data, which covers attendance only for the 2024 to 2026 regular seasons.",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "We cannot show how the Yankees drew in 2019 because that season is outside our data, which only covers attendance for the 2024 to 2026 regular seasons.",
   "sources": [],
   "data_note": ""
  },
@@ -466,7 +661,10 @@
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "Which team, season, or comparison would you like to research?",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "Which team, season, or matchup would you like to know about?",
   "sources": [],
   "data_note": ""
  },
@@ -475,12 +673,20 @@
   "q": "How many people watched Dodgers vs Blue Jays on TBS on April 7, 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 18,
+  "seconds": 17,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "An uncertain total of 708,000 viewers watched the single-game broadcast of the Dodgers versus the Blue Jays on TBS on April 7, 2026[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "Uncertain total",
+    "value": "708,000"
+   }
+  ],
+  "box_score": null,
+  "report": "An uncertain audience of 708,000 viewers watched the Dodgers vs Blue Jays game on TBS on April 7, 2026[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -488,7 +694,7 @@
     "tables": [
      "game_tv_lookup"
     ],
-    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2026-04-07' AND (home_team LIKE '%Dodgers%' OR away_team LIKE '%Dodgers%' OR home_team LIKE '%Blue Jays%' OR away_team LIKE '%Blue Jays%')",
+    "query": "SELECT * FROM game_tv_lookup WHERE network = 'TBS' AND official_date = '2026-04-07'",
     "columns": [
      "game_pk",
      "official_date",
@@ -538,11 +744,19 @@
   "q": "How many people watched Tigers vs Yankees on TBS on June 30, 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 20,
+  "seconds": 22,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "TV audience",
+    "value": "279,000"
+   }
+  ],
+  "box_score": null,
   "report": "An audience of 279,000 viewers watched the Tigers vs. Yankees game on TBS on June 30, 2026, though this figure is main-network only and the total viewership is unknown[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
@@ -551,45 +765,37 @@
     "tables": [
      "game_tv_lookup"
     ],
-    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2026-06-30' AND network = 'TBS'",
+    "query": "SELECT game_pk, official_date, home_team, away_team, network, broadcast, audience_status, viewers_total, viewers_main, window_total, coverage_pct, window_games, can_split FROM game_tv_lookup WHERE official_date = '2026-06-30' AND (home_team ILIKE '%Yankees%' OR away_team ILIKE '%Yankees%') AND (home_team ILIKE '%Tigers%s' OR away_team ILIKE '%Tigers%');",
     "columns": [
      "game_pk",
      "official_date",
-     "season",
-     "home_team_id",
      "home_team",
-     "away_team_id",
      "away_team",
-     "special_event",
      "network",
      "broadcast",
      "audience_status",
      "viewers_total",
      "viewers_main",
-     "can_split",
      "window_total",
      "coverage_pct",
-     "window_games"
+     "window_games",
+     "can_split"
     ],
     "rows": [
      [
       823528,
       "2026-06-30",
-      2026,
-      147,
       "New York Yankees",
-      116,
       "Detroit Tigers",
-      null,
       "TBS",
       "single game",
       "main_network_only",
       null,
       279000,
-      true,
       null,
       null,
-      null
+      null,
+      true
      ]
     ]
    }
@@ -601,12 +807,20 @@
   "q": "How many people watched Dodgers vs Yankees on NBC on July 19, 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 17,
+  "seconds": 16,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The Dodgers vs Yankees game on July 19, 2026, was watched by a total of 3,616,000 viewers on NBC[1]. This single-game broadcast drew 3,616,000 main-network viewers[2].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "TV audience",
+    "value": "3,616,000"
+   }
+  ],
+  "box_score": null,
+  "report": "An audience of 3,616,000 total viewers watched the Dodgers vs Yankees game on NBC on July 19, 2026[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -614,7 +828,7 @@
     "tables": [
      "game_tv_lookup"
     ],
-    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2026-07-19' AND (home_team LIKE '%Dodgers%' OR away_team LIKE '%Dodgers%' OR home_team LIKE '%Yankees%' OR away_team LIKE '%Yankees%')",
+    "query": "SELECT * FROM game_tv_lookup WHERE official_date = '2026-07-19'",
     "columns": [
      "game_pk",
      "official_date",
@@ -655,38 +869,6 @@
       null
      ]
     ]
-   },
-   {
-    "n": 2,
-    "kind": "query",
-    "tables": [
-     "game_tv_lookup"
-    ],
-    "query": "SELECT network, broadcast, audience_status, viewers_total, viewers_main, window_total, coverage_pct, window_games, can_split FROM game_tv_lookup WHERE game_pk = 823521",
-    "columns": [
-     "network",
-     "broadcast",
-     "audience_status",
-     "viewers_total",
-     "viewers_main",
-     "window_total",
-     "coverage_pct",
-     "window_games",
-     "can_split"
-    ],
-    "rows": [
-     [
-      "NBC",
-      "single game",
-      "known",
-      3616000,
-      3616000,
-      null,
-      null,
-      null,
-      true
-     ]
-    ]
    }
   ],
   "data_note": "Data sources: TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
@@ -696,55 +878,167 @@
   "q": "What was the local RSN viewership for Marlins games in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 23,
+  "seconds": 26,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The data cannot answer what the local RSN viewership was for Marlins games in 2025 because the viewership data is for national television only[1].",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "We cannot provide the local RSN viewership for Marlins games in 2025 because our data does not track regional sports network viewership[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
-     "data_coverage"
+     "team_tv_summary"
     ],
-    "query": "SELECT * FROM data_coverage",
+    "query": "SELECT * FROM team_tv_summary WHERE team_id = 146",
     "columns": [
-     "dataset",
-     "first_season",
-     "last_season",
-     "note"
+     "team_id",
+     "season",
+     "team",
+     "appearances",
+     "single_games",
+     "fox_window_games",
+     "special_event_games",
+     "single_games_with_known_audience",
+     "avg_single_game_viewers",
+     "highest_single_game_viewers",
+     "network_mix"
     ],
     "rows": [
      [
-      "attendance",
-      2024,
+      146,
       2026,
-      "Regular season only."
+      "Miami Marlins",
+      3,
+      3,
+      0,
+      0,
+      1,
+      218000.0,
+      218000,
+      "FS1 3"
      ],
      [
-      "viewership",
+      146,
       2025,
-      2026,
-      "viewership_starts: 2025. National TV only. 2025 tables end in early September. A season before 2025 is not in our data, which does not mean the team was not on TV."
+      "Miami Marlins",
+      1,
+      1,
+      0,
+      0,
+      1,
+      208000.0,
+      208000,
+      "FS1 1"
      ]
     ]
    }
   ],
-  "data_note": ""
+  "data_note": "Data sources: TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
  },
  {
   "id": "held_tigers",
   "q": "How did Tigers crowds change in 2025, and why?",
   "passed": true,
   "failures": [],
-  "seconds": 43,
+  "seconds": 62,
   "researchers": 2,
   "retries": 0,
   "errors": [],
-  "chart": null,
-  "report": "The Detroit Tigers averaged 29,796 a game in 2025, 22.4% above the 24,351 their prior two years of crowds, win rate and market would predict, up 22.9% from 24,237 the season before[1]. The 2025 average attendance was higher than the 2024 average by 5,559, with a 2025 fill rate of 72.5% and a 2024 fill rate of 59.0%, creating a gap of 13.5 percentage points[2]. This growth coincided with the offseason signings of free agents including pitcher Alex Cobb, infielder Gleyber Torres, and pitcher Jack Flaherty[3]. Additionally, the team improved by one win over the previous season to finish with an 87\u201375 record, building a strong first half that reached 25 games over .500 by July 8[3].\n\n*Promotions are not in the data. These are associations, not cause and effect.*",
+  "chart": {
+   "type": "line",
+   "title": "Average attendance by month, one line per season",
+   "x_label": "Month",
+   "y_label": "Average attendance (fans)",
+   "unit": "fans",
+   "labels": [
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September"
+   ],
+   "series": [
+    {
+     "name": "2024",
+     "values": [
+      18327.0,
+      22523.3,
+      23835.4,
+      26719.2,
+      24420.5,
+      29022.7
+     ],
+     "color": "#5F6670",
+     "style": "dashed"
+    },
+    {
+     "name": "2025",
+     "values": [
+      22653.6,
+      28762.5,
+      33932.7,
+      31305.4,
+      31089.3,
+      32336.6
+     ],
+     "color": "#0C2340",
+     "style": "solid"
+    }
+   ],
+   "source": [
+    "games_clean"
+   ]
+  },
+  "team_chart": {
+   "team": "Detroit Tigers",
+   "color": "#0C2340",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2024,
+     "avg_attendance": 24236.716216216217,
+     "expected_avg_attendance": 23109.86904926892,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2025,
+     "avg_attendance": 29795.58024691358,
+     "expected_avg_attendance": 24351.03723160732,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2026,
+     "avg_attendance": 28677.197530864196,
+     "expected_avg_attendance": 26543.177703322286,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [
+   {
+    "label": "Avg crowd",
+    "value": "29,796"
+   },
+   {
+    "label": "Vs expected",
+    "value": "+22.4%"
+   },
+   {
+    "label": "Vs last year",
+    "value": "+22.9%"
+   }
+  ],
+  "box_score": null,
+  "report": "The Detroit Tigers averaged 29,796 a game in 2025, 22.4% above the 24,351 their prior two years of crowds, win rate, and market would predict, up 22.9% from 24,237 the season before[1]. Average home attendance was higher in 2025 than in 2024 by 5,559 per game, with 29,796 in 2025 at 72.5% of capacity compared to 24,237 in 2024 at 59.0% of capacity, a gap of 13.5 percentage points[2]. Average expected home attendance was also higher in 2025 than in 2024 by 5,496 per game, rising from 22,741 to 28,238[2]. These larger crowds coincided with the team improving its record to 87\u201375 and reaching the postseason[3]. The interest also coincided with major offseason roster additions, including signing Gleyber Torres, Alex Cobb, Tommy Kahnle, Jack Flaherty, John Brebbia, and Jos\u00e9 Urquidy[3]. Additionally, the season coincided with a second-half collapse where the team went 28\u201337 after the All-Star Game and 7\u201317 in September[3].",
   "sources": [
    {
     "n": 1,
@@ -752,76 +1046,31 @@
     "tables": [
      "team_season_model"
     ],
-    "query": "SELECT * FROM team_season_model WHERE team_id = 116 AND season IN (2024, 2025)",
+    "query": "SELECT season, avg_attendance, expected_avg_attendance, prior_season_avg, yoy_change_pct, residual_pct FROM team_season_model WHERE team_id = 116 AND season IN (2024, 2025) ORDER BY season",
     "columns": [
-     "team_id",
-     "home_team",
      "season",
      "avg_attendance",
-     "model_games",
-     "near_ceiling_games",
-     "win_pct",
+     "expected_avg_attendance",
      "prior_season_avg",
      "yoy_change_pct",
-     "prior_two_year_avg",
-     "market",
-     "population",
-     "population_year",
-     "teams_in_market",
-     "in_model",
-     "exclusion_reason",
-     "expected_avg_attendance",
-     "residual_pct",
-     "prior_residual_pct",
-     "possible_rebound",
-     "official_home_total"
+     "residual_pct"
     ],
     "rows": [
      [
-      116,
-      "Detroit Tigers",
       2024,
       24236.716216216217,
-      74,
-      6,
-      0.5308641975308642,
+      23109.86904926892,
       20946.0,
       0.15710475585869466,
-      20320.0,
-      "Detroit-Warren-Dearborn, MI",
-      4377045,
-      2024,
-      1,
-      true,
-      null,
-      23109.86904926892,
-      0.04876043064306956,
-      null,
-      null,
-      1858295
+      0.04876043064306956
      ],
      [
-      116,
-      "Detroit Tigers",
       2025,
       29795.58024691358,
-      81,
-      10,
-      0.5370370370370371,
+      24351.03723160732,
       24236.716216216217,
       0.22935714480074898,
-      22385.0,
-      "Detroit-Warren-Dearborn, MI",
-      4390913,
-      2025,
-      1,
-      true,
-      null,
-      24351.03723160732,
-      0.22358567167066368,
-      0.04876043064306956,
-      false,
-      2413442
+      0.22358567167066368
      ]
     ]
    },
@@ -829,21 +1078,32 @@
     "n": 2,
     "kind": "query",
     "tables": [
-     "games_clean",
-     "team_season_model"
+     "games_clean"
     ],
-    "query": "SELECT 2025 as season, (SELECT avg_attendance FROM team_season_model WHERE team_id = 116 AND season = 2025) - (SELECT avg_attendance FROM team_season_model WHERE team_id = 116 AND season = 2024) as diff_avg_attendance, (SELECT expected_avg_attendance FROM team_season_model WHERE team_id = 116 AND season = 2025) - (SELECT expected_avg_attendance FROM team_season_model WHERE team_id = 116 AND season = 2024) as diff_expected_avg_attendance, (SELECT avg(fill_pct) FROM games_clean WHERE home_team = 'Detroit Tigers' AND season = 2025) - (SELECT avg(fill_pct) FROM games_clean WHERE home_team = 'Detroit Tigers' AND season = 2024) as diff_fill_pct",
+    "query": "SELECT t2024.season AS season_2024, t2024.avg_attendance AS att_2024, t2025.avg_attendance AS att_2025, (t2025.avg_attendance - t2024.avg_attendance) AS att_diff, t2024.avg_expected AS exp_2024, t2025.avg_expected AS exp_2025, (t2025.avg_expected - t2024.avg_expected) AS exp_diff, t2024.avg_fill_pct AS fill_2024, t2025.avg_fill_pct AS fill_2025, (t2025.avg_fill_pct - t2024.avg_fill_pct) AS fill_diff FROM (SELECT season, avg(attendance) as avg_attendance, avg(expected_attendance) as avg_expected, avg(fill_pct) as avg_fill_pct FROM games_clean WHERE home_team_id = 116 AND season = 2024 GROUP BY season) t2024, (SELECT season, avg(attendance) as avg_attendance, avg(expected_attendance) as avg_expected, avg(fill_pct) as avg_fill_pct FROM games_clean WHERE home_team_id = 116 AND season = 2025 GROUP BY season) t2025",
     "columns": [
-     "season",
-     "diff_avg_attendance",
-     "diff_expected_avg_attendance",
-     "diff_fill_pct"
+     "season_2024",
+     "att_2024",
+     "att_2025",
+     "att_diff",
+     "exp_2024",
+     "exp_2025",
+     "exp_diff",
+     "fill_2024",
+     "fill_2025",
+     "fill_diff"
     ],
     "rows": [
      [
-      2025,
+      2024,
+      24236.716216216217,
+      29795.58024691358,
       5558.864030697365,
-      1241.1681823383988,
+      22741.209720063205,
+      28237.703409607242,
+      5496.493689544037,
+      58.991891891891896,
+      72.52716049382714,
       13.535268601935243
      ]
     ]
@@ -862,12 +1122,106 @@
   "q": "Which team under-performed the most on attendance in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 41,
-  "researchers": 3,
+  "seconds": 80,
+  "researchers": 2,
   "retries": 0,
   "errors": [],
-  "chart": null,
-  "report": "The St. Louis Cardinals under-performed the most on attendance in 2025, with an average attendance of 27,778 that was 21.7% below what their prior two years of crowds, win rate, and market size would predict, and a 22.6% drop from the prior season's average of 35,872[1]. This decline coincided with the team being eliminated from postseason contention for the third consecutive season on September 24, 2025[2]. Additionally, for the first time since 2018, Paul Goldschmidt was not on the roster after signing with the Yankees in free agency[2]. During the season, the Cardinals had an average fill rate of 64.0% with an average capacity used of 43,435[3].\n\n*Promotions are not in the data. These are associations, not cause and effect.*",
+  "chart": {
+   "type": "paired",
+   "title": "Actual and expected attendance by name",
+   "x_label": "Name",
+   "y_label": "Average attendance (fans per game)",
+   "unit": "fans",
+   "labels": [
+    "St. Louis Cardinals",
+    "Baltimore Orioles",
+    "Miami Marlins",
+    "Pittsburgh Pirates",
+    "Houston Astros"
+   ],
+   "series": [
+    {
+     "name": "Actual",
+     "values": [
+      27777.9,
+      22702.4,
+      14294.9,
+      18827.5,
+      33677.5
+     ],
+     "color": "#C41E3A",
+     "style": "solid"
+    },
+    {
+     "name": "Expected",
+     "values": [
+      35479.4,
+      25705.8,
+      15892.8,
+      20752.9,
+      36802.4
+     ],
+     "color": "#8A8F98",
+     "style": "hatch"
+    }
+   ],
+   "source": [
+    "games_clean",
+    "teams",
+    "team_season_model"
+   ],
+   "item_colors": [
+    "#C41E3A",
+    "#000000",
+    "#0075A2",
+    "#27251F",
+    "#EB6E1F"
+   ]
+  },
+  "team_chart": {
+   "team": "St. Louis Cardinals",
+   "color": "#C41E3A",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "St. Louis Cardinals",
+     "season": 2024,
+     "avg_attendance": 35872.2875,
+     "expected_avg_attendance": 39840.505054361056,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "St. Louis Cardinals",
+     "season": 2025,
+     "avg_attendance": 27777.864197530864,
+     "expected_avg_attendance": 35479.35361497342,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "St. Louis Cardinals",
+     "season": 2026,
+     "avg_attendance": 27579.037037037036,
+     "expected_avg_attendance": 30306.39194975374,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [
+   {
+    "label": "Avg crowd",
+    "value": "27,778"
+   },
+   {
+    "label": "Vs expected",
+    "value": "-21.7%"
+   },
+   {
+    "label": "Vs last year",
+    "value": "-22.6%"
+   }
+  ],
+  "box_score": null,
+  "report": "The St. Louis Cardinals averaged 27,778 a game in 2025, 21.7% below the 35,479 their prior two years of crowds, win rate, and market would predict, down 22.6% from 35,872 the season before[1]. This attendance represented 64.0% of capacity[2]. During the season, the Cardinals were eliminated from postseason contention on September 24, 2025, marking the third consecutive season they missed the playoffs[3]. Additionally, Paul Goldschmidt was not on the roster for the first time since 2018 after signing with the Yankees in free agency[3]. Other under-performing teams in 2025 included the Baltimore Orioles, who averaged 22,702 a game (49.9% of capacity) which was 11.7% below their expected 25,706; the Miami Marlins, who averaged 14,295 a game (38.2% of capacity) which was 10.1% below their expected 15,893; the Pittsburgh Pirates, who averaged 18,827 a game (48.6% of capacity) which was 9.3% below their expected 20,753; and the Houston Astros, who averaged 33,677 a game (81.8% of capacity) which was 8.5% below their expected 36,802[2].",
   "sources": [
    {
     "n": 1,
@@ -875,53 +1229,67 @@
     "tables": [
      "team_season_model"
     ],
-    "query": "SELECT team_id, home_team, season, avg_attendance, expected_avg_attendance, residual_pct, prior_season_avg, yoy_change_pct FROM team_season_model WHERE season = 2025 ORDER BY residual_pct ASC LIMIT 1",
+    "query": "select * from team_season_model where home_team = 'St. Louis Cardinals' and season = 2025",
     "columns": [
-     "team_id",
      "home_team",
      "season",
      "avg_attendance",
+     "prior_season_avg",
+     "yoy_change_pct",
      "expected_avg_attendance",
      "residual_pct",
-     "prior_season_avg",
-     "yoy_change_pct"
+     "prior_residual_pct",
+     "possible_rebound"
     ],
     "rows": [
      [
-      138,
       "St. Louis Cardinals",
       2025,
       27777.864197530864,
+      35872.2875,
+      -0.22564558511829325,
       35479.35361497342,
       -0.2170696090188149,
-      35872.2875,
-      -0.22564558511829325
+      -0.09960259160737439,
+      false
      ]
     ]
    },
    {
     "n": 2,
-    "kind": "article",
-    "title": "2025 St. Louis Cardinals season",
-    "url": "https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season"
-   },
-   {
-    "n": 3,
     "kind": "query",
     "tables": [
-     "games_clean"
+     "games_clean",
+     "teams",
+     "team_season_model"
     ],
-    "query": "SELECT avg(fill_pct) AS avg_fill_pct, avg(capacity_used) AS avg_capacity_used FROM games_clean WHERE home_team_id = 138 AND season = 2025",
+    "query": "SELECT t.name, ts.team_id, ts.season, ts.avg_attendance, ts.expected_avg_attendance, ts.residual_pct, g.avg_fill_pct FROM team_season_model ts JOIN teams t ON ts.team_id = t.team_id AND ts.season = t.season JOIN ( SELECT home_team_id, season, AVG(fill_pct) as avg_fill_pct FROM games_clean WHERE season = 2025 GROUP BY home_team_id, season ) g ON ts.team_id = g.home_team_id AND ts.season = g.season WHERE ts.season = 2025 ORDER BY ts.residual_pct ASC LIMIT 5",
     "columns": [
-     "avg_fill_pct",
-     "avg_capacity_used"
+     "name",
+     "team_id",
+     "season",
+     "avg_attendance",
+     "expected_avg_attendance",
+     "residual_pct",
+     "avg_fill_pct"
     ],
     "rows": [
      [
-      63.95679012345679,
-      43435.0
+      "St. Louis Cardinals",
+      138,
+      2025,
+      27777.864197530864,
+      35479.35361497342,
+      -0.2170696090188149,
+      63.95679012345679
      ]
     ]
+   },
+   {
+    "n": 3,
+    "kind": "article",
+    "title": "2025 St. Louis Cardinals season",
+    "url": "https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season"
    }
   ],
   "data_note": "Data sources: MLB Stats API (statsapi.mlb.com); Wikipedia."
@@ -931,12 +1299,42 @@
   "q": "Do Cubs Sunday games draw better than their Tuesday games?",
   "passed": true,
   "failures": [],
-  "seconds": 25,
+  "seconds": 32,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "Yes, Chicago Cubs Sunday home games draw larger crowds than Tuesday home games, with Sunday average attendance being higher by 1,860 fans[1]. Across the 2024, 2025, and 2026 regular seasons, Sunday home games averaged 37,140 fans with an 89.9% fill rate, while Tuesday home games averaged 35,280 fans with an 85.4% fill rate, representing a gap of 4.5 percentage points[1].",
+  "team_chart": {
+   "team": "Chicago Cubs",
+   "color": "#0E3386",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2024,
+     "avg_attendance": 35923.38271604938,
+     "expected_avg_attendance": 34656.889891408806,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2025,
+     "avg_attendance": 37129.759493670885,
+     "expected_avg_attendance": 36686.74786274155,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2026,
+     "avg_attendance": 36661.51851851852,
+     "expected_avg_attendance": 37153.235520910894,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": null,
+  "report": "Yes, Chicago Cubs Sunday home games draw better than Tuesday home games, with Sunday average attendance higher by 1,860 at an average of 37,140 (89.9% of capacity) compared to Tuesday's average of 35,280 (85.4% of capacity), representing a gap of 4.5 percentage points[1].",
   "sources": [
    {
     "n": 1,
@@ -944,28 +1342,25 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT weekday, AVG(attendance) AS avg_attendance, AVG(fill_pct) AS avg_fill_pct, (SELECT AVG(attendance) FROM games_clean WHERE home_team_id = 112 AND weekday = 'Sunday') - (SELECT AVG(attendance) FROM games_clean WHERE home_team_id = 112 AND weekday = 'Tuesday') AS attendance_difference, (SELECT AVG(fill_pct) FROM games_clean WHERE home_team_id = 112 AND weekday = 'Sunday') - (SELECT AVG(fill_pct) FROM games_clean WHERE home_team_id = 112 AND weekday = 'Tuesday') AS fill_pct_difference FROM games_clean WHERE home_team_id = 112 AND weekday IN ('Sunday', 'Tuesday') GROUP BY weekday",
+    "query": "SELECT weekday, avg(attendance) AS avg_attendance, avg(expected_attendance) AS avg_expected_attendance, avg(fill_pct) AS avg_fill_pct FROM games_clean WHERE home_team_id = 112 AND weekday IN ('Sunday', 'Tuesday') GROUP BY weekday",
     "columns": [
      "weekday",
      "avg_attendance",
-     "avg_fill_pct",
-     "attendance_difference",
-     "fill_pct_difference"
+     "avg_expected_attendance",
+     "avg_fill_pct"
     ],
     "rows": [
      [
       "Tuesday",
       35280.36842105263,
-      85.43157894736841,
-      1859.8815789473665,
-      4.500921052631597
+      32297.451347997092,
+      85.43157894736841
      ],
      [
       "Sunday",
       37140.25,
-      89.9325,
-      1859.8815789473665,
-      4.500921052631597
+      38516.806247216184,
+      89.9325
      ]
     ]
    }
@@ -977,17 +1372,18 @@
   "q": "Which network had the biggest national TV audiences in 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 37,
+  "seconds": 19,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": {
    "type": "bar",
-   "title": "Average 2 by network 2",
-   "x_label": "Network 2",
-   "y_label": "Average 2",
-   "unit": "",
+   "title": "Average viewers by network",
+   "x_label": "Network",
+   "y_label": "Average viewers",
+   "unit": "viewers",
    "labels": [
+    "Fox",
     "Netflix",
     "NBC",
     "ABC",
@@ -997,22 +1393,28 @@
    ],
    "series": [
     {
-     "name": "Average 2",
+     "name": "Average viewers",
      "values": [
+      2343875.0,
       2314000.0,
       2312761.9,
       1794333.3,
       1126208.3,
       614900.0,
       385904.8
-     ]
+     ],
+     "color": "#12402E",
+     "style": "solid"
     }
    ],
    "source": [
     "network_audience"
    ]
   },
-  "report": "Fox had the biggest national TV audiences in 2026[1]. Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026[1]. Netflix averaged 2,314,000 viewers across 2 games with known audiences in 2026[1]. NBC averaged 2,312,762 viewers across 21 games with known audiences in 2026[1]. ABC averaged 1,794,333 viewers across 3 games with known audiences in 2026[1]. ESPN averaged 1,126,208 viewers across 24 games with known audiences in 2026, out of 27 games[1]. TBS averaged 614,900 viewers across 10 games with known audiences in 2026, out of 25 games[1]. FS1 averaged 385,905 viewers across 21 games with known audiences in 2026, out of 39 games[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "Fox had the biggest national TV audiences in 2026[1]. Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026[1]. Other top-performing networks included Netflix, which averaged 2,314,000 viewers across 2 broadcasts, NBC, which averaged 2,312,762 viewers across 21 broadcasts, and ABC, which averaged 1,794,333 viewers across 3 broadcasts[1]. Additionally, ESPN averaged 1,126,208 viewers over 27 broadcasts, TBS averaged 614,900 viewers over 25 broadcasts, and FS1 averaged 385,905 viewers over 39 broadcasts[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -1020,18 +1422,30 @@
     "tables": [
      "network_audience"
     ],
-    "query": "SELECT network_text FROM network_audience WHERE season = 2026 ORDER BY average_viewers DESC",
+    "query": "SELECT network, broadcasts, average_viewers, network_text FROM network_audience WHERE season = 2026 ORDER BY average_viewers DESC",
     "columns": [
+     "network",
+     "broadcasts",
+     "average_viewers",
      "network_text"
     ],
     "rows": [
      [
+      "Fox",
+      24,
+      2343875.0,
       "Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026."
      ],
      [
+      "Netflix",
+      2,
+      2314000.0,
       "Netflix averaged 2,314,000 viewers across 2 games with known audiences in 2026."
      ],
      [
+      "NBC",
+      21,
+      2312761.904761905,
       "NBC averaged 2,312,762 viewers across 21 games with known audiences in 2026."
      ]
     ]
@@ -1044,12 +1458,20 @@
   "q": "What was the attendance at the Speedway Classic?",
   "passed": true,
   "failures": [],
-  "seconds": 15,
+  "seconds": 27,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The attendance at the Speedway Classic on August 2, 2025, was 91,032[1]. This 2025 special event game featured the Cincinnati Reds hosting the Atlanta Braves at Bristol Motor Speedway in Bristol, Tennessee[1].",
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "Crowd",
+    "value": "91,032"
+   }
+  ],
+  "box_score": null,
+  "report": "The attendance at the Speedway Classic on August 2, 2025, was 91,032[1]. This 2025 season special event game was hosted by the Cincinnati Reds against the Atlanta Braves at Bristol Motor Speedway in Bristol, Tennessee[1].",
   "sources": [
    {
     "n": 1,
@@ -1057,35 +1479,27 @@
     "tables": [
      "games"
     ],
-    "query": "SELECT special_event, venue_name, venue_city, venue_state, official_date, season, home_team, away_team, attendance, fill_rate, capacity_api, capacity_used FROM games WHERE game_pk = 776907",
+    "query": "SELECT game_pk, season, official_date, home_team, away_team, attendance, venue_name, special_event FROM games WHERE special_event ILIKE '%Speedway%' OR venue_name ILIKE '%Speedway%' OR description ILIKE '%Speedway%'",
     "columns": [
-     "special_event",
-     "venue_name",
-     "venue_city",
-     "venue_state",
-     "official_date",
+     "game_pk",
      "season",
+     "official_date",
      "home_team",
      "away_team",
      "attendance",
-     "fill_rate",
-     "capacity_api",
-     "capacity_used"
+     "venue_name",
+     "special_event"
     ],
     "rows": [
      [
-      "Speedway Classic",
-      "Bristol Motor Speedway",
-      "Bristol",
-      "Tennessee",
-      "2025-08-02",
+      776907,
       2025,
+      "2025-08-02",
       "Cincinnati Reds",
       "Atlanta Braves",
       91032,
-      null,
-      null,
-      null
+      "Bristol Motor Speedway",
+      "Speedway Classic"
      ]
     ]
    }
@@ -1097,12 +1511,15 @@
   "q": "What drives MLB attendance?",
   "passed": true,
   "failures": [],
-  "seconds": 78,
-  "researchers": 3,
+  "seconds": 55,
+  "researchers": 2,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "Major League Baseball attendance is strongest during home openers, weekend games, matchups against popular opponents, and seasons when the home team is winning or has a strong history of drawing crowds[1]. At the game level, home openers coincide with the largest positive difference, showing a 69.1% higher attendance compared to normal games[1]. Opponent matchups also relate to attendance: games against the Los Angeles Dodgers go with a 25.0% higher crowd, the New York Yankees with a 15.7% higher crowd, and the Chicago Cubs with a 13.1% higher crowd compared to an average opponent[1]. Conversely, weekday games go with lower attendance than Friday games, with Monday games showing a 21.8% lower crowd, Wednesdays 20.6% lower, Tuesdays 18.9% lower, and Thursdays 16.6% lower[1]. Early season timing also accompanies smaller crowds, as March and April games show a 10.9% lower attendance compared to August[1]. At the team level, a season win rate that is .100 higher goes with an 8.6% higher attendance, while a 10.0% higher average crowd over the prior two years goes with an 8.2% higher attendance[1]. Meanwhile, a 10.0% larger metro population goes with only a 0.2% higher attendance after accounting for prior crowds, which is an unclear relationship[1]. These patterns are reflected in models analyzing 7,205 games and 86 team-seasons across the 2024 to 2026 seasons[2].\n\n*These are associations, not cause and effect.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "MLB attendance is highest for home openers, high-profile opponents, weekend dates, and teams with a strong winning track record[1]. Home openers coincide with the largest attendance boost, with a 69.1% increase in game-level crowds[1]. Hosting premium opponents also goes hand in hand with larger crowds, as games against the Los Angeles Dodgers see a 25.0% increase, the New York Yankees a 15.7% increase, and the Chicago Cubs a 13.1% increase[1]. Conversely, games against the Washington Nationals, Colorado Rockies, and Miami Marlins coincide with attendance decreases of 6.4%, 6.5%, and 6.6% respectively[1]. Timing is also closely linked to crowd sizes: compared to Friday games, Saturdays see an 8.8% increase, while Mondays, Wednesdays, Tuesdays, and Thursdays see drops of 21.8%, 20.6%, 18.9%, and 16.6% respectively[1]. At the team level, a season win rate that is .100 higher goes with an 8.6% increase in attendance[2]. Meanwhile, a 10.0% larger metro population has a negligible and unclear relationship of just 0.2%[2].",
   "sources": [
    {
     "n": 1,
@@ -1110,31 +1527,21 @@
     "tables": [
      "model_coefficients"
     ],
-    "query": "SELECT model, term, label, effect_pct FROM model_coefficients WHERE label IS NOT NULL ORDER BY model, term",
+    "query": "SELECT model, term, label, effect_pct, clear_effect FROM model_coefficients WHERE label IS NOT NULL AND model = 'game' ORDER BY effect_pct DESC",
     "columns": [
      "model",
      "term",
      "label",
-     "effect_pct"
+     "effect_pct",
+     "clear_effect"
     ],
     "rows": [
      [
       "game",
-      "C(day_night)[T.night]",
-      "Night games, compared with day games",
-      -0.002194405296922275
-     ],
-     [
-      "game",
-      "C(month_group)[T.Jul]",
-      "July games, compared with August",
-      0.042192970898963233
-     ],
-     [
-      "game",
-      "C(month_group)[T.Jun]",
-      "June games, compared with August",
-      0.02543539722939947
+      "home_opener_term",
+      "Home openers",
+      0.6909185609999846,
+      true
      ]
     ]
    },
@@ -1142,25 +1549,23 @@
     "n": 2,
     "kind": "query",
     "tables": [
-     "model_fit"
+     "model_coefficients"
     ],
-    "query": "SELECT * FROM model_fit",
+    "query": "SELECT model, term, label, effect_pct, clear_effect FROM model_coefficients WHERE label IS NOT NULL AND model = 'team' ORDER BY effect_pct DESC",
     "columns": [
      "model",
-     "n",
-     "r2",
-     "r2_within_venue_season",
-     "cv_rmse_log",
-     "cv_rmse_log_baseline"
+     "term",
+     "label",
+     "effect_pct",
+     "clear_effect"
     ],
     "rows": [
      [
-      "game",
-      7205,
-      0.8262957417207928,
-      0.43170785215892915,
-      0.1933325558849753,
-      0.2541261522582768
+      "team",
+      "win_pct",
+      "A season win rate .100 higher",
+      0.08623819189894677,
+      true
      ]
     ]
    }
@@ -1172,12 +1577,135 @@
   "q": "How did the Cubs do on attendance and viewership last year?",
   "passed": true,
   "failures": [],
-  "seconds": 24,
+  "seconds": 49,
   "researchers": 2,
   "retries": 0,
   "errors": [],
-  "chart": null,
-  "report": "During the 2025 season, the Chicago Cubs averaged 37,130 fans per game, which was 1.2% above what the prior two years of crowds, win rate, and market would predict, representing a 3.4% increase from the season before[1]. This attendance resulted in an average home game fill rate of 89.9%[2]. On national television, the Cubs made 17 appearances, including 12 single-game broadcasts, 5 Fox window games, and 2 special events[3]. Their single-game broadcasts drew an average of 1,030,818 viewers, with one audience remaining unknown, and reached a peak of 2,041,000 viewers[3]. The team's national broadcasts were distributed across several networks, with 6 games on Fox, 5 on ESPN, 3 on FS1, and 3 on TBS[3].\n\n*Assumed last year means the 2025 season.*\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Promotions are not in the data. These are associations, not cause and effect.*",
+  "chart": {
+   "type": "bar",
+   "title": "Appearances by team",
+   "x_label": "Team",
+   "y_label": "Appearances",
+   "unit": "",
+   "labels": [
+    "Los Angeles Dodgers",
+    "New York Yankees",
+    "Philadelphia Phillies",
+    "Chicago Cubs",
+    "New York Mets",
+    "Boston Red Sox",
+    "Detroit Tigers",
+    "Atlanta Braves",
+    "San Diego Padres",
+    "St. Louis Cardinals",
+    "Houston Astros",
+    "Cleveland Guardians",
+    "Seattle Mariners",
+    "San Francisco Giants",
+    "Texas Rangers",
+    "Milwaukee Brewers",
+    "Minnesota Twins",
+    "Arizona Diamondbacks",
+    "Cincinnati Reds",
+    "Kansas City Royals",
+    "Baltimore Orioles",
+    "Pittsburgh Pirates",
+    "Tampa Bay Rays",
+    "Washington Nationals",
+    "Toronto Blue Jays",
+    "Miami Marlins",
+    "Colorado Rockies",
+    "Los Angeles Angels",
+    "Athletics",
+    "Chicago White Sox"
+   ],
+   "series": [
+    {
+     "name": "Appearances",
+     "values": [
+      19.0,
+      19.0,
+      18.0,
+      17.0,
+      17.0,
+      15.0,
+      14.0,
+      14.0,
+      13.0,
+      11.0,
+      11.0,
+      10.0,
+      10.0,
+      9.0,
+      9.0,
+      9.0,
+      8.0,
+      8.0,
+      7.0,
+      7.0,
+      7.0,
+      6.0,
+      3.0,
+      3.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0
+     ],
+     "color": "#0E3386",
+     "style": "solid"
+    }
+   ],
+   "source": [
+    "team_tv_summary"
+   ]
+  },
+  "team_chart": {
+   "team": "Chicago Cubs",
+   "color": "#0E3386",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2024,
+     "avg_attendance": 35923.38271604938,
+     "expected_avg_attendance": 34656.889891408806,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2025,
+     "avg_attendance": 37129.759493670885,
+     "expected_avg_attendance": 36686.74786274155,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2026,
+     "avg_attendance": 36661.51851851852,
+     "expected_avg_attendance": 37153.235520910894,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [
+   {
+    "label": "Avg crowd",
+    "value": "37,130"
+   },
+   {
+    "label": "Vs expected",
+    "value": "+1.2%"
+   },
+   {
+    "label": "Vs last year",
+    "value": "+3.4%"
+   }
+  ],
+  "box_score": null,
+  "report": "The Chicago Cubs averaged 37,130 a game in 2025, 1.2% above the 36,687 their prior two years of crowds, win rate, and market would predict, up 3.4% from 35,923 the season before[1]. This attendance represented 89.9% of capacity[2]. On television, the Cubs had 17 national appearances, far exceeding the league average of 8.9 appearances, with a network mix of 6 games on Fox, 5 on ESPN, 3 on FS1, and 3 on TBS[3]. These appearances consisted of 12 single games, which included 5 Fox window games, and 2 special event games, alongside 3 additional Fox window games that had no audience of their own[4]. The Cubs ranked fifth in the league with an average of 1,030,818 viewers for single-game broadcasts with known audiences, which was well above the unweighted team average of 634,243 viewers, and achieved a season-high viewership of 2,041,000 viewers[5].\n\n*Assumed last year means the 2025 season.*\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -1239,21 +1767,22 @@
     "n": 2,
     "kind": "query",
     "tables": [
-     "games_clean"
+     "games_clean",
+     "team_season_model"
     ],
-    "query": "SELECT AVG(attendance) AS avg_attendance, AVG(expected_attendance) AS avg_expected_attendance, AVG(fill_pct) AS avg_fill_pct, AVG(residual_pct_capped) AS avg_residual_pct_capped FROM games_clean WHERE home_team_id = 112 AND season = 2025",
+    "query": "SELECT avg_attendance, expected_avg_attendance, residual_pct, (SELECT avg(fill_pct) FROM games_clean WHERE home_team_id = 112 AND season = 2025) as fill_pct FROM team_season_model WHERE team_id = 112 AND season = 2025",
     "columns": [
      "avg_attendance",
-     "avg_expected_attendance",
-     "avg_fill_pct",
-     "avg_residual_pct_capped"
+     "expected_avg_attendance",
+     "residual_pct",
+     "fill_pct"
     ],
     "rows": [
      [
       37129.759493670885,
-      35050.8045932787,
-      89.90506329113924,
-      0.024478190913571632
+      36686.74786274155,
+      0.012075522000118522,
+      89.90506329113924
      ]
     ]
    },
@@ -1263,33 +1792,62 @@
     "tables": [
      "team_tv_summary"
     ],
-    "query": "SELECT * FROM team_tv_summary WHERE team_id = 112 AND season = 2025",
+    "query": "SELECT avg(avg_single_game_viewers) AS league_avg_viewers, avg(appearances) AS league_avg_appearances FROM team_tv_summary WHERE season = 2025",
     "columns": [
-     "team_id",
-     "season",
+     "league_avg_viewers",
+     "league_avg_appearances"
+    ],
+    "rows": [
+     [
+      634242.5,
+      8.933333333333334
+     ]
+    ]
+   },
+   {
+    "n": 4,
+    "kind": "query",
+    "tables": [
+     "team_tv_summary"
+    ],
+    "query": "SELECT sum(avg_single_game_viewers) / count(avg_single_game_viewers) AS weighted_avg FROM team_tv_summary WHERE season = 2025",
+    "columns": [
+     "weighted_avg"
+    ],
+    "rows": [
+     [
+      634242.5
+     ]
+    ]
+   },
+   {
+    "n": 5,
+    "kind": "query",
+    "tables": [
+     "team_tv_summary"
+    ],
+    "query": "SELECT team, appearances, avg_single_game_viewers, highest_single_game_viewers, network_mix FROM team_tv_summary WHERE season = 2025 ORDER BY avg_single_game_viewers DESC NULLS LAST",
+    "columns": [
      "team",
      "appearances",
-     "single_games",
-     "fox_window_games",
-     "special_event_games",
-     "single_games_with_known_audience",
      "avg_single_game_viewers",
      "highest_single_game_viewers",
      "network_mix"
     ],
     "rows": [
      [
-      112,
-      2025,
       "Chicago Cubs",
       17,
-      12,
-      5,
-      2,
-      11,
       1030818.0,
       2041000,
       "Fox 6, ESPN 5, FS1 3, TBS 3"
+     ],
+     [
+      "Philadelphia Phillies",
+      18,
+      948769.0,
+      2041000,
+      "ESPN 6, Fox 5, TBS 5, FS1 2"
      ]
     ]
    }
@@ -1301,56 +1859,50 @@
   "q": "Did the Red Sox or the Yankees have better season opener attendance in 2024?",
   "passed": true,
   "failures": [],
-  "seconds": 38,
-  "researchers": 1,
+  "seconds": 50,
+  "researchers": 2,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The Boston Red Sox had higher attendance than the New York Yankees for the 2024 season opener, though the Yankees drew more for their home opener[1]. For the season opener, the Red Sox attendance of 45,337 was higher than the Yankees attendance of 42,642 by 2,695, with a Red Sox fill rate of 95.7% and a Yankees fill rate of 103.6%, representing a gap of 7.9 percentage points[2]. For the home opener, the Yankees attendance of 47,812 was higher than the Red Sox attendance of 36,093 by 11,719, with a Yankees fill rate of 102.7% and a Red Sox fill rate of 95.6%, representing a gap of 7.1 percentage points[2].",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "The Boston Red Sox had higher attendance for their overall season opener in 2024, while the New York Yankees drew a larger crowd for their home opener[1]. For their overall season openers on March 28, 2024, the Red Sox had higher attendance than the Yankees by 2,695, with Boston drawing 45,337 at 95.7% of capacity and New York drawing 42,642 at 103.6% of capacity, a gap of 7.9 percentage points[2]. For their home openers, the Yankees had higher attendance than the Red Sox by 11,719, with New York drawing 47,812 at 102.7% of capacity on April 5, 2024, and Boston drawing 36,093 at 95.6% of capacity on April 9, 2024, representing a gap of 7.1 percentage points[3].",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
-     "games"
+     "games_clean"
     ],
-    "query": "WITH openers AS ( SELECT 'Season Opener' AS opener_type, game_pk, official_date, home_team, attendance, capacity_api, fill_rate FROM games WHERE game_pk = 745283 UNION ALL SELECT 'Season Opener', game_pk, official_date, home_team, attendance, capacity_api, fill_rate FROM games WHERE game_pk = 746418 UNION ALL SELECT 'Home Opener', game_pk, official_date, home_team, attendance, capacity_api, fill_rate FROM games WHERE game_pk = 746981 UNION ALL SELECT 'Home Opener', game_pk, official_date, home_team, attendance, capacity_api, fill_rate FROM games WHERE game_pk = 745764 ) SELECT * FROM openers;",
+    "query": "WITH red_sox_home_opener AS ( SELECT 'Boston Red Sox' AS team_name, official_date, away_team AS opponent, 'Home' AS status, attendance, capacity_used AS capacity, fill_pct FROM games_clean WHERE season = 2024 AND home_team_id = 111 AND home_opener = true ), yankees_home_opener AS ( SELECT 'New York Yankees' AS team_name, official_date, away_team AS opponent, 'Home' AS status, attendance, capacity_used AS capacity, fill_pct FROM games_clean WHERE season = 2024 AND home_team_id = 147 AND home_opener = true ) SELECT * FROM red_sox_home_opener UNION ALL SELECT * FROM yankees_home_opener",
     "columns": [
-     "opener_type",
-     "game_pk",
+     "team_name",
      "official_date",
-     "home_team",
+     "opponent",
+     "status",
      "attendance",
-     "capacity_api",
-     "fill_rate"
+     "capacity",
+     "fill_pct"
     ],
     "rows": [
      [
-      "Season Opener",
-      745283,
-      "2024-03-28",
-      "Seattle Mariners",
-      45337,
-      47378,
-      0.9569209337667272
-     ],
-     [
-      "Season Opener",
-      746418,
-      "2024-03-28",
-      "Houston Astros",
-      42642,
-      41168,
-      1.0358045083560046
-     ],
-     [
-      "Home Opener",
-      746981,
-      "2024-04-09",
       "Boston Red Sox",
+      "2024-04-09",
+      "Baltimore Orioles",
+      "Home",
       36093,
       37755,
-      0.955979340484704
+      95.6
+     ],
+     [
+      "New York Yankees",
+      "2024-04-05",
+      "Toronto Blue Jays",
+      "Home",
+      47812,
+      46537,
+      102.7
      ]
     ]
    },
@@ -1358,31 +1910,70 @@
     "n": 2,
     "kind": "query",
     "tables": [
-     "games"
+     "games_clean"
     ],
-    "query": "WITH stats AS ( SELECT CASE WHEN game_pk IN (745283, 746418) THEN 'Season Opener' WHEN game_pk IN (745764, 746981) THEN 'Home Opener' END AS opener_type, MAX(CASE WHEN home_team_id = 147 OR away_team_id = 147 THEN attendance END) AS nyy_att, MAX(CASE WHEN home_team_id = 147 OR away_team_id = 147 THEN capacity_api END) AS nyy_cap, MAX(CASE WHEN home_team_id = 147 OR away_team_id = 147 THEN fill_rate END) AS nyy_fill, MAX(CASE WHEN home_team_id = 111 OR away_team_id = 111 THEN attendance END) AS bos_att, MAX(CASE WHEN home_team_id = 111 OR away_team_id = 111 THEN capacity_api END) AS bos_cap, MAX(CASE WHEN home_team_id = 111 OR away_team_id = 111 THEN fill_rate END) AS bos_fill FROM games WHERE game_pk IN (745283, 746418, 745764, 746981) GROUP BY opener_type ) SELECT opener_type, nyy_att AS yankees_attendance, nyy_cap AS yankees_capacity, nyy_fill AS yankees_fill_rate, bos_att AS redsox_attendance, bos_cap AS redsox_capacity, bos_fill AS redsox_fill_rate, nyy_att - bos_att AS attendance_difference, nyy_fill - bos_fill AS fill_rate_difference FROM stats;",
+    "query": "WITH red_sox_opener AS ( SELECT 'Boston Red Sox' AS team_name, official_date, away_team AS opponent, CASE WHEN home_team_id = 111 THEN 'Home' ELSE 'Away' END AS status, attendance, capacity_used AS capacity, fill_pct FROM games_clean WHERE season = 2024 AND (home_team_id = 111 OR away_team_id = 111) ORDER BY official_date ASC LIMIT 1 ), yankees_opener AS ( SELECT 'New York Yankees' AS team_name, official_date, away_team AS opponent, CASE WHEN home_team_id = 147 THEN 'Home' ELSE 'Away' END AS status, attendance, capacity_used AS capacity, fill_pct FROM games_clean WHERE season = 2024 AND (home_team_id = 147 OR away_team_id = 147) ORDER BY official_date ASC LIMIT 1 ) SELECT * FROM red_sox_opener UNION ALL SELECT * FROM yankees_opener",
     "columns": [
-     "opener_type",
-     "yankees_attendance",
-     "yankees_capacity",
-     "yankees_fill_rate",
-     "redsox_attendance",
-     "redsox_capacity",
-     "redsox_fill_rate",
-     "attendance_difference",
-     "fill_rate_difference"
+     "team_name",
+     "official_date",
+     "opponent",
+     "status",
+     "attendance",
+     "capacity",
+     "fill_pct"
     ],
     "rows": [
      [
-      "Season Opener",
-      42642,
-      41168,
-      1.0358045083560046,
+      "Boston Red Sox",
+      "2024-03-28",
+      "Boston Red Sox",
+      "Away",
       45337,
       47378,
-      0.9569209337667272,
-      -2695,
-      0.07888357458927742
+      95.7
+     ],
+     [
+      "New York Yankees",
+      "2024-03-28",
+      "New York Yankees",
+      "Away",
+      42642,
+      41168,
+      103.6
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "WITH openers AS ( SELECT home_team, home_team_id, official_date, attendance, capacity_used, fill_pct, home_opener FROM games_clean WHERE season = 2024 AND home_opener = true AND home_team_id IN (111, 147) ) SELECT o1.home_team AS team1, o1.attendance AS attendance1, o1.capacity_used AS capacity1, o1.fill_pct AS fill_pct1, o2.home_team AS team2, o2.attendance AS attendance2, o2.capacity_used AS capacity2, o2.fill_pct AS fill_pct2, o1.attendance - o2.attendance AS attendance_difference, o1.fill_pct - o2.fill_pct AS fill_pct_difference FROM openers o1 CROSS JOIN openers o2 WHERE o1.home_team_id = 147 AND o2.home_team_id = 111;",
+    "columns": [
+     "team1",
+     "attendance1",
+     "capacity1",
+     "fill_pct1",
+     "team2",
+     "attendance2",
+     "capacity2",
+     "fill_pct2",
+     "attendance_difference",
+     "fill_pct_difference"
+    ],
+    "rows": [
+     [
+      "New York Yankees",
+      47812,
+      46537,
+      102.7,
+      "Boston Red Sox",
+      36093,
+      37755,
+      95.6,
+      11719,
+      7.1000000000000085
      ]
     ]
    }
@@ -1394,71 +1985,81 @@
   "q": "How did the Oakland A's viewership change in their final season before moving?",
   "passed": true,
   "failures": [],
-  "seconds": 52,
-  "researchers": 1,
+  "seconds": 37,
+  "researchers": 3,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "We cannot show how the Oakland Athletics' viewership changed during their final season in Oakland because our viewership data starts in 2025, and a season outside that is not in our data[1]. The data covers attendance for 2024 to 2026 and viewership from 2025[2].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "We cannot determine how the Oakland A's viewership changed in their final season before moving because our viewership data starts in 2025, and a season outside that is not in our data[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
-     "game_tv_lookup"
+     "team_tv_summary"
     ],
-    "query": "SELECT season, count(*) FROM game_tv_lookup WHERE home_team_id = 133 OR away_team_id = 133 GROUP BY season",
+    "query": "SELECT team_id, season, appearances, single_games, fox_window_games, special_event_games, avg_single_game_viewers, highest_single_game_viewers, network_mix FROM team_tv_summary WHERE team_id = 133 AND season IN (2025, 2026)",
     "columns": [
+     "team_id",
      "season",
-     "count_star()"
+     "appearances",
+     "single_games",
+     "fox_window_games",
+     "special_event_games",
+     "avg_single_game_viewers",
+     "highest_single_game_viewers",
+     "network_mix"
     ],
     "rows": [
      [
+      133,
       2026,
-      1
-     ]
-    ]
-   },
-   {
-    "n": 2,
-    "kind": "query",
-    "tables": [
-     "games"
-    ],
-    "query": "SELECT season, count(*) FROM games WHERE home_team_id = 133 OR away_team_id = 133 GROUP BY season",
-    "columns": [
-     "season",
-     "count_star()"
-    ],
-    "rows": [
-     [
-      2024,
-      162
+      1,
+      1,
+      0,
+      0,
+      null,
+      null,
+      "FS1 1"
      ],
      [
+      133,
       2025,
-      162
-     ],
-     [
-      2026,
-      162
+      0,
+      0,
+      0,
+      0,
+      null,
+      null,
+      null
      ]
     ]
    }
   ],
-  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com); TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
+  "data_note": "Data sources: TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
  },
  {
   "id": "plain_lookup",
   "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 40,
+  "seconds": 20,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "The attendance for the Los Angeles Dodgers at the San Diego Padres on August 23, 2025, was 46,326, representing a fill rate of 116.1% on a capacity of 39,909[1].",
+  "team_chart": null,
+  "tiles": [
+   {
+    "label": "Crowd",
+    "value": "46,326"
+   }
+  ],
+  "box_score": null,
+  "report": "The attendance for the Los Angeles Dodgers at the San Diego Padres on August 23, 2025, was 46,326[1]. This turnout represented 116.1% of capacity for the stadium, which has a capacity of 39,909[1].",
   "sources": [
    {
     "n": 1,
@@ -1466,25 +2067,17 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT attendance, capacity_used AS capacity, fill_pct, ceiling_game, expected_attendance, residual_pct_capped, capped_text FROM games_clean WHERE official_date = '2025-08-23' AND home_team = 'San Diego Padres' AND away_team = 'Los Angeles Dodgers';",
+    "query": "SELECT attendance, capacity_used AS capacity, fill_pct FROM games_clean WHERE official_date = '2025-08-23' AND home_team_id = 135 AND away_team_id = 119",
     "columns": [
      "attendance",
      "capacity",
-     "fill_pct",
-     "ceiling_game",
-     "expected_attendance",
-     "residual_pct_capped",
-     "capped_text"
+     "fill_pct"
     ],
     "rows": [
      [
       46326,
       39909,
-      116.1,
-      true,
-      null,
-      null,
-      "The crowd was at or near the park's season high of 47,345, and demand may have been higher."
+      116.1
      ]
     ]
    }
@@ -1496,12 +2089,42 @@
   "q": "How did Cubs day games compare with night games on attendance in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 54,
+  "seconds": 61,
   "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": null,
-  "report": "In 2025, Chicago Cubs home day games had a higher average attendance than night games by an average of 1,714, with day games averaging 37,780 and night games averaging 36,067[1]. Day games reached an average fill rate of 91.5% compared to 87.3% for night games, representing a gap of 4.1 percentage points[1].",
+  "team_chart": {
+   "team": "Chicago Cubs",
+   "color": "#0E3386",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2024,
+     "avg_attendance": 35923.38271604938,
+     "expected_avg_attendance": 34656.889891408806,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2025,
+     "avg_attendance": 37129.759493670885,
+     "expected_avg_attendance": 36686.74786274155,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2026,
+     "avg_attendance": 36661.51851851852,
+     "expected_avg_attendance": 37153.235520910894,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": null,
+  "report": "During the 2025 season, Chicago Cubs home day games had a higher average attendance than night games by 1,714, with day games averaging 37,780 at 91.5% of capacity and night games averaging 36,067 at 87.3% of capacity[1].",
   "sources": [
    {
     "n": 1,
@@ -1509,25 +2132,34 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT day_night, avg(attendance) as avg_attendance, avg(expected_attendance) as avg_expected_attendance, avg(fill_pct) as avg_fill_pct FROM games_clean WHERE home_team_id = 112 AND season = 2025 GROUP BY day_night",
+    "query": "SELECT day_night, avg(attendance) AS avg_attendance, avg(expected_attendance) AS avg_expected_attendance, avg(fill_pct) AS avg_fill_rate, (SELECT avg(attendance) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'day') - (SELECT avg(attendance) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'night') AS difference_attendance, (SELECT avg(expected_attendance) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'day') - (SELECT avg(expected_attendance) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'night') AS difference_expected_attendance, (SELECT avg(fill_pct) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'day') - (SELECT avg(fill_pct) FROM games_clean WHERE home_team_id = 112 AND season = 2025 AND day_night = 'night') AS difference_fill_rate FROM games_clean WHERE home_team_id = 112 AND season = 2025 GROUP BY day_night",
     "columns": [
      "day_night",
      "avg_attendance",
      "avg_expected_attendance",
-     "avg_fill_pct"
+     "avg_fill_rate",
+     "difference_attendance",
+     "difference_expected_attendance",
+     "difference_fill_rate"
     ],
     "rows": [
-     [
-      "day",
-      37780.489795918365,
-      37093.23275236952,
-      91.4795918367347
-     ],
      [
       "night",
       36066.9,
       32926.67930782423,
-      87.33333333333333
+      87.33333333333333,
+      1713.589795918364,
+      4166.553444545287,
+      4.14625850340137
+     ],
+     [
+      "day",
+      37780.489795918365,
+      37093.23275236952,
+      91.4795918367347,
+      1713.589795918364,
+      4166.553444545287,
+      4.14625850340137
      ]
     ]
    }
@@ -1539,7 +2171,7 @@
   "q": "How did Cubs attendance change by month in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 44,
+  "seconds": 54,
   "researchers": 1,
   "retries": 0,
   "errors": [],
@@ -1567,14 +2199,46 @@
       39284.4,
       38215.9,
       36265.8
-     ]
+     ],
+     "color": "#0E3386",
+     "style": "solid"
     }
    ],
    "source": [
     "games_clean"
    ]
   },
-  "report": "During the 2025 season, the Chicago Cubs' average home attendance and average fill rate rose through the spring to peak in June, then declined steadily through September[1]. In April, total home attendance was 474,334, with an average attendance of 33,881 and an average fill rate of 82.0%[1]. In May, total attendance reached 513,185, as the average attendance grew by 2,775 to an average of 36,656, and the average fill rate increased by 6.7 percentage points to 88.8%[1]. June saw total attendance at 395,310, while average attendance peaked at 39,531 (an increase of 2,875) and the average fill rate reached a high of 95.7%, up 7.0 percentage points[1]. In July, total attendance was 471,413, but average attendance fell by 247 to an average of 39,284, and the average fill rate dropped by 0.6 percentage points to 95.1%[1]. August total attendance was 535,022, while average attendance decreased by 1,069 to an average of 38,216, and the average fill rate fell by 2.6 percentage points to 92.6%[1]. Finally, September total attendance was 543,987, but average attendance declined by 1,950 to an average of 36,266, and the average fill rate dropped by 4.7 percentage points to 87.8%[1].",
+  "team_chart": {
+   "team": "Chicago Cubs",
+   "color": "#0E3386",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2024,
+     "avg_attendance": 35923.38271604938,
+     "expected_avg_attendance": 34656.889891408806,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2025,
+     "avg_attendance": 37129.759493670885,
+     "expected_avg_attendance": 36686.74786274155,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2026,
+     "avg_attendance": 36661.51851851852,
+     "expected_avg_attendance": 37153.235520910894,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": null,
+  "report": "Chicago Cubs home attendance in 2025 rose through the spring to peak in June at an average of 39,531 per game, then declined steadily through September[1]. In April, the Cubs averaged 33,881 fans per game with a total attendance of 474,334, representing 82.0% of capacity[1]. May attendance was higher than April, with average attendance rising by 2,775 to 36,656, total attendance increasing by 38,851 to 513,185, and the fill rate growing by 6.7 percentage points from 82.0% of capacity to 88.8% of capacity[1]. June average attendance was higher than May by 2,875, reaching 39,531, while total attendance fell by 117,875 to 395,310, and the fill rate increased by 7.0 percentage points from 88.8% of capacity to 95.7% of capacity[1]. In July, average attendance was lower than June by 247 at 39,284, but total attendance rose by 76,103 to 471,413, and the fill rate fell by 0.6 percentage points from 95.7% of capacity to 95.1% of capacity[1]. August average attendance was lower than July by 1,069 at 38,216, though total attendance grew by 63,609 to 535,022, and the fill rate dropped by 2.6 percentage points from 95.1% of capacity to 92.6% of capacity[1]. September average attendance was lower than August by 1,950 at 36,266, while total attendance rose by 8,965 to 543,987, and the fill rate decreased by 4.7 percentage points from 92.6% of capacity to 87.8% of capacity[1].",
   "sources": [
    {
     "n": 1,
@@ -1582,39 +2246,37 @@
     "tables": [
      "games_clean"
     ],
-    "query": "SELECT strftime(official_date, '%Y-%m') AS month, SUM(attendance) AS total_attendance, AVG(attendance) AS avg_attendance, AVG(fill_pct) AS avg_fill_pct, AVG(attendance) - LAG(AVG(attendance), 1) OVER (ORDER BY strftime(official_date, '%Y-%m')) AS mom_avg_attendance_diff, AVG(fill_pct) - LAG(AVG(fill_pct), 1) OVER (ORDER BY strftime(official_date, '%Y-%m')) AS mom_avg_fill_pct_diff FROM games_clean WHERE home_team_id = 112 AND season = 2025 GROUP BY strftime(official_date, '%Y-%m') ORDER BY month",
+    "query": "WITH monthly AS ( SELECT EXTRACT(MONTH FROM official_date) AS month_num, strftime(official_date, '%B') AS month_name, AVG(attendance) AS avg_attendance, SUM(attendance) AS total_attendance, AVG(fill_pct) AS avg_fill_rate FROM games_clean WHERE home_team_id = 112 AND EXTRACT(YEAR FROM official_date) = 2025 GROUP BY 1, 2 ) SELECT m1.month_name, m1.avg_attendance, m1.total_attendance, m1.avg_fill_rate, m2.avg_attendance AS prev_avg_attendance, m1.avg_attendance - m2.avg_attendance AS avg_attendance_diff, m1.total_attendance - m2.total_attendance AS total_attendance_diff, m1.avg_fill_rate - m2.avg_fill_rate AS avg_fill_rate_diff FROM monthly m1 LEFT JOIN monthly m2 ON m1.month_num = m2.month_num + 1 ORDER BY m1.month_num",
     "columns": [
-     "month",
-     "total_attendance",
+     "month_name",
      "avg_attendance",
-     "avg_fill_pct",
-     "mom_avg_attendance_diff",
-     "mom_avg_fill_pct_diff"
+     "total_attendance",
+     "avg_fill_rate",
+     "prev_avg_attendance",
+     "avg_attendance_diff",
+     "total_attendance_diff",
+     "avg_fill_rate_diff"
     ],
     "rows": [
      [
-      "2025-04",
-      474334,
-      33881.0,
-      82.04285714285716,
-      null,
-      null
-     ],
-     [
-      "2025-05",
-      513185,
-      36656.07142857143,
-      88.75,
-      2775.0714285714275,
-      6.707142857142841
-     ],
-     [
-      "2025-06",
-      395310,
+      "June",
       39531.0,
+      395310,
       95.72,
+      36656.07142857143,
       2874.9285714285725,
+      -117875,
       6.969999999999999
+     ],
+     [
+      "July",
+      39284.416666666664,
+      471413,
+      95.11666666666666,
+      39531.0,
+      -246.58333333333576,
+      76103,
+      -0.6033333333333388
      ]
     ]
    }
@@ -1626,8 +2288,8 @@
   "q": "Which five teams drew the highest average attendance in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 17,
-  "researchers": 1,
+  "seconds": 38,
+  "researchers": 2,
   "retries": 0,
   "errors": [],
   "chart": {
@@ -1641,7 +2303,12 @@
     "San Diego Padres",
     "New York Yankees",
     "Philadelphia Phillies",
-    "New York Mets"
+    "New York Mets",
+    "Chicago Cubs",
+    "San Francisco Giants",
+    "Atlanta Braves",
+    "Toronto Blue Jays",
+    "Boston Red Sox"
    ],
    "series": [
     {
@@ -1651,25 +2318,59 @@
       42434.6,
       42390.3,
       41672.3,
-      39775.7
-     ]
+      39775.7,
+      37129.8,
+      36121.3,
+      35841.6,
+      35184.4,
+      34277.7
+     ],
+     "color": "#12402E",
+     "style": "solid"
     }
    ],
    "source": [
-    "games_clean",
     "team_season_model"
    ]
   },
-  "report": "The five teams that drew the highest average attendance in 2025 were the Los Angeles Dodgers, San Diego Padres, New York Yankees, Philadelphia Phillies, and New York Mets[1]. The Los Angeles Dodgers topped the list with an average attendance of 49,537 and an average fill rate of 88.5%[1]. The San Diego Padres followed with an average of 42,435 fans per game and an average fill rate of 106.3%[1]. The New York Yankees secured the third spot, averaging 42,390 attendees with an average fill rate of 91.1%[1]. The Philadelphia Phillies were fourth with an average attendance of 41,672 and an average fill rate of 95.5%[1]. Finally, the New York Mets rounded out the top five, drawing an average crowd of 39,776 per game with an average fill rate of 94.9%[1].",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "The five teams with the highest average attendance in 2025 were the Los Angeles Dodgers, San Diego Padres, New York Yankees, Philadelphia Phillies, and New York Mets[1]. The Los Angeles Dodgers recorded the highest average attendance at 49,537, representing 88.5% of capacity[2]. The San Diego Padres followed with an average attendance of 42,435, which was 106.3% of capacity[2]. The New York Yankees drew an average attendance of 42,390, representing 91.1% of capacity[2]. The Philadelphia Phillies averaged 41,672 in attendance, representing 95.5% of capacity[2]. Lastly, the New York Mets drew an average attendance of 39,776, which represented 94.9% of capacity[2].",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
-     "games_clean",
      "team_season_model"
     ],
-    "query": "SELECT t.home_team, t.avg_attendance, AVG(g.fill_pct) AS avg_fill_pct FROM team_season_model t JOIN games_clean g ON t.team_id = g.home_team_id AND t.season = g.season WHERE t.season = 2025 GROUP BY t.home_team, t.avg_attendance ORDER BY t.avg_attendance DESC LIMIT 5",
+    "query": "SELECT ts.home_team, ts.avg_attendance FROM team_season_model ts WHERE ts.season = 2025 ORDER BY ts.avg_attendance DESC LIMIT 10",
+    "columns": [
+     "home_team",
+     "avg_attendance"
+    ],
+    "rows": [
+     [
+      "Los Angeles Dodgers",
+      49536.666666666664
+     ],
+     [
+      "San Diego Padres",
+      42434.58024691358
+     ],
+     [
+      "New York Yankees",
+      42390.3164556962
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT g.home_team, AVG(g.attendance) AS avg_attendance, AVG(g.fill_pct) AS avg_fill_pct FROM games_clean g WHERE g.season = 2025 AND g.attendance IS NOT NULL GROUP BY g.home_team ORDER BY avg_attendance DESC LIMIT 5",
     "columns": [
      "home_team",
      "avg_attendance",
@@ -1680,16 +2381,6 @@
       "Los Angeles Dodgers",
       49536.666666666664,
       88.45925925925927
-     ],
-     [
-      "San Diego Padres",
-      42434.58024691358,
-      106.32592592592592
-     ],
-     [
-      "New York Yankees",
-      42390.3164556962,
-      91.08481012658228
      ]
     ]
    }
@@ -1699,10 +2390,8 @@
  {
   "id": "chart_weekdays",
   "q": "How did average attendance differ by weekday across MLB in 2025?",
-  "passed": false,
-  "failures": [
-   "The number 248 does not appear in any data or article."
-  ],
+  "passed": true,
+  "failures": [],
   "seconds": 38,
   "researchers": 1,
   "retries": 0,
@@ -1733,14 +2422,19 @@
       26644.2,
       26396.8,
       26139.8
-     ]
+     ],
+     "color": "#12402E",
+     "style": "solid"
     }
    ],
    "source": [
     "games_clean"
    ]
   },
-  "report": "During the 2025 MLB season, average attendance peaked on Saturdays at an average of 33,568 and declined through the rest of the week to a low on Wednesdays at an average of 26,140[1]. Saturdays saw an average attendance of 33,568, which was 1,371 higher than Friday's average of 32,198, with fill rates of 82.9% and 79.7% respectively[1]. Fridays drew an average of 32,198, which was 1,249 higher than Sunday's average of 30,948, with fill rates of 79.7% and 76.8% respectively[1]. Sundays averaged 30,948, which was 2,797 higher than Thursday's average of 28,151, with fill rates of 76.8% and 70.2% respectively[1]. Thursdays had an average attendance of 28,151, which was 1,507 higher than Tuesday's average of 26,644, with fill rates of 70.2% and 67.1% respectively[1]. Tuesdays averaged 26,644, which was 248 higher than Monday's average of 26,397, with fill rates of 67.1% and 66.4% respectively[1]. Mondays drew an average of 26,397, which was 257 higher than Wednesday's average of 26,140, with fill rates of 66.4% and 65.7% respectively[1].",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "During the 2025 MLB season, average attendance was highest on Saturdays and lowest on Wednesdays[1]. Saturday average attendance of 33,568 at 82.9% of capacity was higher than Friday average attendance of 32,198 at 79.7% of capacity by 1,371[2]. Sundays drew an average attendance of 30,949 at 76.8% of capacity, followed by Thursdays with 28,151 at 70.2% of capacity, Tuesdays with 26,644 at 67.1% of capacity, and Mondays with 26,397 at 66.4% of capacity[2]. Saturday average attendance of 33,568 at 82.9% of capacity was higher than Wednesday average attendance of 26,140 at 65.7% of capacity by 7,429[2].",
   "sources": [
    {
     "n": 1,
@@ -1748,39 +2442,63 @@
     "tables": [
      "games_clean"
     ],
-    "query": "WITH weekday_agg AS ( SELECT weekday, AVG(attendance) AS avg_attendance, AVG(expected_attendance) AS avg_expected_attendance, AVG(fill_pct) AS avg_fill_pct FROM games_clean WHERE season = 2025 GROUP BY weekday ), ordered AS ( SELECT weekday, avg_attendance, avg_expected_attendance, avg_fill_pct, ROW_NUMBER() OVER (ORDER BY avg_attendance DESC) as rn FROM weekday_agg ) SELECT weekday, avg_attendance, avg_expected_attendance, avg_fill_pct, LAG(avg_attendance) OVER (ORDER BY avg_attendance DESC) as prev_avg_attendance, avg_attendance - LAG(avg_attendance) OVER (ORDER BY avg_attendance DESC) as difference FROM weekday_agg ORDER BY avg_attendance DESC;",
+    "query": "WITH weekday_stats AS ( SELECT weekday, avg(attendance) AS avg_attendance, avg(fill_pct) AS avg_fill_pct FROM games_clean WHERE season = 2025 GROUP BY weekday ) SELECT w1.weekday AS weekday_1, w2.weekday AS weekday_2, w1.avg_attendance AS avg_attendance_1, w2.avg_attendance AS avg_attendance_2, w1.avg_attendance - w2.avg_attendance AS difference FROM weekday_stats w1 CROSS JOIN weekday_stats w2 ORDER BY w1.avg_attendance DESC, w2.avg_attendance DESC;",
     "columns": [
-     "weekday",
-     "avg_attendance",
-     "avg_expected_attendance",
-     "avg_fill_pct",
-     "prev_avg_attendance",
+     "weekday_1",
+     "weekday_2",
+     "avg_attendance_1",
+     "avg_attendance_2",
      "difference"
     ],
     "rows": [
      [
       "Saturday",
+      "Saturday",
       33568.463054187196,
-      30753.756028362142,
+      33568.463054187196,
+      0.0
+     ],
+     [
+      "Saturday",
+      "Friday",
+      33568.463054187196,
+      32197.565989847717,
+      1370.8970643394787
+     ],
+     [
+      "Saturday",
+      "Sunday",
+      33568.463054187196,
+      30948.509950248757,
+      2619.9531039384383
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT weekday, avg(attendance) AS avg_attendance, avg(fill_pct) AS avg_fill_pct, (SELECT avg(attendance) FROM games_clean WHERE season = 2025 AND weekday = 'Friday') - avg(attendance) AS difference_from_friday FROM games_clean WHERE season = 2025 GROUP BY weekday ORDER BY avg_attendance DESC;",
+    "columns": [
+     "weekday",
+     "avg_attendance",
+     "avg_fill_pct",
+     "difference_from_friday"
+    ],
+    "rows": [
+     [
+      "Saturday",
+      33568.463054187196,
       82.92142857142854,
-      null,
-      null
+      -1370.8970643394787
      ],
      [
       "Friday",
       32197.565989847717,
-      28508.70543193887,
       79.70329949238577,
-      33568.463054187196,
-      -1370.8970643394787
-     ],
-     [
-      "Wednesday",
-      26139.764864864865,
-      24620.401377781214,
-      65.69783783783787,
-      26396.760617760618,
-      -256.99575289575296
+      0.0
      ]
     ]
    }
@@ -1792,163 +2510,108 @@
   "q": "Compare actual and expected average attendance for the five AL East teams in 2025.",
   "passed": true,
   "failures": [],
-  "seconds": 51,
-  "researchers": 2,
+  "seconds": 62,
+  "researchers": 1,
   "retries": 0,
   "errors": [],
   "chart": {
    "type": "paired",
-   "title": "Actual and expected attendance by team name",
-   "x_label": "Team name",
+   "title": "Actual and expected attendance by team",
+   "x_label": "Team",
    "y_label": "Average attendance (fans per game)",
    "unit": "fans",
    "labels": [
-    "New York Yankees",
-    "Toronto Blue Jays",
+    "Baltimore Orioles",
     "Boston Red Sox",
-    "Baltimore Orioles"
+    "New York Yankees",
+    "Toronto Blue Jays"
    ],
    "series": [
     {
      "name": "Actual",
      "values": [
-      42390.3,
-      35184.4,
+      22702.4,
       34277.7,
-      22702.4
-     ]
+      42390.3,
+      35184.4
+     ],
+     "color": "#12402E",
+     "style": "solid"
     },
     {
      "name": "Expected",
      "values": [
-      43173.9,
-      37066.4,
+      25705.8,
       33923.3,
-      25705.8
-     ]
+      43173.9,
+      37066.4
+     ],
+     "color": "#8A8F98",
+     "style": "hatch"
     }
    ],
    "source": [
     "games_clean",
-    "teams",
+    "team_aliases",
     "team_season_model"
+   ],
+   "item_colors": [
+    "#DF4601",
+    "#0C2340",
+    "#00797A",
+    "#134A8E"
    ]
   },
-  "report": "In 2025, the Boston Red Sox were the only AL East team to exceed their expected average attendance, while the New York Yankees, Toronto Blue Jays, and Baltimore Orioles all fell short, and the Tampa Bay Rays had no expected baseline because they played in a temporary stadium[1][2][3]. Specifically, the Red Sox actual average attendance of 34,278 was 354 higher than their expected average of 33,923, with a 90.8% fill rate[2]. Meanwhile, the Yankees actual average of 42,390 was 784 below their expected average of 43,174, with a 91.1% fill rate[2]. The Blue Jays actual average of 35,184 was 1,882 below their expected average of 37,066, with an 89.9% fill rate[2]. The Orioles actual average of 22,702 was 3,003 below their expected average of 25,706, with a 49.9% fill rate[2]. Finally, the Rays actual average attendance was 9,713 with an 88.1% fill rate, but their expected average is unknown because they were excluded from the model due to playing at Steinbrenner Field, a temporary park[2].\n\n*Promotions are not in the data. These are associations, not cause and effect.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "In 2025, the Boston Red Sox were the only AL East team to exceed their expected average attendance, while the Baltimore Orioles, New York Yankees, and Toronto Blue Jays fell short, and expected metrics for the Tampa Bay Rays were unavailable[1]. The Boston Red Sox drew an actual average attendance of 34,278, which was 354 over their expected average of 33,923, representing a 1.0% difference and 90.8% of capacity[1]. The New York Yankees averaged 42,390 in actual attendance, which was 784 below their expected average of 43,174, a -1.8% difference and 91.1% of capacity[1]. The Toronto Blue Jays had an actual average attendance of 35,184, which was 1,882 below their expected average of 37,066, a -5.1% difference and 89.9% of capacity[1]. The Baltimore Orioles averaged 22,702 in actual attendance, falling 3,003 below their expected average of 25,706, which was an -11.7% difference and 49.9% of capacity[1]. Finally, the Tampa Bay Rays recorded an actual average attendance of 9,713, representing 88.1% of capacity, but their expected average attendance, difference, and percentage difference are unknown because they played at Steinbrenner Field, a temporary park[1].",
   "sources": [
    {
     "n": 1,
     "kind": "query",
     "tables": [
+     "games_clean",
+     "team_aliases",
      "team_season_model"
     ],
-    "query": "SELECT * FROM team_season_model WHERE team_id = 139 AND season = 2025",
+    "query": "SELECT t.team, m.season, m.avg_attendance, m.expected_avg_attendance, (m.avg_attendance - m.expected_avg_attendance) AS diff, ((m.avg_attendance - m.expected_avg_attendance) / m.expected_avg_attendance) * 100 AS pct_diff, avg(g.fill_pct) AS avg_fill_pct FROM team_season_model m JOIN team_aliases t ON m.team_id = t.team_id LEFT JOIN games_clean g ON g.home_team_id = m.team_id AND g.season = m.season WHERE m.season = 2025 AND t.alias_key IN ('orioles', 'red sox', 'yankees', 'rays', 'blue jays') GROUP BY t.team, m.season, m.avg_attendance, m.expected_avg_attendance ORDER BY t.team",
     "columns": [
-     "team_id",
-     "home_team",
+     "team",
      "season",
      "avg_attendance",
-     "model_games",
-     "near_ceiling_games",
-     "win_pct",
-     "prior_season_avg",
-     "yoy_change_pct",
-     "prior_two_year_avg",
-     "market",
-     "population",
-     "population_year",
-     "teams_in_market",
-     "in_model",
-     "exclusion_reason",
      "expected_avg_attendance",
-     "residual_pct",
-     "prior_residual_pct",
-     "possible_rebound",
-     "official_home_total"
-    ],
-    "rows": [
-     [
-      139,
-      "Tampa Bay Rays",
-      2025,
-      9712.962962962964,
-      81,
-      61,
-      0.47530864197530864,
-      16540.7125,
-      -0.4127844877925928,
-      17148.0,
-      "Tampa-St. Petersburg-Clearwater, FL",
-      3418895,
-      2025,
-      1,
-      false,
-      "Rays at Steinbrenner Field, a temporary park",
-      null,
-      null,
-      -0.08915786781575852,
-      null,
-      786750
-     ]
-    ]
-   },
-   {
-    "n": 2,
-    "kind": "query",
-    "tables": [
-     "games_clean",
-     "teams",
-     "team_season_model"
-    ],
-    "query": "SELECT t.name AS team_name, ts.avg_attendance, ts.expected_avg_attendance, (ts.avg_attendance - ts.expected_avg_attendance) AS difference, ts.residual_pct, (SELECT avg(g.fill_pct) FROM games_clean g WHERE g.home_team_id = ts.team_id AND g.season = 2025) AS avg_fill_pct FROM team_season_model ts JOIN teams t ON ts.team_id = t.team_id AND ts.season = t.season WHERE t.division = 'American League East' AND ts.season = 2025 ORDER BY ts.avg_attendance DESC;",
-    "columns": [
-     "team_name",
-     "avg_attendance",
-     "expected_avg_attendance",
-     "difference",
-     "residual_pct",
+     "diff",
+     "pct_diff",
      "avg_fill_pct"
     ],
     "rows": [
      [
-      "New York Yankees",
-      42390.3164556962,
-      43173.887015551176,
-      -783.5705598549757,
-      -0.018149177987442644,
-      91.08481012658228
-     ],
-     [
-      "Toronto Blue Jays",
-      35184.38271604938,
-      37066.377979344434,
-      -1881.9952632950517,
-      -0.05077364894794445,
-      89.86913580246912
+      "Baltimore Orioles",
+      2025,
+      22702.354430379746,
+      25705.782831718036,
+      -3003.4284013382894,
+      -11.683862814060648,
+      49.924050632911396
      ],
      [
       "Boston Red Sox",
+      2025,
       34277.72839506173,
       33923.32707621943,
       354.40131884229777,
-      0.01044712737185316,
+      1.044712737185311,
       90.78641975308638
-     ]
-    ]
-   },
-   {
-    "n": 3,
-    "kind": "query",
-    "tables": [
-     "games_clean"
-    ],
-    "query": "SELECT temporary_park FROM games_clean WHERE home_team_id = 139 AND season = 2025 GROUP BY 1",
-    "columns": [
-     "temporary_park"
-    ],
-    "rows": [
+     ],
      [
-      true
+      "New York Yankees",
+      2025,
+      42390.3164556962,
+      43173.887015551176,
+      -783.5705598549757,
+      -1.8149177987442608,
+      91.08481012658228
      ]
     ]
    }
@@ -1960,7 +2623,7 @@
   "q": "Rank the networks by average national TV audience in 2026.",
   "passed": true,
   "failures": [],
-  "seconds": 21,
+  "seconds": 36,
   "researchers": 1,
   "retries": 0,
   "errors": [],
@@ -1990,14 +2653,19 @@
       1126208.3,
       614900.0,
       385904.8
-     ]
+     ],
+     "color": "#12402E",
+     "style": "solid"
     }
    ],
    "source": [
     "network_audience"
    ]
   },
-  "report": "In 2026, Fox topped the national TV audience rankings with an average of 2,343,875 viewers across 24 windows, followed by Netflix with an average of 2,314,000 viewers for its 2 games, and NBC with an average of 2,312,762 viewers across 21 games[1]. ABC ranked fourth, averaging 1,794,333 viewers over 3 games[1]. ESPN followed with an average of 1,126,208 viewers across 24 games with known audiences, out of 27 total broadcasts[1]. TBS averaged 614,900 viewers across 10 games with known audiences out of 25 broadcasts, and FS1 finished last with an average of 385,905 viewers across 21 games with known audiences out of 39 broadcasts[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "report": "In 2026, the networks ranked by average national TV audience were Fox, Netflix, NBC, ABC, ESPN, TBS, and FS1[1]. Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026[1]. Netflix averaged 2,314,000 viewers across 2 games with known audiences in 2026[1]. NBC averaged 2,312,762 viewers across 21 games with known audiences in 2026[1]. ABC averaged 1,794,333 viewers across 3 games with known audiences in 2026[1]. ESPN averaged 1,126,208 viewers across 24 games with known audiences in 2026, out of 27 games[1]. TBS averaged 614,900 viewers across 10 games with known audiences in 2026, out of 25 games[1]. FS1 averaged 385,905 viewers across 21 games with known audiences in 2026, out of 39 games[1].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
   "sources": [
    {
     "n": 1,
@@ -2005,7 +2673,7 @@
     "tables": [
      "network_audience"
     ],
-    "query": "SELECT network, average_viewers, broadcasts, network_text FROM network_audience WHERE season = 2026 ORDER BY average_viewers DESC",
+    "query": "SELECT network, average_viewers, broadcasts, network_text FROM network_audience WHERE season = 2026 ORDER BY average_viewers DESC;",
     "columns": [
      "network",
      "average_viewers",
@@ -2035,5 +2703,787 @@
    }
   ],
   "data_note": "Data sources: TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
+ },
+ {
+  "id": "season_lines_two_years",
+  "q": "How did Yankees attendance change from 2024 to 2025?",
+  "passed": true,
+  "failures": [],
+  "seconds": 73,
+  "researchers": 2,
+  "retries": 0,
+  "errors": [],
+  "chart": {
+   "type": "line",
+   "title": "Average attendance by month, one line per season",
+   "x_label": "Month",
+   "y_label": "Average attendance (fans)",
+   "unit": "fans",
+   "labels": [
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September"
+   ],
+   "series": [
+    {
+     "name": "2024",
+     "values": [
+      null,
+      37779.2,
+      39911.9,
+      45264.2,
+      45196.2,
+      41950.8,
+      41873.4
+     ],
+     "color": "#5F6670",
+     "style": "dashed"
+    },
+    {
+     "name": "2025",
+     "values": [
+      44898.0,
+      40466.2,
+      43208.2,
+      43240.1,
+      42769.2,
+      41954.5,
+      41477.6
+     ],
+     "color": "#003087",
+     "style": "solid"
+    }
+   ],
+   "source": [
+    "games_clean"
+   ]
+  },
+  "team_chart": {
+   "team": "New York Yankees",
+   "color": "#003087",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "New York Yankees",
+     "season": 2024,
+     "avg_attendance": 41910.36363636364,
+     "expected_avg_attendance": 43857.94324706509,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "New York Yankees",
+     "season": 2025,
+     "avg_attendance": 42390.3164556962,
+     "expected_avg_attendance": 43173.887015551176,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "New York Yankees",
+     "season": 2026,
+     "avg_attendance": 41673.05128205128,
+     "expected_avg_attendance": 43456.73385317452,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": null,
+  "report": "Yankees average attendance rose to an average of 42,390 per game in 2025, which was 1.8% below what the prior two years of crowds, win rate, and market would predict, representing an increase of 480 per game from the season before[1][2]. This 2025 average attendance represented 91.1% of capacity, whereas the 2024 average attendance of 41,910 per game represented 90.1% of capacity, showing an increase of 1.0 percentage points[2]. Total attendance also increased by 121,737 to 3,348,835 across 79 games in 2025, up from 3,227,098 across 77 games in 2024[2]. During these seasons, 8 games in 2024 and 9 games in 2025 had attendance that varied from expectations by more than 15.0%[3]. Additionally, the team did not play in any temporary parks, but they did play in 1 special event game away from home in 2024[4].",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "team_season_model"
+    ],
+    "query": "SELECT season, avg_attendance, expected_avg_attendance, residual_pct, exclusion_reason FROM team_season_model WHERE team_id = 147 AND season IN (2024, 2025)",
+    "columns": [
+     "season",
+     "avg_attendance",
+     "expected_avg_attendance",
+     "residual_pct",
+     "exclusion_reason"
+    ],
+    "rows": [
+     [
+      2024,
+      41910.36363636364,
+      43857.94324706509,
+      -0.04440654227057905,
+      null
+     ],
+     [
+      2025,
+      42390.3164556962,
+      43173.887015551176,
+      -0.018149177987442644,
+      null
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "WITH yankees_games AS ( SELECT season, AVG(attendance) AS avg_attendance, SUM(attendance) AS total_attendance, AVG(fill_pct) AS avg_fill_pct FROM games_clean WHERE home_team_id = 147 AND season IN (2024, 2025) GROUP BY season ) SELECT g2024.season AS season_2024, g2024.avg_attendance AS avg_att_2024, g2024.total_attendance AS total_att_2024, g2024.avg_fill_pct AS avg_fill_2024, g2025.season AS season_2025, g2025.avg_attendance AS avg_att_2025, g2025.total_attendance AS total_att_2025, g2025.avg_fill_pct AS avg_fill_2025, g2025.avg_attendance - g2024.avg_attendance AS avg_attendance_diff, ((g2025.avg_attendance - g2024.avg_attendance) / g2024.avg_attendance) * 100 AS avg_attendance_pct_change, g2025.total_attendance - g2024.total_attendance AS total_attendance_diff, ((g2025.total_attendance - g2024.total_attendance) / CAST(g2024.total_attendance AS DOUBLE)) * 100 AS total_attendance_pct_change, g2025.avg_fill_pct - g2024.avg_fill_pct AS avg_fill_diff, ((g2025.avg_fill_pct - g2024.avg_fill_pct) / g2024.avg_fill_pct) * 100 AS avg_fill_pct_change FROM yankees_games g2024 JOIN yankees_games g2025 ON g2024.season = 2024 AND g2025.season = 2025",
+    "columns": [
+     "season_2024",
+     "avg_att_2024",
+     "total_att_2024",
+     "avg_fill_2024",
+     "season_2025",
+     "avg_att_2025",
+     "total_att_2025",
+     "avg_fill_2025",
+     "avg_attendance_diff",
+     "avg_attendance_pct_change",
+     "total_attendance_diff",
+     "total_attendance_pct_change",
+     "avg_fill_diff",
+     "avg_fill_pct_change"
+    ],
+    "rows": [
+     [
+      2024,
+      41910.36363636364,
+      3227098,
+      90.05974025974027,
+      2025,
+      42390.3164556962,
+      3348835,
+      91.08481012658228,
+      479.95281933256047,
+      1.1451888690274405,
+      121737,
+      3.772336631859336,
+      1.025069866842017,
+      1.1382109962627305
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT season, count(*) AS total_games, sum(CASE WHEN abs(residual_pct_capped) > 0.15 THEN 1 ELSE 0 END) AS anomalies_gt_15pct, sum(CASE WHEN ceiling_game = true THEN 1 ELSE 0 END) AS ceiling_games FROM games_clean WHERE home_team_id = 147 AND season IN (2024, 2025) GROUP BY season",
+    "columns": [
+     "season",
+     "total_games",
+     "anomalies_gt_15pct",
+     "ceiling_games"
+    ],
+    "rows": [
+     [
+      2024,
+      77,
+      8,
+      29
+     ],
+     [
+      2025,
+      79,
+      9,
+      36
+     ]
+    ]
+   },
+   {
+    "n": 4,
+    "kind": "query",
+    "tables": [
+     "games"
+    ],
+    "query": "SELECT season, official_date, home_team, away_team, description, temporary_park FROM games WHERE (home_team_id = 147 OR away_team_id = 147) AND season IN (2024, 2025) AND special_event IS NOT NULL",
+    "columns": [
+     "season",
+     "official_date",
+     "home_team",
+     "away_team",
+     "description",
+     "temporary_park"
+    ],
+    "rows": [
+     [
+      2024,
+      "2024-08-18",
+      "Detroit Tigers",
+      "New York Yankees",
+      "MLB Little League Classic in Williamsport, PA",
+      false
+     ],
+     [
+      2024,
+      "2024-09-20",
+      "Oakland Athletics",
+      "New York Yankees",
+      null,
+      false
+     ],
+     [
+      2024,
+      "2024-09-21",
+      "Oakland Athletics",
+      "New York Yankees",
+      null,
+      false
+     ]
+    ]
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com)."
+ },
+ {
+  "id": "season_lines_three",
+  "q": "Compare Dodgers attendance in 2024, 2025 and 2026.",
+  "passed": true,
+  "failures": [],
+  "seconds": 100,
+  "researchers": 3,
+  "retries": 0,
+  "errors": [],
+  "chart": {
+   "type": "line",
+   "title": "Average attendance by month, one line per season",
+   "x_label": "Month",
+   "y_label": "Average attendance (fans)",
+   "unit": "fans",
+   "labels": [
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September"
+   ],
+   "series": [
+    {
+     "name": "2024",
+     "values": [
+      46556.0,
+      47836.8,
+      47531.2,
+      50681.9,
+      50445.7,
+      49366.8,
+      49708.8
+     ],
+     "color": "#8A8F98",
+     "style": "dotted"
+    },
+    {
+     "name": "2025",
+     "values": [
+      52057.0,
+      51165.8,
+      48791.0,
+      51143.8,
+      48527.7,
+      48381.9,
+      47600.2
+     ],
+     "color": "#5F6670",
+     "style": "dashed"
+    },
+    {
+     "name": "2026",
+     "values": [
+      52875.8,
+      51141.2,
+      49958.4,
+      50690.1,
+      49308.9,
+      48467.2,
+      48493.6
+     ],
+     "color": "#005A9C",
+     "style": "solid"
+    }
+   ],
+   "source": [
+    "games_clean"
+   ]
+  },
+  "team_chart": {
+   "team": "Los Angeles Dodgers",
+   "color": "#005A9C",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Los Angeles Dodgers",
+     "season": 2024,
+     "avg_attendance": 49066.5375,
+     "expected_avg_attendance": 50554.13428155012,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Los Angeles Dodgers",
+     "season": 2025,
+     "avg_attendance": 49536.666666666664,
+     "expected_avg_attendance": 48093.16144301453,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Los Angeles Dodgers",
+     "season": 2026,
+     "avg_attendance": 49805.17283950617,
+     "expected_avg_attendance": 50436.51189598,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": null,
+  "report": "Los Angeles Dodgers home attendance grew steadily from 2024 to 2026, ending with a 2026 average of 49,805 fans per game (88.9% of capacity) that was 1.3% below what the prior two years of crowds, win rate, and market would predict, representing an increase of 269 fans per game from the season before[1][2]. Total home attendance rose from 3,925,323 in 2024, to 4,012,470 in 2025, and to 4,034,219 in 2026[1][2]. The 2025 average of 49,537 fans (88.5% of capacity) was higher than the 2024 average of 49,067 fans (87.6% of capacity) by 470 fans[1][2]. The 2026 average of 49,805 fans (88.9% of capacity) was higher than the 2025 average of 49,537 fans (88.5% of capacity) by 269 fans[1][2]. For context, the 2024 average was 2.9% below predictions, the 2025 average was 3.0% above predictions, and the team played in the 2024 Seoul Series at Gocheok Sky Dome, where Game 1 drew 15,952 fans (95.3% of capacity) and Game 2 drew 15,928 fans (95.1% of capacity)[3][4].",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "games_clean",
+     "team_aliases"
+    ],
+    "query": "WITH dodgers_seasons AS ( SELECT season, avg(attendance) as calculated_avg_attendance, sum(attendance) as calculated_total_attendance, avg(fill_pct) as calculated_avg_fill_pct FROM games_clean WHERE home_team_id = (SELECT team_id FROM team_aliases WHERE alias_key = 'dodgers') AND season IN (2024, 2025, 2026) GROUP BY season ) SELECT curr.season, curr.calculated_avg_attendance, curr.calculated_total_attendance, curr.calculated_avg_fill_pct, prev.calculated_avg_attendance as prev_avg_attendance, curr.calculated_avg_attendance - prev.calculated_avg_attendance as abs_diff_avg, (curr.calculated_avg_attendance - prev.calculated_avg_attendance) / prev.calculated_avg_attendance * 100 as pct_diff_avg FROM dodgers_seasons curr LEFT JOIN dodgers_seasons prev ON curr.season = prev.season + 1 ORDER BY curr.season",
+    "columns": [
+     "season",
+     "calculated_avg_attendance",
+     "calculated_total_attendance",
+     "calculated_avg_fill_pct",
+     "prev_avg_attendance",
+     "abs_diff_avg",
+     "pct_diff_avg"
+    ],
+    "rows": [
+     [
+      2024,
+      49066.5375,
+      3925323,
+      87.61624999999995,
+      null,
+      null,
+      null
+     ],
+     [
+      2025,
+      49536.666666666664,
+      4012470,
+      88.45925925925927,
+      49066.5375,
+      470.1291666666657,
+      0.9581462043590618
+     ],
+     [
+      2026,
+      49805.17283950617,
+      4034219,
+      88.94074074074075,
+      49536.666666666664,
+      268.5061728395085,
+      0.5420352052476451
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "games_clean",
+     "team_aliases",
+     "team_season_model"
+    ],
+    "query": "SELECT t.season, t.avg_attendance, t.official_home_total, t.yoy_change_pct, (SELECT avg(fill_pct) FROM games_clean g WHERE g.home_team_id = t.team_id AND g.season = t.season) as avg_fill_pct, (SELECT sum(attendance) FROM games_clean g WHERE g.home_team_id = t.team_id AND g.season = t.season) as games_clean_total_attendance FROM team_season_model t JOIN team_aliases a ON t.team_id = a.team_id WHERE a.alias_key = 'dodgers' AND t.season IN (2024, 2025, 2026) ORDER BY t.season",
+    "columns": [
+     "season",
+     "avg_attendance",
+     "official_home_total",
+     "yoy_change_pct",
+     "avg_fill_pct",
+     "games_clean_total_attendance"
+    ],
+    "rows": [
+     [
+      2024,
+      49066.5375,
+      3941251,
+      0.03579273184015541,
+      87.61624999999995,
+      3925323
+     ],
+     [
+      2025,
+      49536.666666666664,
+      4012470,
+      0.00958146204359056,
+      88.45925925925927,
+      4012470
+     ],
+     [
+      2026,
+      49805.17283950617,
+      4034219,
+      0.005420352052476485,
+      88.94074074074075,
+      4034219
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "query",
+    "tables": [
+     "games"
+    ],
+    "query": "SELECT * FROM games WHERE season = 2024 AND (home_team ILIKE '%Dodgers%' OR away_team ILIKE '%Dodgers%') AND (venue_city = 'Seoul' OR special_event ILIKE '%Seoul%')",
+    "columns": [
+     "game_pk",
+     "season",
+     "official_date",
+     "weekday",
+     "start_utc",
+     "start_time_et",
+     "day_night",
+     "doubleheader",
+     "game_number",
+     "status",
+     "home_team_id",
+     "home_team",
+     "away_team_id",
+     "away_team",
+     "home_score",
+     "away_score",
+     "home_wins_after",
+     "home_losses_after",
+     "away_wins_after",
+     "away_losses_after",
+     "home_wins_before",
+     "home_losses_before",
+     "home_win_pct_before",
+     "away_wins_before",
+     "away_losses_before",
+     "away_win_pct_before",
+     "venue_id",
+     "venue_name",
+     "venue_city",
+     "venue_state",
+     "capacity_api",
+     "roof_type",
+     "turf_type",
+     "attendance",
+     "attendance_api_zero",
+     "dh_shared_gate",
+     "capacity_used",
+     "capacity_source",
+     "fill_rate_raw",
+     "fill_rate",
+     "over_capacity",
+     "weather_condition",
+     "temp_f",
+     "wind_mph",
+     "wind_direction",
+     "duration_minutes",
+     "home_probable_pitcher",
+     "away_probable_pitcher",
+     "description",
+     "rescheduled_from",
+     "resumed_from",
+     "series_game_number",
+     "games_in_series",
+     "special_event",
+     "temporary_park",
+     "home_opener"
+    ],
+    "rows": [
+     [
+      745444,
+      2024,
+      "2024-03-20",
+      "Wednesday",
+      "2024-03-20 10:05:00",
+      "06:05:00",
+      "night",
+      "N",
+      1,
+      "Final",
+      135,
+      "San Diego Padres",
+      119,
+      "Los Angeles Dodgers",
+      2,
+      5,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      null,
+      0,
+      0,
+      null,
+      5150,
+      "Gocheok Sky Dome",
+      "Seoul",
+      null,
+      16744,
+      "Dome",
+      "Artificial Turf",
+      15952,
+      false,
+      false,
+      16744,
+      "api",
+      0.9526994744386049,
+      0.9526994744386049,
+      false,
+      "Dome",
+      72,
+      0,
+      "None",
+      185,
+      "Yu Darvish",
+      "Tyler Glasnow",
+      "in Seoul, South Korea",
+      null,
+      null,
+      1,
+      2,
+      "Seoul Series",
+      false,
+      false
+     ],
+     [
+      746175,
+      2024,
+      "2024-03-21",
+      "Thursday",
+      "2024-03-21 10:05:00",
+      "06:05:00",
+      "night",
+      "N",
+      1,
+      "Final",
+      119,
+      "Los Angeles Dodgers",
+      135,
+      "San Diego Padres",
+      11,
+      15,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1.0,
+      0,
+      1,
+      0.0,
+      5150,
+      "Gocheok Sky Dome",
+      "Seoul",
+      null,
+      16744,
+      "Dome",
+      "Artificial Turf",
+      15928,
+      false,
+      false,
+      16744,
+      "api",
+      0.9512661251791686,
+      0.9512661251791686,
+      false,
+      "Dome",
+      72,
+      0,
+      "None",
+      222,
+      "Yoshinobu Yamamoto",
+      "Joe Musgrove",
+      "in Seoul, South Korea",
+      null,
+      null,
+      2,
+      2,
+      "Seoul Series",
+      false,
+      false
+     ]
+    ]
+   },
+   {
+    "n": 4,
+    "kind": "query",
+    "tables": [
+     "team_aliases",
+     "team_season_model"
+    ],
+    "query": "SELECT t.season, t.expected_avg_attendance, t.residual_pct, t.official_home_total FROM team_season_model t JOIN team_aliases a ON t.team_id = a.team_id WHERE a.alias_key = 'dodgers' ORDER BY t.season",
+    "columns": [
+     "season",
+     "expected_avg_attendance",
+     "residual_pct",
+     "official_home_total"
+    ],
+    "rows": [
+     [
+      2024,
+      50554.13428155012,
+      -0.029425818534746906,
+      3941251
+     ],
+     [
+      2025,
+      48093.16144301453,
+      0.030014770922526024,
+      4012470
+     ],
+     [
+      2026,
+      50436.51189598,
+      -0.012517500373061097,
+      4034219
+     ]
+    ]
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com)."
+ },
+ {
+  "id": "box_score_games",
+  "q": "List the five biggest Cubs home crowds in 2025, with date, opponent and attendance.",
+  "passed": true,
+  "failures": [],
+  "seconds": 23,
+  "researchers": 1,
+  "retries": 0,
+  "errors": [],
+  "chart": null,
+  "team_chart": {
+   "team": "Chicago Cubs",
+   "color": "#0E3386",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2024,
+     "avg_attendance": 35923.38271604938,
+     "expected_avg_attendance": 34656.889891408806,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2025,
+     "avg_attendance": 37129.759493670885,
+     "expected_avg_attendance": 36686.74786274155,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Chicago Cubs",
+     "season": 2026,
+     "avg_attendance": 36661.51851851852,
+     "expected_avg_attendance": 37153.235520910894,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [],
+  "box_score": {
+   "columns": [
+    "DATE",
+    "AWAY",
+    "ATT",
+    "% CAP"
+   ],
+   "rows": [
+    [
+     "2025-06-19",
+     "Milwaukee Brewers",
+     "41,078",
+     "99.5%"
+    ],
+    [
+     "2025-07-18",
+     "Boston Red Sox",
+     "41,011",
+     "99.3%"
+    ],
+    [
+     "2025-06-20",
+     "Seattle Mariners",
+     "40,787",
+     "98.8%"
+    ],
+    [
+     "2025-08-02",
+     "Baltimore Orioles",
+     "40,781",
+     "98.7%"
+    ],
+    [
+     "2025-07-19",
+     "Boston Red Sox",
+     "40,703",
+     "98.6%"
+    ]
+   ],
+   "source": [
+    "games_clean"
+   ]
+  },
+  "report": "The five biggest Chicago Cubs home crowds of the 2025 season were 41,078 against the Milwaukee Brewers on June 19, 41,011 against the Boston Red Sox on July 18, 40,787 against the Seattle Mariners on June 20, 40,781 against the Baltimore Orioles on August 2, and 40,703 against the Boston Red Sox on July 19[1]. These high-demand matchups reached 99.5%, 99.3%, 98.8%, 98.7%, and 98.6% of capacity, respectively[1].",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT official_date, away_team, attendance, capacity_used, fill_pct, fill_pct AS fill_rate FROM games_clean WHERE home_team_id = 112 AND season = 2025 ORDER BY attendance DESC LIMIT 5",
+    "columns": [
+     "official_date",
+     "away_team",
+     "attendance",
+     "capacity_used",
+     "fill_pct",
+     "fill_rate"
+    ],
+    "rows": [
+     [
+      "2025-06-19",
+      "Milwaukee Brewers",
+      41078,
+      41298,
+      99.5,
+      99.5
+     ],
+     [
+      "2025-07-18",
+      "Boston Red Sox",
+      41011,
+      41298,
+      99.3,
+      99.3
+     ],
+     [
+      "2025-06-20",
+      "Seattle Mariners",
+      40787,
+      41298,
+      98.8,
+      98.8
+     ]
+    ]
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com)."
  }
 ]

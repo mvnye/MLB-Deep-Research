@@ -89,7 +89,7 @@ TEAM_COLUMN_COMMENTS = {
                           "A negative value followed by a positive one suggests a rebound.",
 }
 TEAM_TABLE_COMMENT = (
-    "Team-season average attendance against win rate, metro population and the prior two years of "
+    "Team-season average attendance against win rate, metro population, and the prior two years of "
     "crowds. "
     "Market population is not split in two-team metros. Correlational, not causal."
 )
@@ -141,7 +141,7 @@ EFFECT_LABELS = {
     "C(month_group)[T.Jul]": "July games, compared with August",
     "C(month_group)[T.Sep]": "September games, compared with August",
     "indoor": "Games with a closed roof or dome, which partly reflects bad weather",
-    "precipitation": "Games with rain, drizzle or snow",
+    "precipitation": "Games with rain, drizzle, or snow",
     "home_opener_term": "Home openers",
 }
 PER_UNIT_LABELS = {  # term: (label, how much of one unit to report)
