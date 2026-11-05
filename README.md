@@ -1,19 +1,44 @@
 # MLB-Deep-Research
+
+A multi-agent deep research app on MLB attendance. It explores what drives attendance, why specific teams and games over- or under-perform against a regression baseline, and whether smaller crowds went with smaller national TV audiences in 2025 and 2026. A Lead sends parallel Researchers to query a DuckDB database and read Wikipedia, goes back for gaps, and a Writer produces a footnoted answer, with a chart when the result suits one.
+
+**Target user:** a sports media or sponsorship seller preparing team pitches.
+
+**Live app:** https://mlb-deep-research-git-636637173930.europe-west1.run.app (restricted to columbia.edu accounts).
+
+## Data sources
+
+- [MLB Stats API](https://statsapi.mlb.com): 2024 to 2026 regular season games, attendance, weather, venues, and season totals back to 2022. Postseason is out of scope.
+- TV Media Blog viewership archives: [2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database) and [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive), saved as CSVs in `data/raw/`.
+- Wikipedia team-season articles, read live through the public MediaWiki API.
+- Metro population, described under Market size data below.
+
+## Loading the data and running the app
+
+`data/mlb.duckdb` and the raw files are in the repo, so the app runs without a data step. Vertex AI access comes from gcloud credentials.
+
+```bash
+uv sync
+uv run uvicorn app:app --port 8080
+```
+
+To rebuild from scratch, run `uv run python scripts/pull_statsapi.py`, then `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`.
+
 ## Sample questions
 
 The expected answer is what the data says, so the agent can be checked against it. The agent answer is its real output from a saved run on November 5, 2026, unedited. Wording varies between runs, but the facts should hold. The no-tools baseline is the same model with no tools and no system prompt.
 
-To test the agent against 23 questions with required facts, run `uv run python scripts/eval_agent.py`.
+To test the agent against 28 questions with required facts, run `uv run python scripts/eval_agent.py`.
 
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
-**Expected answer:** Yes on the raw numbers, but there is no clear link after adjusting. Comparing games on the same network, smaller crowds tended to come with smaller TV audiences, a moderate correlation of 0.34 in 2025 (n = 82, range 0.14 to 0.52) and 0.47 in 2026 (n = 83, range 0.29 to 0.62), where 0 means no link and 1 means a perfect match. Adjusting compares each game with its own park's usual crowd, so popular teams do not drive the result. After that, the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34). Both ranges include zero, so a crowd below a park's usual level did not clearly mean a smaller TV audience.
+**Expected answer:** Yes on the raw numbers, but there is no clear link after adjusting. Comparing games on the same network, smaller crowds tended to come with smaller TV audiences, a moderate correlation of 0.34 in 2025 (n = 82, range 0.14 to 0.52) and 0.47 in 2026 (n = 83, range 0.29 to 0.62), where 0 means no link and 1 means a perfect match. Adjusting compares each game with its own park's usual crowd, so popular teams do not drive the result. After that, the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34). Both ranges include zero, so a crowd below a park's usual level did not clearly mean a smaller TV audience. At the team level, a team-season's average crowd and its average national TV audience correlate at 0.52 across 2025 and 2026 (n = 56, range 0.30 to 0.69). That is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause.
 
-**Source:** `crowd_tv_headline`, built from `crowd_tv_residual`.
+**Source:** `crowd_tv_headline`, built from `crowd_tv_residual`, and `team_crowd_tv`.
 
 **Agent answer:**
 
-> Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62). Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero (table: crowd_tv_headline).
+> Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero[2]. Across team-seasons, teams with bigger average crowds also had bigger average national TV audiences (correlation 0.52, n = 56, range 0.30 to 0.69), which is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause[3].
 >
 > *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like. These are associations, not cause and effect.*
 
@@ -29,7 +54,7 @@ To test the agent against 23 questions with required facts, run `uv run python s
 
 **Agent answer:**
 
-> The New York Mets' home attendance surged in 2025, with actual average attendance growing by 35.9% from the season before to reach 39,776 fans per game (table: team_season_model). This turnout was 23.6% higher than what the prior two years of crowds, win rate, and market size would predict (table: team_season_model). Part of this may be a rebound: the team was 18.8% below its prediction the season before (table: team_season_model). In comparison, the 2025 actual average of 39,776 fans per game was higher than the 2024 average of 29,268 fans per game by 10,508 fans per game (table: team_season_model). These strong crowds coincided with the franchise signing outfielder Juan Soto to a 15-year, $765 million contract in December 2024 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). The team also added starting pitchers Frankie Montas and Griffin Canning during the offseason ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)), and opened the season with a stellar 45–24 record through June 12 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)).
+> The New York Mets averaged 39,776 a game in 2025, 23.6% above the 32,182 their prior two years of crowds, win rate and market would predict, up 35.9% from 29,268 the season before, and part of this may be a rebound from 18.8% below prediction[1]. This strong turnout achieved a 94.9% average fill rate[2]. This high attendance coincided with the historic signing of outfielder Juan Soto to a 15-year, $765 million contract in December 2024[3]. The team also brought back several key players prior to the season, re-signing starting pitcher Sean Manaea, outfielder Jesse Winker, relief pitcher Ryne Stanek, and first baseman Pete Alonso[3]. Additionally, the Mets opened the season with a strong 45–24 record through June 12[3].
 >
 > *Promotions are not in the data. These are associations, not cause and effect.*
 
@@ -45,7 +70,7 @@ To test the agent against 23 questions with required facts, run `uv run python s
 
 **Agent answer:**
 
-> The data has no separate audience number for the Yankees versus Red Sox game alone because it was broadcast in a regional window that cannot be split (table: game_tv_lookup). The entire regional Fox window drew 3,094,000 viewers (table: fox_windows). This window included the Yankees versus Red Sox game, which reached 96.0% of the country, and the San Diego Padres at Milwaukee Brewers game, which reached 4.0% of the country (table: fox_window_games).
+> The exact viewership for the Yankees vs Red Sox game on June 7, 2025, is uncertain because the data has no number for that game alone, but the regional Fox window drew a total of 3,094,000 viewers[1]. This broadcast window also featured the San Diego Padres at Milwaukee Brewers game, and the Yankees vs Red Sox matchup reached 96% of the country[2].
 >
 > *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*
 

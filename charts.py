@@ -15,9 +15,11 @@ import re
 MIN_ITEMS = 4
 MIN_PAIRED_ITEMS = 3
 MAX_ITEMS = 31
+MAX_LABEL_CHARS = 40
 MONTHS = {3: "March", 4: "April", 5: "May", 6: "June", 7: "July", 8: "August", 9: "September", 10: "October"}
-TIME_COLUMN = re.compile(r"month|season|year", re.I)
+TIME_COLUMN = re.compile(r"(^|_)(month|season|year)(_name|_num|_number)?$", re.I)
 ID_COLUMN = re.compile(r"(_id|_pk|^n|^rank|^row_number|count|games|_games|num_|^number)", re.I)
+CHANGE_COLUMN = re.compile(r"diff|delta|prev|prior|lag", re.I)  # the step between rows, not the value
 EXPECTED_COLUMN = re.compile(r"expected|predict", re.I)
 ACTUAL_COLUMN = re.compile(r"actual|attendance|crowd", re.I)
 MEASURE_ORDER = [r"(avg|average|mean).*(attendance|crowd)", r"attendance|crowd", r"viewers|audience", r"fill", r"pct|percent|change", r"avg|average|mean|total|sum"]
@@ -29,7 +31,8 @@ LABELS = {"home_team": "Team", "away_team": "Opponent", "team": "Team", "network
 
 
 def words(column: str) -> str:
-    name = re.sub(r"\bavg\b", "average", column.lower().replace("_", " "))
+    column = re.sub(r"^current_", "", column.lower())
+    name = re.sub(r"\bavg\b", "average", column.replace("_", " "))
     name = re.sub(r"\bpct\b", "percent", name)
     return LABELS.get(column.lower(), re.sub(r"\s+", " ", name).strip().capitalize())
 
@@ -66,8 +69,8 @@ def split_columns(columns: list[str], rows: list[list]) -> tuple[list[int], list
         elif all(is_number(v) or v is None for v in values) and any(is_number(v) for v in values):
             if not ID_COLUMN.search(name) and varies:
                 measures.append(i)
-        elif all(isinstance(v, str) for v in values) and varies:
-            labels.append(i)
+        elif all(isinstance(v, str) and len(v) <= MAX_LABEL_CHARS for v in values) and varies:
+            labels.append(i)  # longer text is a sentence about the row, not its name
     return labels, measures
 
 
@@ -109,6 +112,8 @@ def build(kind: str, columns: list[str], rows: list[list], label: int, measures:
 def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wants_expected: bool = True) -> dict | None:
     if not MIN_PAIRED_ITEMS <= len(rows) <= MAX_ITEMS:
         return None
+    if any(re.search(r"_\d+$", c) for c in columns):
+        return None  # network_1, network_2: a pairwise comparison, not one value per item
     labels, measures = split_columns(columns, rows)
     time_labels = [i for i in labels if TIME_COLUMN.search(columns[i])]
     if len(labels) > 1 and len(time_labels) >= 1:
@@ -116,6 +121,8 @@ def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wan
     if len(labels) != 1 or not measures:
         return None  # several label columns means game-level detail, not one comparison
     label = labels[0]
+    if len({str(r[label]) for r in rows}) < len(rows):
+        return None  # a repeated label means a second split, such as day within season
     expected = [i for i in measures if EXPECTED_COLUMN.search(columns[i])]
     actual = [i for i in measures if ACTUAL_COLUMN.search(columns[i]) and i not in expected]
     if expected and actual and wants_expected:
@@ -127,11 +134,12 @@ def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wan
     measures = [i for i in measures if i not in expected and all(r[i] is not None for r in rows)]
     if not measures:
         return None
+    measures = [i for i in measures if not CHANGE_COLUMN.search(columns[i])] or measures
     measure = main_measure(columns, measures)
     if TIME_COLUMN.search(columns[label]):
         ordered = sorted(rows, key=lambda r: r[label]) if all(is_number(r[label]) for r in rows) else rows
         return build("line", columns, ordered, label, [measure], source)
-    return build("bar", columns, rows, label, [measure], source)
+    return build("bar", columns, sorted(rows, key=lambda r: -r[measure]), label, [measure], source)
 
 
 def relevant(chart: dict, report: str) -> bool:

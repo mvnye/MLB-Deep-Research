@@ -67,6 +67,7 @@ class Research:
     tool_calls: list[dict] = field(default_factory=list)  # every call, for POST /chat
     errors: list[str] = field(default_factory=list)  # researcher failures, for logs
     failed_roles: set[str] = field(default_factory=set)  # roles with no successful researcher yet
+    answered_round: dict[str, int] = field(default_factory=dict)  # first round each role delivered
     retries: int = 0  # researchers rerun after a malformed tool call
     report: str = ""
     chart: dict | None = None  # built from query rows in charts.py, never from the report's text
@@ -462,6 +463,7 @@ def round_counts(report: str) -> str:
         if value >= 100:
             return f"{round(value):,}"
         return f"{value:.1f}" if len(m[0].split(".")[1]) > 2 else m[0]  # 8.9333 reads as noise
+    report = re.sub(r"\b\d+\.\d{2,}(?= percentage points)", lambda m: f"{float(m[0]):.1f}", report)
     return re.sub(r"(?<![\d.])\d[\d,]*\.\d+(?![\d%]| percent| percentage)", whole, report)
 
 
@@ -474,9 +476,12 @@ def add_thousands(report: str) -> str:
 
 
 def fix_citation_format(report: str) -> str:
-    """'(team_season_model)' -> '(table: team_season_model)'."""
+    """'(team_season_model)' -> '(table: team_season_model)', and the citation inside its sentence:
+    'in 2026. (table: x) Netflix' would otherwise read as one sentence with Netflix."""
     names = "|".join(data_tools.TABLE_DOCS)
-    return re.sub(rf"\(((?:{names})(?:, (?:{names}))*)\)", r"(table: \1)", report)
+    report = re.sub(rf"\(((?:{names})(?:, (?:{names}))*)\)", r"(table: \1)", report)
+    citation = r"\((?:tables?:[^()]*|\[[^\]]+\]\(https?://[^)\s]+\))\)"
+    return re.sub(rf"\.\s*({citation})\s*\.?[ \t]*", r" \1. ", report).replace(". \n", ".\n").strip()
 
 
 def word_count(report: str) -> int:
@@ -566,8 +571,11 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
         findings = f"The {role} researcher failed on this task and found no answer ({type(e).__name__})."
         run.errors.append(f"{agent.name}: {type(e).__name__}: {str(e)[:300]}")
     if failed:
-        run.failed_roles.add(role)
+        # A follow-up that fails after this role already delivered leaves the answer whole.
+        if run.answered_round.get(role, turn) >= turn:
+            run.failed_roles.add(role)
     else:
+        run.answered_round.setdefault(role, turn)
         run.failed_roles.discard(role)
         run.findings.append(f"Task ({role}): {task}\n\n{findings}")
     run.tool_calls.append({"name": "research", "args": {"task": task, "role": role},
@@ -854,7 +862,9 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
 
     run.report = strip_quoted_phrases(run.report).replace("—", ", ").replace("READY:", "").strip()
     run.report = fix_citation_format(run.report)
-    team, _ = opening_gaps(run.report, asked, run.tool_calls)  # before cleanup can remove the opening
+    # Before cleanup can remove the opening. If a check already has, the findings still name the team.
+    team = (opening_gaps(run.report, asked, run.tool_calls)[0]
+            or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
     run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
     run.report = fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question))))
     if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):

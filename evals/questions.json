@@ -197,6 +197,7 @@
  {
   "id": "held_cubs_days",
   "q": "Do Cubs Sunday games draw better than their Tuesday games?",
+  "chart": null,
   "must": [
    "37,140",
    "35,280"
@@ -354,6 +355,6 @@
  {
   "id": "chart_network_rank",
   "q": "Rank the networks by average national TV audience in 2026.",
-  "chart": "any"
+  "chart": "bar"
  }
 ]
