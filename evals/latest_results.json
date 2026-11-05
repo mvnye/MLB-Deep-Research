@@ -2,25 +2,20 @@
  {
   "id": "sample_crowd_tv",
   "q": "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
-  "passed": false,
-  "failures": [
-   "should not say 'ESPN'"
-  ],
-  "seconds": 57,
-  "researchers": 1,
-  "report": "Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62). Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero. (table: crowd_tv_headline) In 2025, ESPN had 26 games with a crowd-to-audience correlation of 0.49 (range 0.13 to 0.74) and a correlation of 0.27 (range -0.14 to 0.59) after adjusting for each park's usual crowd, while FS1 had 34 games with a correlation of 0.29 (range -0.05 to 0.57) and an adjusted correlation of 0.17 (range -0.18 to 0.48), and TBS had 22 games with a correlation of 0.40 (range -0.02 to 0.71) and an adjusted correlation of 0.08 (range -0.35 to 0.48) (table: crowd_tv_residual). In 2026, ESPN had 23 games with a crowd-to-audience correlation of 0.48 (range 0.08 to 0.74) and an adjusted correlation of 0.30 (range -0.12 to 0.64), FS1 had 21 games with a correlation of 0.52 (range 0.12 to 0.78) and an adjusted correlation of 0.43 (range -0.01 to 0.72), NBC had 21 games with a correlation of 0.56 (range 0.17 to 0.80) and an adjusted correlation of -0.08 (range -0.49 to 0.37), and TBS had 10 games with a correlation of 0.65 (range 0.04 to 0.91) and an adjusted correlation of -0.58 (range -0.89 to 0.07) (table: crowd_tv_residual).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like. These are associations, not cause and effect.*"
+  "passed": true,
+  "failures": [],
+  "seconds": 97,
+  "researchers": 3,
+  "report": "Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62). Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero (table: crowd_tv_headline).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like. These are associations, not cause and effect.*"
  },
  {
   "id": "sample_mets",
   "q": "Why did the Mets over-perform on attendance in 2025?",
-  "passed": false,
-  "failures": [
-   "missing '35.9%'",
-   "missing 'rebound'"
-  ],
-  "seconds": 58,
+  "passed": true,
+  "failures": [],
+  "seconds": 52,
   "researchers": 2,
-  "report": "The Mets over-performed on attendance in 2025, drawing an actual average attendance of 39,776, which was 23.6% higher than the expected average of 32,182 predicted by their market, win rate, and prior crowds (table: team_season_model). This strong turnout coincided with several major roster moves, including Juan Soto signing a 15-year, $765 million contract in December 2024 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). Additionally, Sean Manaea re-signed on a three-year, $75 million contract in December 2024, and Pete Alonso re-signed on a two-year, $54 million contract in February 2025 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). On the field, the Mets opened the season with a hot 45\u201324 record through June 12, though they finished 38\u201355 the rest of the way to end at 83\u201379 and miss the postseason ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
+  "report": "The New York Mets' home attendance surged in 2025, with actual average attendance growing by 35.9% from the season before to reach 39,776 fans per game (table: team_season_model). This turnout was 23.6% higher than what the prior two years of crowds, win rate, and market size would predict (table: team_season_model). Part of this may be a rebound: the team was 18.8% below its prediction the season before (table: team_season_model). In comparison, the 2025 actual average of 39,776 fans per game was higher than the 2024 average of 29,268 fans per game by 10,508 fans per game (table: team_season_model). These strong crowds coincided with the franchise signing outfielder Juan Soto to a 15-year, $765 million contract in December 2024 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). The team also added starting pitchers Frankie Montas and Griffin Canning during the offseason ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)), and opened the season with a stellar 45\u201324 record through June 12 ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "sample_fox",
@@ -28,55 +23,53 @@
   "passed": true,
   "failures": [],
   "seconds": 31,
-  "researchers": 1,
-  "report": "The exact viewership for the Yankees vs Red Sox game on June 7, 2025, is unknown because the data has no number for that game alone (table: game_tv_lookup). The game aired as part of a regional Fox window that reached 96.0% of the country and drew a total of 3,094,000 viewers (table: game_tv_lookup). The other game featured in this window was the San Diego Padres at Milwaukee Brewers (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "researchers": 2,
+  "report": "The data has no separate audience number for the Yankees versus Red Sox game alone because it was broadcast in a regional window that cannot be split (table: game_tv_lookup). The entire regional Fox window drew 3,094,000 viewers (table: fox_windows). This window included the Yankees versus Red Sox game, which reached 96.0% of the country, and the San Diego Padres at Milwaukee Brewers game, which reached 4.0% of the country (table: fox_window_games).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
  },
  {
   "id": "capped_game",
   "q": "How did the Padres vs Dodgers crowd on August 23, 2025 compare with expected?",
   "passed": true,
   "failures": [],
-  "seconds": 37,
+  "seconds": 39,
   "researchers": 2,
-  "report": "The crowd was at or near the park's season high of 47,345, and demand may have been higher (table: games_clean). The August 23, 2025, game between the San Diego Padres and the Dodgers at Petco Park drew an attendance of 46,326, which represents a 116.1% fill percentage for the 39,909-capacity stadium (table: games_clean)."
+  "report": "The expected attendance for the San Diego Padres game against the Los Angeles Dodgers on August 23, 2025 is unknown (table: games_clean). The crowd was at or near the park's season high of 47,345, and demand may have been higher (table: games_clean). Held at Petco Park, which has a capacity of 39,909, the game drew a crowd of 46,326 for a fill rate of 116.1% (table: games_clean).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "rays_game",
   "q": "How did the Rays crowd on May 1, 2025 compare with expected?",
-  "passed": false,
-  "failures": [
-   "The link https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season was not read in this research."
-  ],
-  "seconds": 74,
+  "passed": true,
+  "failures": [],
+  "seconds": 47,
   "researchers": 2,
-  "report": "The Tampa Bay Rays' home game on May 1, 2025, drew an actual attendance of 8,794, which was 171 people or 2.0% higher than the expected attendance of 8,623 (table: games_clean). This matchup against the Kansas City Royals was played at George M. Steinbrenner Field, a temporary ballpark (table: games_clean). The Rays played their 2025 home games at this temporary venue following storm damage inflicted on Tropicana Field by Hurricane Milton ([2025 Tampa Bay Rays season](https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season)), a powerful tropical cyclone that struck Florida in October 2024 ([Hurricane Milton](https://en.wikipedia.org/wiki/Hurricane_Milton)).\n\n**Could not be traced to a source:** The link https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season was not read in this research.\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
+  "report": "The Tampa Bay Rays' actual crowd of 8,794 on May 1, 2025, was higher than the expected attendance of 8,623 by 171, representing a 2.0% difference and a 79.8% fill rate (table: games_clean). This 2025 season coincided with Tropicana Field being heavily damaged by Hurricane Milton, which rendered it unusable for the entire year ([2025 Tampa Bay Rays season](https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season)). Consequently, the Rays announced on November 14, 2024, that they would play their 2025 home games at George M. Steinbrenner Field, the spring training home of the New York Yankees ([2025 Tampa Bay Rays season](https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season)). The temporary park had a capacity of 11,026 for this game (table: games_clean).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "postseason",
   "q": "How did postseason crowds compare in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 6,
+  "seconds": 20,
   "researchers": 0,
-  "report": "We cannot compare postseason crowds for 2025 because our data only covers regular season attendance from 2024 to 2026."
+  "report": "We cannot compare postseason crowds in 2025 because our attendance data only covers the regular seasons from 2024 to 2026."
  },
  {
   "id": "out_of_range",
   "q": "How did the Yankees draw in 2019?",
   "passed": true,
   "failures": [],
-  "seconds": 10,
+  "seconds": 11,
   "researchers": 0,
-  "report": "We cannot report on how the Yankees drew in 2019 because that season is outside what our data covers, which only includes attendance from 2024 to 2026."
+  "report": "We cannot provide attendance details for the Yankees' 2019 season because that year is outside what our data covers, which spans the 2024 to 2026 regular seasons."
  },
  {
   "id": "vague",
   "q": "Tell me about attendance",
   "passed": true,
   "failures": [],
-  "seconds": 16,
+  "seconds": 1,
   "researchers": 0,
-  "report": "Which teams, seasons, or matchups are you interested in?"
+  "report": "Which team or season are you interested in?"
  },
  {
   "id": "uncertain_total",
@@ -85,25 +78,25 @@
   "failures": [],
   "seconds": 18,
   "researchers": 1,
-  "report": "An audience of 708,000 viewers watched the Dodgers vs Blue Jays single-game broadcast on TBS on April 7, 2026, though this viewership figure is uncertain (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "report": "An uncertain audience of 708,000 viewers watched the Dodgers vs Blue Jays game on TBS on April 7, 2026 (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
  },
  {
   "id": "main_only",
   "q": "How many people watched Tigers vs Yankees on TBS on June 30, 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 35,
-  "researchers": 2,
-  "report": "The main-network audience for the Tigers vs Yankees game on TBS on June 30, 2026, was 279,000 viewers, but because this is a main-network only figure, the total audience is unknown (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "seconds": 17,
+  "researchers": 1,
+  "report": "An audience of 279,000 viewers watched the Tigers vs. Yankees game on TBS on June 30, 2026, though this count is for the main network only (table: game_tv_lookup). The total viewership for this game is unknown (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
  },
  {
   "id": "single_game_tv",
   "q": "How many people watched Dodgers vs Yankees on NBC on July 19, 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 42,
+  "seconds": 14,
   "researchers": 1,
-  "report": "A total of 3,616,000 viewers watched the Dodgers vs Yankees single-game broadcast on NBC on July 19, 2026 (table: game_tv_lookup). This entire audience of 3,616,000 watched on the main network (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "report": "The Dodgers vs Yankees game on NBC on July 19, 2026, was watched by 3,616,000 viewers (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
  },
  {
   "id": "rsn",
@@ -111,104 +104,106 @@
   "passed": true,
   "failures": [],
   "seconds": 14,
-  "researchers": 1,
-  "report": "We cannot provide the local RSN viewership for Miami Marlins games in 2025 because our viewership data does not cover local RSN broadcasts."
+  "researchers": 0,
+  "report": "We cannot provide the local RSN viewership for Marlins games in 2025 because local regional sports network viewership is outside what our data covers."
  },
  {
   "id": "held_tigers",
   "q": "How did Tigers crowds change in 2025, and why?",
   "passed": true,
   "failures": [],
-  "seconds": 65,
+  "seconds": 56,
   "researchers": 2,
-  "report": "Detroit Tigers average home attendance increased by 22.9% in 2025 to 29,796 per game, up from 24,237 in 2024 (table: team_season_model). The 2025 average represented a 72.5% fill rate, which was higher than the 59.0% fill rate in 2024 (table: team_season_model). This average crowd was 22.4% higher than the 24,351 that the prior two years of crowds, win rate, and market size would predict (table: team_season_model). This turnout coincided with the Tigers finishing the season with an 87\u201375 record and clinching a postseason berth ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)). The season also coincided with the offseason signings of free agents Gleyber Torres, Alex Cobb, Tommy Kahnle, and Jack Flaherty ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)). Additionally, the franchise had six players selected to the All-Star game ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
+  "report": "Detroit Tigers average home attendance in 2025 was higher than in 2024 by 5,559 per game, with 29,796 in 2025 (72.5% fill rate) compared to 24,237 in 2024 (59.0% fill rate) (table: team_season_model, games_clean). Average attendance was up 22.9% from 24,237 the season before (table: team_season_model). That is 22.4% above the 24,351 that the prior two years of crowds, win rate and market would predict (table: team_season_model). Coinciding with the larger crowds, the team signed several major league players ahead of the season, including infielder Gleyber Torres on December 27, 2024, and pitcher Jack Flaherty on February 7, 2025 ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)). Additionally, the Tigers improved their record to finish 87\u201375 and clinched a postseason berth on September 27, 2025 ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "held_cardinals",
   "q": "Which team under-performed the most on attendance in 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 43,
-  "researchers": 3,
-  "report": "The St. Louis Cardinals under-performed the most on attendance in 2025, seeing their average crowd drop 22.6% from the prior season's average of 35,872 to 27,778 (table: team_season_model). This actual average was 21.7% below the expected average of 35,479 that the team's prior two years of crowds, win rate, and market size would predict (table: team_season_model). The team drew an official home total of 2,250,007 (table: team_season_model). These crowds coincided with Paul Goldschmidt not being on the roster for the first time since 2018 after signing with the Yankees in free agency ([2025 St. Louis Cardinals season](https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season)), and the team being eliminated from postseason contention for the third consecutive year on September 24 ([2025 St. Louis Cardinals season](https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
+  "seconds": 24,
+  "researchers": 2,
+  "report": "The St. Louis Cardinals under-performed the most on attendance in 2025, with their average crowd of 27,778 falling 22.6% from the season before (table: team_season_model). This average attendance was 21.7% below the 35,479 that their prior two years of crowds, win rate, and market size would predict (table: team_season_model). Coinciding with this decline, star player Paul Goldschmidt was not on the roster for the first time since 2018 after signing with the Yankees in free agency ([2025 St. Louis Cardinals season](https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season)), and the team was eliminated from postseason contention for the third consecutive year on September 24, 2025 ([2025 St. Louis Cardinals season](https://en.wikipedia.org/wiki/2025_St._Louis_Cardinals_season)).\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "held_cubs_days",
   "q": "Do Cubs Sunday games draw better than their Tuesday games?",
-  "passed": false,
-  "failures": [
-   "The number 1,859.88 does not appear in any data or article.",
-   "The number 6,219.36 does not appear in any data or article."
-  ],
-  "seconds": 56,
+  "passed": true,
+  "failures": [],
+  "seconds": 21,
   "researchers": 1,
-  "report": "Yes, Chicago Cubs Sunday home games draw larger crowds than Tuesday games, averaging 37,140 attendees over 40 games compared to Tuesday's average of 35,280 over 38 games, a difference of 1,859.88 per game (table: games_clean). Sunday games also saw a higher average fill rate of 89.9% compared to 85.4% for Tuesday games (table: games_clean). This trend is also reflected in the expected attendance, where Sunday games averaged 38,517, which is 6,219.36 higher than the Tuesday expected average of 32,297 (table: games_clean).\n\n**Could not be traced to a source:** The number 1,859.88 does not appear in any data or article. The number 6,219.36 does not appear in any data or article.\n\n*Promotions are not in the data. These are associations, not cause and effect.*"
+  "report": "Yes, Chicago Cubs Sunday home games draw better than their Tuesday home games, with Sundays averaging 37,140 fans compared to 35,280 fans on Tuesdays, a difference of 1,860 (table: games_clean). The average fill rate was also higher on Sundays at 89.9% compared to Tuesdays at 85.4%, which is a difference of 4.5 percentage points (table: games_clean)."
  },
  {
   "id": "held_network",
   "q": "Which network had the biggest national TV audiences in 2026?",
   "passed": true,
   "failures": [],
-  "seconds": 26,
+  "seconds": 18,
   "researchers": 1,
-  "report": "Fox had the biggest national TV audiences in 2026. Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026. (table: network_audience) Netflix averaged 2,314,000 viewers across 2 games with known audiences in 2026. (table: network_audience) NBC averaged 2,312,762 viewers across 21 games with known audiences in 2026. (table: network_audience) ABC averaged 1,794,333 viewers across 3 games with known audiences in 2026. (table: network_audience) ESPN averaged 1,126,208 viewers across 24 games with known audiences in 2026, out of 27 games. (table: network_audience) TBS averaged 614,900 viewers across 10 games with known audiences in 2026, out of 25 games. (table: network_audience) FS1 averaged 385,905 viewers across 21 games with known audiences in 2026, out of 39 games. (table: network_audience)\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "report": "Fox had the biggest national TV audiences in 2026 (table: network_audience). Fox averaged 2,343,875 viewers across 24 windows with known audiences in 2026. (table: network_audience) Netflix followed closely, averaging 2,314,000 viewers across 2 rated broadcasts (table: network_audience). NBC was next with an average of 2,312,762 viewers across 21 rated broadcasts (table: network_audience). ABC averaged 1,794,333 viewers across 3 rated broadcasts (table: network_audience). ESPN averaged 1,126,208 viewers across 24 rated broadcasts out of 27 total broadcasts (table: network_audience). TBS averaged 614,900 viewers across 10 rated broadcasts out of 25 total broadcasts (table: network_audience). FS1 averaged 385,905 viewers across 21 rated broadcasts out of 39 total broadcasts (table: network_audience).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
  },
  {
   "id": "held_speedway",
   "q": "What was the attendance at the Speedway Classic?",
   "passed": true,
   "failures": [],
-  "seconds": 23,
-  "researchers": 2,
-  "report": "The Speedway Classic on August 2, 2025, between the Cincinnati Reds and Atlanta Braves drew an attendance of 91,032 (table: games). This historic matchup was the first regular-season National League or American League game played in the state of Tennessee and the first MLB game played on a racetrack ([MLB Speedway Classic](https://en.wikipedia.org/wiki/MLB_Speedway_Classic)). The crowd of 91,032 coincided with a new all-time regular-season MLB attendance record, hosted within the massive 146,000-seat Bristol Motor Speedway NASCAR venue ([MLB Speedway Classic](https://en.wikipedia.org/wiki/MLB_Speedway_Classic)). This record-setting turnout also coincided with prominent pregame entertainment, including a headline concert by Tim McGraw, Pitbull, and Jake Owen, plus an outdoor fan zone with a 110-foot Ferris wheel ([MLB Speedway Classic](https://en.wikipedia.org/wiki/MLB_Speedway_Classic)).\n\n*These are associations, not cause and effect.*"
+  "seconds": 18,
+  "researchers": 1,
+  "report": "The attendance at the Speedway Classic on August 2, 2025, was 91,032 (table: games). This 2025 season matchup featured the Cincinnati Reds hosting the Atlanta Braves at Bristol Motor Speedway (table: games). The stadium's capacity is unknown, which means the fill rate for this game is also unknown (table: games)."
  },
  {
   "id": "held_drivers",
   "q": "What drives MLB attendance?",
   "passed": true,
   "failures": [],
-  "seconds": 51,
+  "seconds": 65,
   "researchers": 5,
-  "report": "MLB attendance is strongest for home openers, weekend games, and matchups against high-profile opponents like the Los Angeles Dodgers. At the team level, a season win rate that is .100 higher coincides with an 8.6% increase in expected attendance, while a 10% higher crowd over the prior two years relates to an 8.2% increase (table: model_coefficients). A 10% larger metro population has a negligible 0.2% effect that is not clear (table: model_coefficients). For individual games, home openers see a massive 69.1% boost in attendance (table: model_coefficients). Playing the Los Angeles Dodgers coincides with a 25.0% jump, followed by the New York Yankees at 15.7%, the Chicago Cubs at 13.1%, the Philadelphia Phillies at 9.5%, and the Boston Red Sox at 5.2% (table: model_coefficients). Conversely, falling behind in the standings hurts crowds, with each game further behind the division leader reducing attendance by 0.3% (table: model_coefficients). Timing and weather also play major roles. Compared to Fridays, Saturday games see an 8.8% increase, while Mondays drop by 21.8%, Wednesdays by 20.6%, Tuesdays by 18.9%, and Thursdays by 16.6% (table: model_coefficients). Sunday games show a minor, unclear decrease of 1.0% (table: model_coefficients). By month, compared to August, July games are up 4.2% and June games are up 2.5%, while March and April games are down 10.9% and May games are down 3.1% (table: model_coefficients). Bad weather like rain, drizzle, or snow goes with a 5.7% drop, and playing under a closed roof or dome relates to a 7.0% decrease (table: model_coefficients).\n\n*These are associations, not cause and effect.*"
+  "report": "MLB attendance closely coincides with game-level factors like home openers, specific opponents, and the day of the week, as well as team-level factors like recent winning records and past crowds. At the team level, a season win rate .100 higher coincides with an 8.6% increase in attendance, while a 10% higher crowd over the prior two years goes with an 8.2% increase (table: model_coefficients). A metro population 10% larger has a 0.2% association, though this does not show a clear effect (table: model_coefficients). A team's overall season attendance is highly predictable, with a model capturing 90.2% of the differences between teams, while game-by-game attendance is also highly predictable, with a model capturing 82.6% of the variation overall, 43.2% of the variation within the same stadium, and a prediction error of 0.193 (table: model_fit). At the game level, home openers coincide with a 69.1% jump in attendance (table: model_coefficients). Games against the Los Angeles Dodgers and New York Yankees go with increases of 25.0% and 15.7% respectively, while a .100 higher home win rate is associated with a 4.7% increase (table: model_coefficients). Conversely, Monday games coincide with a 21.8% drop compared to Fridays, Wednesday games with a 20.6% drop, Tuesday games with an 18.9% drop, and March and April games with a 10.9% drop compared to August (table: model_coefficients).\n\n*These are associations, not cause and effect.*"
  },
  {
   "id": "new_cubs",
   "q": "How did the Cubs do on attendance and viewership last year?",
   "passed": true,
   "failures": [],
-  "seconds": 35,
-  "researchers": 2,
-  "report": "During the 2025 season, the Chicago Cubs grew their home attendance to an average of 37,130 fans per game while averaging 1,030,818 viewers for their single-game national television broadcasts (table: team_season_model) (table: team_tv_summary). This attendance average represents a 3.4% increase from the 2024 season average of 35,923 (table: team_season_model). The crowd was also above the expected average of 36,687 predicted by their prior two years of crowds, win rate, and market size (table: team_season_model). For notable matchups, the home opener on April 4 against the San Diego Padres had 40,244 fans in attendance with a 97.4% fill rate, while the lowest-attendance game on April 9 against the Texas Rangers had 23,590 fans, a 57.1% fill rate against an expected 23,427 (table: games_clean). The highest-attendance home game on June 19 against the Milwaukee Brewers had 41,078 fans with a 99.5% fill rate; because this game was at or near the park's season high, it may have been limited by the park, so demand may have been higher than the crowd (table: games_clean). On television, the Cubs made 17 national appearances, including 12 single games, 5 Fox window games, and 2 special event games (table: team_tv_summary). Their single-game broadcasts peaked at 2,041,000 viewers, with a network mix of 6 games on Fox, 5 on ESPN, 3 on FS1, and 3 on TBS (table: team_tv_summary).\n\n*Assumed last year means the 2025 season.*\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Promotions are not in the data. These are associations, not cause and effect.*"
+  "seconds": 69,
+  "researchers": 4,
+  "report": "During the 2025 season, the Chicago Cubs drew strong crowds with an average fill rate of 89.9% at the ballpark (table: games_clean) and averaged 1,030,818 viewers for their single-game national television appearances (table: team_tv_summary). Average attendance was up 3.4% from 35,923 the season before (table: team_season_model). That is 1.2% above the 36,687 that the prior two years of crowds, win rate and market would predict (table: team_season_model). The team welcomed 2,933,251 total actual fans to the park, averaging 37,130 per game (table: games_clean). On television, the Cubs made 17 total national appearances, including 12 single-game broadcasts, 5 Fox window appearances, and 2 special event games (table: team_tv_summary). Their single-game appearances drew a total audience of 11,339,000 viewers (table: viewership_games, games). Their highest-rated single game was on April 13, 2025, against the Los Angeles Dodgers on ESPN, drawing 2,041,000 viewers (table: team_tv_summary, viewership_games, games). Other top games on ESPN included an August 10, 2025 matchup against the St. Louis Cardinals with 1,994,000 viewers, an April 27, 2025 game against the Philadelphia Phillies with 1,727,000 viewers, and a July 6, 2025 game against the St. Louis Cardinals with 1,720,000 viewers (table: viewership_games, games).\n\n*Assumed last year means the 2025 season.*\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Promotions are not in the data. These are associations, not cause and effect.*"
  },
  {
   "id": "new_opener",
   "q": "Did the Red Sox or the Yankees have better season opener attendance in 2024?",
-  "passed": false,
-  "failures": [
-   "missing '11,719'",
-   "should not say '45,337'",
-   "should not say '42,642'"
-  ],
-  "seconds": 52,
-  "researchers": 2,
-  "report": "The New York Yankees had higher attendance for their 2024 home opener than the Boston Red Sox, though the Red Sox played in front of a larger crowd for the very first game of the regular season (table: games_clean). For their home opener on April 5, 2024, the Yankees drew 47,812 fans with a 102.7% fill percentage (table: games_clean). The Red Sox home opener on April 9, 2024, drew 36,093 fans with a 95.6% fill percentage (table: games_clean). For the very first game of the regular season on March 28, 2024, the Red Sox played at the Seattle Mariners with an attendance of 45,337 and a 95.7% fill percentage (table: games_clean). On that same day, the Yankees played at the Houston Astros with an attendance of 42,642 and a 103.6% fill percentage (table: games_clean)."
+  "passed": true,
+  "failures": [],
+  "seconds": 33,
+  "researchers": 1,
+  "report": "The New York Yankees had higher attendance for their 2024 home opener on April 5 than the Boston Red Sox had for theirs on April 9 by 11,719 fans, drawing 47,812 compared to 36,093 for the Red Sox (table: games_clean). The Yankees' fill rate of 102.7% was 7.1% higher than the Red Sox's fill rate of 95.6% (table: games_clean)."
  },
  {
   "id": "new_as",
   "q": "How did the Oakland A's viewership change in their final season before moving?",
   "passed": true,
   "failures": [],
-  "seconds": 36,
-  "researchers": 2,
-  "report": "We cannot answer how the Oakland Athletics' viewership changed in their final season before moving because our viewership data starts in 2025, and the 2024 season is not in our data.\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*"
+  "seconds": 28,
+  "researchers": 1,
+  "report": "We cannot determine how the Oakland A's viewership changed in their final season before moving because viewership data for 2024 is not available in our data, which only covers viewership starting in 2025. In 2025, the team had 0 national television appearances (table: team_tv_summary). For the 2026 season, the Athletics had 1 national television appearance, which was a single game broadcast on FS1 (table: team_tv_summary). However, the audience for this 2026 game is uncertain, and the total viewers are unknown (table: game_tv_lookup).\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*"
  },
  {
   "id": "plain_lookup",
   "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
   "passed": true,
   "failures": [],
-  "seconds": 20,
+  "seconds": 15,
   "researchers": 1,
-  "report": "The attendance for the Los Angeles Dodgers at the San Diego Padres game on August 23, 2025, at Petco Park was 46,326 (table: games). This turnout represented a fill percentage of 116.1% (table: games_clean)."
+  "report": "The attendance for the Los Angeles Dodgers at the San Diego Padres on August 23, 2025, was 46,326 in a stadium with a capacity of 39,909, resulting in a fill rate of 116.1% (table: games_clean)."
+ },
+ {
+  "id": "new_cubs_day_night",
+  "q": "How did Cubs day games compare with night games on attendance in 2025?",
+  "passed": true,
+  "failures": [],
+  "seconds": 44,
+  "researchers": 2,
+  "report": "Chicago Cubs home day games in 2025 had higher average attendance than night games by 1,714 (37,780 compared to 36,067), with fill rates of 91.5% and 87.3% respectively (table: games_clean). This difference in attendance is linked to the weekday schedule composition, as weekends consist overwhelmingly of day games (39 day versus 3 night games) while weekdays feature most of the night games (27 night versus 10 day games) (table: games_clean). When comparing day versus night games directly on individual weekdays, attendance levels are comparable, indicating the difference is a byproduct of scheduling rather than a general preference for day games (table: games_clean). Additionally, day games consistently outdraw or closely match night games within individual months from April through September (table: games_clean)."
  }
 ]

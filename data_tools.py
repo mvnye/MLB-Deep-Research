@@ -257,6 +257,19 @@ def run_sql(query: str) -> str:
         con.close()
 
 
+def team_season_facts() -> list[dict]:
+    """Facts an answer about a team-season must carry. Read by code, not by the model."""
+    con = _connect()
+    try:
+        rows = con.execute("""select home_team, season, avg_attendance, prior_season_avg, yoy_change_pct,
+                                     expected_avg_attendance, residual_pct, prior_residual_pct,
+                                     possible_rebound from team_season_model""")
+        columns = [c[0] for c in rows.description]
+        return [dict(zip(columns, r)) for r in rows.fetchall()]
+    finally:
+        con.close()
+
+
 def describe_schema(table: str = "") -> str:
     """List all tables, or the columns of one table, as JSON."""
     try:

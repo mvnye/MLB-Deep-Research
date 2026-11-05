@@ -36,7 +36,7 @@ def check(case: dict, run: app.Research) -> list[str]:
     if "context" in case and context != case["context"]:
         failures.append(f"context ran: {context}")
     failures += run.errors
-    failures += app.citation_problems(run.report.split("\n\n*")[0], run.tool_calls)
+    failures += app.citation_problems(run.report.split("\n\n*")[0], run.tool_calls, case["q"])
     if app.word_count(run.report) > app.BROAD_WORD_LIMIT + 60:
         failures.append(f"{app.word_count(run.report)} words")
     return failures

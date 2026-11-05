@@ -26,7 +26,9 @@
   ],
   "context": true,
   "must_not": [
-   "technical"
+   "technical",
+   "10.2%",
+   "32,577"
   ]
  },
  {
@@ -79,7 +81,8 @@
    "8,794"
   ],
   "must_not": [
-   "technical"
+   "technical",
+   "170.69"
   ]
  },
  {
@@ -162,7 +165,8 @@
   "id": "held_tigers",
   "q": "How did Tigers crowds change in 2025, and why?",
   "must": [
-   "22.9%"
+   "22.9%",
+   "22.4%"
   ],
   "context": true,
   "must_not": [
@@ -174,7 +178,9 @@
   "q": "Which team under-performed the most on attendance in 2025?",
   "must": [
    "Cardinals",
-   "21.7%"
+   "21.7%",
+   "22.6%",
+   "27,778"
   ],
   "must_not": [
    "technical"
@@ -192,7 +198,8 @@
    "37,140.2",
    "coefficient of",
    "technical",
-   "ceiling game"
+   "ceiling game",
+   "6,219"
   ]
  },
  {
@@ -227,7 +234,8 @@
   "must_not": [
    "coefficient of",
    "shrunk",
-   "technical"
+   "technical",
+   "driven"
   ],
   "must": [
    "Home openers"
@@ -245,7 +253,13 @@
   "must_not": [
    "10 national",
    "technical",
-   "37,259"
+   "37,259",
+   "April 9",
+   "June 19",
+   "demand may have been higher",
+   "limited by the park",
+   "Yes on the raw",
+   "Mostly no"
   ]
  },
  {
@@ -260,9 +274,7 @@
   ],
   "must_not": [
    "demand may have been higher",
-   "technical",
-   "45,337",
-   "42,642"
+   "technical"
   ]
  },
  {
@@ -290,6 +302,17 @@
   "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
   "must": [
    "46,326"
+  ],
+  "must_not": [
+   "demand may have been higher",
+   "technical"
+  ]
+ },
+ {
+  "id": "new_cubs_day_night",
+  "q": "How did Cubs day games compare with night games on attendance in 2025?",
+  "must": [
+   "1,714"
   ],
   "must_not": [
    "demand may have been higher",
