@@ -28,7 +28,7 @@ To rebuild from scratch, run `uv run python scripts/pull_statsapi.py`, then `uv 
 
 The expected answer is what the data says, so the agent can be checked against it. The agent answer is its real output from a saved run on November 5, 2026, unedited. Wording varies between runs, but the facts should hold. The no-tools baseline is the same model with no tools and no system prompt.
 
-To test the agent against 31 questions with required facts, run `uv run python scripts/eval_agent.py`.
+To test the agent against 37 questions with required facts, run `uv run python scripts/eval_agent.py`.
 
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
@@ -38,7 +38,7 @@ To test the agent against 31 questions with required facts, run `uv run python s
 
 **Agent answer:**
 
-> Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller national TV audiences (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. Mostly no after comparing each game with its own park's usual crowd, so popular teams do not drive the result: the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34), and both ranges include zero[2]. Across team-seasons, teams with bigger average crowds also had bigger average national TV audiences (correlation 0.52, n = 56, range 0.30 to 0.69), which is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause[3].
+> Yes, games with smaller crowds tended to have smaller national TV audiences, but a crowd that was small for its own park did not clearly mean a smaller audience[1]. Comparing games on the same network, the two moved together (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. After comparing each game with its own park's usual crowd, the link mostly disappears (0.16 in 2025, range -0.05 to 0.37; 0.14 in 2026, range -0.08 to 0.34; both ranges include zero)[1]. Across team-seasons, teams with bigger average crowds also had bigger average national TV audiences (correlation 0.52, n = 56, range 0.30 to 0.69), which is consistent with team-level factors such as popularity and market size driving both, though the data does not prove the cause[2].
 >
 > *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*
 
@@ -48,13 +48,13 @@ To test the agent against 31 questions with required facts, run `uv run python s
 
 ### 2. Why did the Mets over-perform on attendance in 2025?
 
-**Expected answer:** The Mets averaged 39,776 fans a game in 2025, up 35.9% from 29,268 in 2024. That is 23.6% above the 32,182 that their prior two years of crowds, win rate, and market would predict. They were 18.8% below that prediction in 2024, so part of this may be a rebound. The rise coincided with signing Juan Soto, though the data cannot show the signing caused it.
+**Expected answer:** The Mets averaged 39,316 fans a game in 2025 (MLB's official season average), up 33.3% from 29,485 in 2024. That is 21.4% above the 32,383 that their prior two years of crowds, win rate, and market would predict. They were 18.6% below that prediction in 2024, so part of this may be a rebound. The rise coincided with signing Juan Soto, though the data cannot show the signing caused it.
 
 **Source:** `team_season_model`, and the Wikipedia article [2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season).
 
 **Agent answer:**
 
-> The New York Mets averaged 39,776 fans a game in 2025, 23.6% above the 32,182 their prior two years of crowds, win rate, and market would predict, up 35.9% from 29,268 the season before, and part of this may be a rebound from 18.8% below prediction[1]. These strong crowds, which averaged 94.9% of capacity, coincided with a hot 45–24 start through June 12 that gave the team a 96.2% chance to make the playoffs[2][3]. The high attendance also coincided with the July 19 retirement of former captain David Wright's number 5[3]. Finally, the fan interest coincided with Pete Alonso breaking the franchise record with his 253rd career home run, Juan Soto joining the 30–30 club, and Francisco Lindor also joining the 30–30 club[3].
+> The New York Mets averaged 39,316 fans per game in 2025, which was 21.4% higher than what their prior two years of crowds, win rate, and market would predict, representing a 33.3% increase from the season before as a rebound from a down 2024[1]. This 2025 average attendance was higher than the 2024 average of 29,485 fans by 9,831 fans, with 94.9% of capacity in 2025 compared to 69.8% of capacity in 2024, a gap of 25.1 percentage points[1]. This surge in crowds coincided with several major events, beginning with the historic signing of outfielder Juan Soto to a 15-year, $765 million contract in December 2024[2]. On the field, the Mets held the best record in MLB at 45–24 through June 12, and on July 19, the team retired former captain David Wright's number 5 and inducted him into the Mets Hall of Fame during a pre-game ceremony at Citi Field[2].
 
 **No-tools baseline:**
 
@@ -68,7 +68,7 @@ To test the agent against 31 questions with required facts, run `uv run python s
 
 **Agent answer:**
 
-> The data has no viewership number for the Yankees vs Red Sox game on June 7, 2025, alone, but the regional Fox window drew a total of 3,094,000 viewers[1]. This regional window featured the Yankees vs Red Sox and the San Diego Padres at the Milwaukee Brewers, with the Yankees vs Red Sox game reaching 96% of the country[1].
+> The Yankees vs Red Sox game on June 7, 2025, reached 96% of the country, but the data has no viewership number for that game alone[1]. The entire regional Fox window, which also featured the San Diego Padres at the Milwaukee Brewers, drew 3,094,000 viewers[1].
 >
 > *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*
 

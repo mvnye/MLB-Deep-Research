@@ -4,6 +4,7 @@ The run's context object must have a `tool_calls` list.
 """
 
 import asyncio
+import json
 from collections.abc import Callable
 
 from agents import function_tool
@@ -11,6 +12,8 @@ from agents.tool_context import ToolContext
 
 import data_tools
 import wikipedia
+
+MAX_QUERIES = 6  # per researcher
 
 
 async def _logged(ctx: ToolContext, name: str, args: dict, call: Callable[[], str]) -> str:
@@ -30,7 +33,21 @@ async def run_sql(ctx: ToolContext, query: str) -> str:
         query: One DuckDB SELECT statement, e.g. 'SELECT home_team, avg(attendance) FROM games
             WHERE season = 2025 GROUP BY 1'. Call describe_schema first for table and column names.
     """
-    return await _logged(ctx, "run_sql", {"query": query}, lambda: data_tools.run_sql(query))
+    run, agent = ctx.context, ctx.agent.name
+    used = run.query_counts.get(agent, 0)
+    run.query_counts[agent] = used + 1
+    if used >= MAX_QUERIES:  # the prompt asks for at most 6; this holds it
+        return await _logged(ctx, "run_sql", {"query": query}, lambda: json.dumps({
+            "error": f"This researcher has used its {MAX_QUERIES} queries.",
+            "hint": "Report what you have found, and say what is still missing."}))
+    key = " ".join(query.lower().split())
+    if key in run.query_cache:  # the same query again: the same answer, without running it
+        cached = json.loads(run.query_cache[key])
+        cached["note"] = "Already run: this is the same result as before. Do not run it again."
+        return await _logged(ctx, "run_sql", {"query": query}, lambda: json.dumps(cached))
+    result = await _logged(ctx, "run_sql", {"query": query}, lambda: data_tools.run_sql(query))
+    run.query_cache[key] = result
+    return result
 
 
 @function_tool

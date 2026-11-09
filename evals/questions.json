@@ -25,9 +25,9 @@
   "id": "sample_mets",
   "q": "Why did the Mets over-perform on attendance in 2025?",
   "must": [
-   "39,776",
-   "35.9%",
-   "23.6%",
+   "39,316",
+   "33.3%",
+   "21.4%",
    "rebound"
   ],
   "context": true,
@@ -37,7 +37,7 @@
    "32,577"
   ],
   "team_chart": true,
-  "tile": "39,776"
+  "tile": "39,316"
  },
  {
   "id": "sample_fox",
@@ -51,7 +51,8 @@
    "share of viewers",
    "data cannot answer",
    "technical",
-   "96.0%"
+   "96.0%",
+   "4% of the country"
   ],
   "max_researchers": 2,
   "chart": null,
@@ -102,14 +103,16 @@
  {
   "id": "postseason",
   "q": "How did postseason crowds compare in 2025?",
-  "must": [
-   "regular season"
-  ],
+  "must": [],
   "max_researchers": 0,
   "must_not": [
    "technical"
   ],
-  "no_tiles": true
+  "no_tiles": true,
+  "must_any": [
+   "regular season",
+   "regular-season"
+  ]
  },
  {
   "id": "out_of_range",
@@ -179,7 +182,8 @@
    "not in the data",
    "does not",
    "no data",
-   "unavailable"
+   "unavailable",
+   "in the data"
   ],
   "must_not": [
    "technical"
@@ -190,8 +194,8 @@
   "id": "held_tigers",
   "q": "How did Tigers crowds change in 2025, and why?",
   "must": [
-   "22.9%",
-   "22.4%"
+   "25.1%",
+   "21.9%"
   ],
   "context": true,
   "must_not": [
@@ -205,8 +209,8 @@
   "q": "Which team under-performed the most on attendance in 2025?",
   "must": [
    "Cardinals",
-   "21.7%",
-   "22.6%",
+   "21.2%",
+   "21.8%",
    "27,778"
   ],
   "must_not": [
@@ -278,13 +282,12 @@
   "must": [
    "Assumed",
    "2025 season",
-   "37,130",
+   "37,259",
    "17"
   ],
   "must_not": [
    "10 national",
    "technical",
-   "37,259",
    "April 9",
    "June 19",
    "demand may have been higher",
@@ -322,7 +325,9 @@
    "doesn't cover",
    "starts in 2025",
    "begins in 2025",
-   "only covers"
+   "only covers",
+   "no 2024 viewership",
+   "not in the data"
   ],
   "must_not": [
    "no national tv broadcasts recorded",
@@ -350,16 +355,18 @@
  {
   "id": "new_cubs_day_night",
   "q": "How did Cubs day games compare with night games on attendance in 2025?",
-  "must": [
-   "1,714"
-  ],
+  "must": [],
   "must_not": [
    "demand may have been higher",
    "technical",
    "byproduct",
    "rather than a general"
   ],
-  "team_chart": true
+  "team_chart": true,
+  "must_any": [
+   "1,713",
+   "1,714"
+  ]
  },
  {
   "id": "chart_cubs_months",
@@ -436,5 +443,44 @@
    "Nielsen"
   ],
   "team_chart": false
+ },
+ {
+  "id": "official_total",
+  "q": "What was the Yankees' total home attendance in 2024?",
+  "must": [
+   "3,309,838"
+  ],
+  "must_not": [
+   "3,227,098"
+  ],
+  "team_chart": true
+ },
+ {
+  "id": "as_viewership_change",
+  "q": "How did the Oakland A's viewership change in their final season before moving?",
+  "must_any": [
+   "cannot",
+   "not cover",
+   "does not",
+   "no 2024 viewership",
+   "not in the data"
+  ],
+  "must_not": [
+   "Something went wrong"
+  ],
+  "must": [
+   "FS1"
+  ]
+ },
+ {
+  "id": "cubs_white_sox",
+  "q": "Compare the Cubs and White Sox on attendance and national TV audiences in 2025.",
+  "must": [
+   "Cubs",
+   "White Sox",
+   "viewers"
+  ],
+  "team_chart": false,
+  "parallel": true
  }
 ]

@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+import time
 import uuid
 from bisect import bisect_left
 from dataclasses import dataclass, field, replace
@@ -69,6 +70,9 @@ class Research:
     errors: list[str] = field(default_factory=list)  # researcher failures, for logs
     failed_roles: set[str] = field(default_factory=set)  # roles with no successful researcher yet
     answered_round: dict[str, int] = field(default_factory=dict)  # first round each role delivered
+    tasks: list[dict] = field(default_factory=list)  # each researcher's role, task words and findings
+    query_counts: dict[str, int] = field(default_factory=dict)  # queries per researcher
+    query_cache: dict[str, str] = field(default_factory=dict)  # query text -> result, for repeats
     retries: int = 0  # researchers rerun after a malformed tool call
     report: str = ""
     chart: dict | None = None  # built from query rows in charts.py, never from the report's text
@@ -115,8 +119,10 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
   residual_pct_capped. If ceiling_game is true, the expected values are empty on purpose and nothing
   is missing. Add capped_text only if the task is about expected attendance or performance. Use games
   only for special events and shared-gate doubleheader games.
-- One team-season: from team_season_model, report avg_attendance, prior_season_avg, yoy_change_pct,
-  expected_avg_attendance, residual_pct, prior_residual_pct, possible_rebound and exclusion_reason.
+- One team-season: from team_season_model, report avg_attendance, official_home_total, record,
+  prior_season_avg, yoy_change_pct, expected_avg_attendance, residual_pct, prior_residual_pct,
+  possible_rebound and exclusion_reason. A season total or season average always comes from
+  team_season_model, never from a sum or average of games_clean. Give a record, not a win percentage.
 - A team across seasons: also run one query on games_clean returning season, month(official_date) as
   month, avg(attendance) as avg_attendance and avg(fill_pct) as avg_fill_pct, one row per season and
   month, for a chart. Do not list
@@ -162,7 +168,7 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
   and scope, n, corr_team_crowd_tv, ci_low and ci_high from team_crowd_tv for scope '2025 and 2026'.
   Report only those, with no network figures. Use crowd_tv_residual only if the task names a network.
 - Comparing networks: select network_text from network_audience.
-- Viewership starts in 2025. A season before that is not in our data: say that, and never say a team
+- Viewership starts in 2025. A season before that is not in the data: say that, and never say a team
   had no broadcasts in that season.
 - NULL viewers are unknown, never zero. Give no reason for a count or gap unless the data states it.
 - The data cannot answer: local RSN viewership, Peacock-only games, late-September 2025 games, or the
@@ -236,6 +242,8 @@ WITHIN_SEASON = re.compile(r"\b(by|each|per) month\b|\bmonthly\b|\bmonth by mont
 ALL_SEASONS = (2024, 2025, 2026)
 MIN_ALIAS_CHARS = 4
 MIN_TILES = 3  # fewer than this and the numbers read fine in the text
+MAX_PARK_SEATS = 100_000
+SINGLE_GAME = re.compile(r"\b(?:game|opener|matchup|doubleheader)\b|\b(?:first|last|final) home game", re.I)
 MIX_SHIFT = 0.15  # a network's share of broadcasts moving this much counts as a different mix
 ATHLETICS_ID = 133
 SEVERAL_TEAMS = re.compile(r"\bteams\b|\bcompare\b|\b(by|each) (month|weekday|day|network)\b", re.I)
@@ -376,6 +384,7 @@ def capacity_wording(report: str) -> str:
     report = re.sub(rf"\ban? {kinds}(\d+(?:\.\d+)?)% {kinds}fill (?:rate|percentage)", r"\1% of capacity", report)
     report = re.sub(r"\bfill rates of (\d+(?:\.\d+)?)% and (\d+(?:\.\d+)?)%", r"\1% and \2% of capacity", report)
     report = re.sub(r"(of capacity)(?: of capacity)+", r"\1", report)
+    report = re.sub(r"\bfilled (just |only )?(\d+(?:\.\d+)?% of)", r"drew \1\2", report)  # a park is never "filled"
 
     def listed(m: re.Match) -> str:  # over 100% only makes sense against a listed figure
         over = any(float(n) > 100 for n in re.findall(r"\d+(?:\.\d+)?", m[0]))
@@ -413,6 +422,8 @@ def nielsen_inline(report: str, tool_calls: list[dict]) -> str:
 
 def mix_text(counts: dict[str, int]) -> str:
     items = [f"{n} on {network}" for network, n in counts.items()]
+    if not items:
+        return "no national broadcasts in the data"
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + (", and " if len(items) > 2 else " and ") + items[-1]
 
 
@@ -427,12 +438,161 @@ def network_mix_note(report: str, question: str, tool_calls: list[dict]) -> str:
     totals = {season: sum(m.values()) or 1 for season, m in mix.items()}
     share = lambda season, network: mix[season].get(network, 0) / totals[season]
     networks = set(mix[2025]) | set(mix[2026])
+    if not mix[2025] or not mix[2026]:
+        return ""  # one season has no broadcasts in the data: the answer already says so
     if set(mix[2025]) == set(mix[2026]) and all(abs(share(2025, n) - share(2026, n)) < MIX_SHIFT for n in networks):
         return ""
     tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
                        "result": json.dumps({"columns": columns, "rows": rows})})
     return (f"The network mix also differs between the seasons: {mix_text(mix[2025])} in 2025, and "
             f"{mix_text(mix[2026])} in 2026 (table: game_tv_lookup).")
+
+
+def official_season_figures(report: str, tool_calls: list[dict]) -> str:
+    """A season total or average from the cleaned games becomes MLB's official figure."""
+    swaps = {}
+    for f in data_tools.season_figures():
+        for clean, official in ((f["clean_total"], f["official_total"]), (f["clean_avg"], f["official_avg"])):
+            if clean and official and round(clean) != round(official):
+                swaps[f"{round(clean):,}"] = (f"{round(official):,}", f)
+    used = []
+
+    def swap(m: re.Match) -> str:
+        if m[0] not in swaps:
+            return m[0]
+        new, f = swaps[m[0]]
+        used.append(f)
+        return new
+
+    report = re.sub(r"(?<![\d,.])\d{1,3}(?:,\d{3})+(?![\d,]*\.\d)", swap, report)
+    for f in {(f["team_id"], f["season"]) for f in used}:  # logged, so the footnote shows the source
+        query = (f"select home_team, season, avg_attendance, official_home_total from team_season_model "
+                 f"where team_id = {f[0]} and season = {f[1]}")
+        tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
+                           "result": data_tools.run_sql(query)})
+    return report
+
+
+def fix_window_coverage(report: str, question: str, tool_calls: list[dict]) -> str:
+    """In a Fox window, each game reached its own share of the country. The share given must be the
+    asked game's, not the other game's in the same window."""
+    day = GAME_DATE.search(question)
+    year = re.search(r"\b(20\d\d)\b", question)
+    named = teams_named(question)
+    if not (day and year and len(named) == 2 and re.search(r"% of the country", report)):
+        return report
+    query, columns, rows = data_tools.window_game(f"{day[0]} {year[1]}", list(named))
+    if not rows or rows[0][columns.index("coverage_pct")] is None:
+        return report
+    share = rows[0][columns.index("coverage_pct")]
+    fixed = re.sub(r"\b\d+(?:\.\d+)?% of the country", f"{share:g}% of the country", report, count=1)
+    if fixed != report:
+        tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
+                           "result": json.dumps({"columns": columns, "rows": rows}, default=str)})
+    return fixed
+
+
+def gaps_from_shown(report: str) -> str:
+    """A gap between two shown values is worked out from those values as shown: 89.9% and 45.0% are
+    44.9 points apart, and 26,644 and 26,397 are 247 apart."""
+    def edit(sentence: str) -> str:
+        plain = citations.CITATION.sub("", sentence)
+        shares = [float(x) for x in re.findall(r"(\d+(?:\.\d+)?)%", plain)]
+        if len(shares) == 2:
+            gap = abs(shares[0] - shares[1])
+            sentence = re.sub(r"\b\d+(?:\.\d+)?(?= percentage points?)", f"{gap:.1f}", sentence, count=1)
+        counts = [int(x.replace(",", "")) for x in re.findall(r"(?<![\d.])\d{1,3}(?:,\d{3})+(?![\d.])", plain)]
+        said = re.search(r"\b(?:by|difference of|gap of)(?: an average of)? (\d{1,3}(?:,\d{3})*)\b(?! percent)", sentence)
+        if said:
+            shown = int(said[1].replace(",", ""))
+            values = [c for c in counts if c != shown]
+            if len(values) == 2 and abs(abs(values[0] - values[1]) - shown) <= 2:
+                sentence = sentence[:said.start(1)] + f"{abs(values[0] - values[1]):,}" + sentence[said.end(1):]
+        return sentence
+
+    return edit_sentences(report, edit)
+
+
+def absent_in_data(report: str) -> str:
+    """'no national TV appearances' -> 'no national TV appearances in the data': the 2025 tables end early."""
+    def edit(sentence: str) -> str:
+        if "in the data" in sentence.lower():
+            return sentence  # already said
+        sentence = re.sub(r"\b((?:no|zero|0) (?:national TV |national |single-game )?(?:appearances|broadcasts))\b",
+                          r"\1 in the data", sentence, count=1)
+        return re.sub(r"\b((?:appearances|broadcasts)\b[^.]{0,60}\b(?:had|with) none)\b(?! in the data)",
+                      r"\1 in the data", sentence, count=1)
+    return edit_sentences(report, edit)
+
+
+def records_not_rates(report: str) -> str:
+    """'a .580 win rate' -> 'a 94-68 record', for the teams in the data."""
+    for t in data_tools.team_season_facts():
+        if not t.get("record") or t.get("win_pct") is None:
+            continue
+        for shown in (f"{t['win_pct']:.3f}"[1:], f"{t['win_pct']:.1%}"):
+            report = re.sub(rf"\b(?:an? )?{re.escape(shown)} (?:win(?:ning)? (?:rate|percentage)|winning record)",
+                            f"a {t['record']} record", report)
+    return report
+
+
+def drop_derived_seats(report: str) -> str:
+    """A park holds tens of thousands. Seats in the hundreds of thousands is a made-up season sum."""
+    def edit(sentence: str) -> str | None:
+        return None if derived_seats(sentence) else sentence
+    return edit_sentences(report, edit)
+
+
+def derived_seats(text: str) -> bool:
+    return any(int(m[1].replace(",", "")) >= MAX_PARK_SEATS
+               for m in re.finditer(r"(\d{1,3}(?:,\d{3})+) (?:total |fewer |more )?seats", text))
+
+
+LIMIT_PHRASE = re.compile(r"cannot|can't|does not (?:cover|include|have)|doesn't|not covered|not available|"
+                          r"unavailable|outside|not in the data|no \w+ (?:data|viewership)|only covers", re.I)
+COVERAGE_LIMIT = re.compile(r"(?:\b20\d\d\b|season).*(?:not cover|does not cover|doesn't cover|not covered|outside|before 2025|only covers)"
+                            r"|(?:not cover|does not cover|doesn't cover|not covered|outside|only covers).*(?:\b20\d\d\b|season)", re.I)
+SAME_POINT = 0.5  # share of a sentence's words another limit sentence also has
+
+
+def drop_repeated_limits(report: str) -> str:
+    """A limit is stated once. A later sentence making the same point in other words is removed."""
+    said: list[set[str]] = []
+
+    def edit(sentence: str) -> str | None:
+        plain = citations.CITATION.sub("", sentence)
+        if not LIMIT_PHRASE.search(plain):
+            return sentence
+        words = task_words(plain) - LIMIT_WORDS
+        if COVERAGE_LIMIT.search(plain):
+            words = {"<seasons not covered>"}  # every way of saying a season is outside the data is one point
+        new_number = re.search(r"\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?%", plain)
+        if not new_number and any(words and old and len(words & old) / min(len(words), len(old)) >= SAME_POINT
+                                  for old in said):
+            return None
+        said.append(words)
+        return sentence
+
+    return edit_sentences(report, edit)
+
+
+LIMIT_WORDS = {"data", "cannot", "can't", "not", "does", "doesn't", "because", "only", "covers", "cover",
+               "available", "unavailable", "this", "that", "which", "there", "no", "are", "were", "has", "have"}
+
+
+def drop_repeated_numbers(report: str) -> str:
+    """A later sentence that only repeats numbers already given adds nothing. Notes are left alone."""
+    seen: set[str] = set()
+
+    def edit(sentence: str) -> str | None:
+        plain = citations.CITATION.sub("", sentence)
+        numbers = {n for n in re.findall(r"\d[\d,]*(?:\.\d+)?%?", plain)
+                   if len(n.replace(",", "").rstrip("%")) >= 3 and not re.fullmatch(r"20\d\d", n)}
+        repeat = bool(numbers) and numbers <= seen and not TEAM_LEVEL.search(plain)
+        seen.update(numbers)
+        return None if repeat else sentence
+
+    return edit_sentences(report, edit)
 
 
 def association_wording(report: str, tool_calls: list[dict]) -> str:
@@ -503,6 +663,11 @@ def missing_audience_notes(report: str, tool_calls: list[dict]) -> list[str]:
     return list(dict.fromkeys(notes))
 
 
+def first_sentence(report: str) -> str:
+    line = next((l for l in report.strip().split("\n") if l.strip() and not l.lstrip().startswith("#")), "")
+    return sentences(line)[0] if line else ""
+
+
 def drop_unsourced(report: str, tool_calls: list[dict]) -> str:
     """Remove any sentence that still has an unread link or a number no tool returned."""
     read = read_urls(tool_calls)
@@ -555,7 +720,8 @@ def teams_named(question: str) -> dict[int, str]:
 def attendance_team(question: str, report: str, answered: dict | None) -> tuple[int, str] | None:
     """The one team whose attendance this is about, or None. answered is the team a 'which team'
     answer settled on. A single game, several teams, TV only or a can't-answer is not about one."""
-    if GAME_DATE.search(question) or charts.NO_ANSWER.search(report[:200]) or not ATTENDANCE_WORDS.search(question):
+    if (GAME_DATE.search(question) or SINGLE_GAME.search(question) or charts.NO_ANSWER.search(report[:200])
+            or not ATTENDANCE_WORDS.search(question)):
         return None
     if any(int(y) not in ALL_SEASONS for y in re.findall(r"\b((?:19|20)\d\d)\b", question)):
         return None  # a season the data does not have
@@ -770,6 +936,29 @@ def found_anomaly(tool_calls: list[dict]) -> bool:
     return False
 
 
+GAP_WORDS = re.compile(r"cannot|could not|couldn't|not found|no rows|not available|unavailable|missing|"
+                       r"unknown|failed|no data|did not|does not (?:cover|include|have)", re.I)
+SAME_TOPIC = 0.5  # share of a task's words that another task also has
+TASK_STOPWORDS = {"the", "a", "an", "and", "or", "of", "in", "on", "for", "to", "with", "by", "from", "at",
+                  "find", "report", "provide", "give", "what", "how", "their", "its", "is", "was", "be"}
+
+
+def task_words(task: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9']+", task.lower()) if w not in TASK_STOPWORDS}
+
+
+def repeated_task(run: "Research", role: str, task: str) -> bool:
+    """A second researcher on the same role and topic, when the first succeeded and found no gap."""
+    words = task_words(task)
+    for done in run.tasks:
+        if done["role"] != role or done["failed"] or GAP_WORDS.search(done["findings"]):
+            continue
+        other = done["words"]
+        if words and other and len(words & other) / min(len(words), len(other)) >= SAME_TOPIC:
+            return True
+    return False
+
+
 @function_tool
 async def research(ctx: ToolContext, task: str, role: Literal["attendance", "viewership", "context"]) -> str:
     """Send a researcher to answer one task in a fresh context. Returns its cited findings.
@@ -784,6 +973,9 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
     if role == "context" and not asks_why(run.question) and not found_anomaly(run.tool_calls):
         return ("Context refused: the question does not ask why, and no anomaly has been found. "
                 "Do not retry unless the findings show one.")
+    if repeated_task(run, role, task):
+        return (f"The {role} researcher already answered this task, and its findings show no gap. "
+                "Do not re-verify. Use those findings, or reply DONE.")
     if is_simple_lookup(run.question) and run.researchers >= 1 and not run.failed_roles:
         return "This lookup needs one researcher, and one has it. Do not re-verify. Reply DONE."
     if is_simple_lookup(run.question) and run.researchers >= 2:
@@ -802,6 +994,7 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
     base = ROLES[role]
     agent = base.clone(name=f"{base.name} {run.researchers}")
     failed = False
+    started = time.time()
     try:
         try:
             result = await Runner.run(agent, f"Task: {task}", context=run, hooks=run.hooks, max_turns=14)
@@ -817,6 +1010,7 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
         failed = True
         findings = f"The {role} researcher failed on this task and found no answer ({type(e).__name__})."
         run.errors.append(f"{agent.name}: {type(e).__name__}: {str(e)[:300]}")
+    run.tasks.append({"role": role, "words": task_words(task), "failed": failed, "findings": findings})
     if failed:
         # A follow-up that fails after this role already delivered leaves the answer whole.
         if run.answered_round.get(role, turn) >= turn:
@@ -825,8 +1019,10 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
         run.answered_round.setdefault(role, turn)
         run.failed_roles.discard(role)
         run.findings.append(f"Task ({role}): {task}\n\n{findings}")
+    # The round and the times show which researchers ran side by side.
     run.tool_calls.append({"name": "research", "args": {"task": task, "role": role},
-                           "result": findings, "agent": ctx.agent.name})
+                           "result": findings, "agent": ctx.agent.name, "researcher": agent.name,
+                           "round": turn, "started": started, "finished": time.time()})
     return findings
 
 
@@ -925,9 +1121,11 @@ you're given.
 9. Events coincide with crowds: never say they drove, caused or explained them. Use at most three
    context facts, the ones most tied to crowds or viewership, dated before or during the season
    asked about.
-10. If the data cannot answer something the question asks, say so plainly and say why. The data
-    covers attendance for 2024 to 2026 and viewership from 2025. A season outside that is not in our
-    data, which is different from a team not being on TV. Mention only limits the question touches,
+10. If the data cannot answer something the question asks, state the limit once, plainly, with the
+    reason, then give the closest data that does exist: "There is no 2024 viewership in the data. In
+    the data, the A's had no national TV appearances in 2025 and one in 2026, on FS1, with the
+    audience unknown." Never make the same point twice in different words. The data
+    covers attendance for 2024 to 2026 and viewership from 2025. Mention only limits the question touches,
     with no citation for them. A researcher failing is a technical problem, not a limit of the data.
 11. Write for a seller: everyday words, no column names or game IDs, and no mention of research,
     findings or rules. Say what is true and move on.
@@ -946,6 +1144,10 @@ you're given.
     Put the unit next to a count the first time it appears, as in "42,390 fans" or "708,000 viewers".
 17. Model results are associations: say "was associated with" or "coincided with", never that a
     factor increases, drives, causes, or boosts attendance.
+20. Do not repeat a number already given in the answer. Do not invent derived figures, such as
+    seats across a season: compare the values the findings give, such as each park's capacity.
+21. Say an absence is in the data: "no national TV appearances in the data for 2025", since the
+    2025 tables end in early September.
 19. When an audience has an audience_note, say why in the same sentence, such as "the truTV
     simulcast number is missing".
 18. Give a fill rate as a share of capacity, such as "99.3% of capacity". Over 100%, say "of listed
@@ -998,6 +1200,8 @@ def unverified_numbers(report: str, tool_calls: list[dict], sources: list[float]
         decimals = len(text.split(".")[1]) if "." in text else 0
         if decimals == 0 and (value < 100 or 1900 <= value <= 2100):
             continue  # counts, ranks and years
+        if report[match.end():match.end() + 18].startswith(" percentage point"):
+            continue  # a gap between two shown shares, recomputed from them by gaps_from_shown
         scale = {"m": 1e6, "k": 1e3}.get((match[1] or " ")[0].lower(), 1)
         # A count can be a rounding step away from a query's average, and a gap between two rounded
         # numbers can be one away from the exact gap.
@@ -1092,7 +1296,9 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
     missing = [f"The first sentence must state the conclusion with its key numbers. Start with: {team_opening(team)}"] if gaps else []
     return (list(dict.fromkeys(problems)) + unverified_numbers(report, tool_calls)
             + sample_size_problems(report) + jargon_problems(report) + plain_language_problems(report, question)
-            + model_wording_problems(report, tool_calls) + missing)
+            + model_wording_problems(report, tool_calls) + missing
+            + (["A park holds tens of thousands: remove the season seat total and compare capacities."]
+               if derived_seats(report) else []))
 
 
 async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
@@ -1137,6 +1343,12 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
                "number from the findings, or remove the fact:\n- " + "\n- ".join(problems))
         result = await Runner.run(writer, fix, context=run, hooks=hooks)
         run.report = str(result.final_output)
+        bad = unverified_numbers(first_sentence(run.report), run.tool_calls)
+        if bad:  # deleting the opening would leave an answer with no conclusion: rewrite it instead
+            fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite only the first sentence, using "
+                   "numbers from the findings, and keep the rest as it is:\n- " + "\n- ".join(bad))
+            result = await Runner.run(writer, fix, context=run, hooks=hooks)
+            run.report = str(result.final_output)
         run.report = drop_unsourced(run.report, run.tool_calls)
     # 5. Enforce the length in code: one pass, kept only if the citations survive it
     limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
@@ -1157,6 +1369,10 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
     run.report = capacity_wording(fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question)))))
     run.report = association_wording(neutral_voice(run.report), run.tool_calls)
+    run.report = official_season_figures(run.report, run.tool_calls)
+    run.report = fix_window_coverage(run.report, asked, run.tool_calls)
+    run.report = drop_repeated_limits(run.report)
+    run.report = drop_repeated_numbers(drop_derived_seats(records_not_rates(absent_in_data(gaps_from_shown(run.report)))))
     run.report = nielsen_inline(run.report, run.tool_calls)
     mix = network_mix_note(run.report, asked, run.tool_calls)
     if mix:
@@ -1195,30 +1411,42 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
 titler = Agent(
     name="Titler",
     instructions="""\
-Write a short title for an answer to the user's question about MLB attendance or national TV
-audiences: 3 to 8 words, naming the team or topic and the seasons, such as "Yankees attendance,
+Write a short title for an answer about MLB attendance or national TV audiences, from what the
+answer actually covers, not only what was asked: 3 to 10 words, naming the team or topic and the
+seasons, such as "Yankees TV audience: local not available, national 2026", such as "Yankees attendance,
 2024 vs 2025", "Mets attendance above expectations, 2025", or "What drives MLB attendance". For a
 follow-up, use the conversation so far to name what it is about: after a question on Yankees
 attendance, "What about TV?" becomes "Yankees national TV audience, 2025 vs 2026". Name only seasons
 the data has: attendance covers 2024 to 2026, and national TV audiences cover 2025 and 2026 only.
+Never reuse a title already used in this conversation: make it say what is different.
 Reply with the title only, with no quotation marks and no ending period.""",
     model=RESEARCHER_MODEL,
     model_settings=SETTINGS,
 )
 TITLE_SECONDS = 30
 MAX_TITLE_CHARS = 80
+TITLE_ANSWER_CHARS = 700
 
 
-async def make_title(question: str, history: str) -> str:
-    """A short title, or the question itself if the model fails or rambles."""
-    prompt = f"Conversation so far:\n{history}\n\nNew question: {question}" if history else question
+async def make_title(question: str, history: str, answer: str = "", used: tuple[str, ...] = ()) -> str:
+    """A short title from the answer, never one already used, or the question if the model fails."""
+    prompt = (f"Conversation so far:\n{history}\n\n" if history else "") + f"Question: {question}"
+    if answer:
+        prompt += f"\n\nAnswer:\n{citations.CITATION.sub('', answer)[:TITLE_ANSWER_CHARS]}"
+    if used:
+        prompt += "\n\nTitles already used: " + "; ".join(used)
     try:
         result = await asyncio.wait_for(Runner.run(titler, prompt), TITLE_SECONDS)
         title = str(result.final_output).strip().strip('"').rstrip(".").replace("—", ", ").split("\n")[0]
     except Exception:
         logger.exception("Title failed for %r", question)
         title = ""
-    return title if 0 < len(title) <= MAX_TITLE_CHARS else question
+    title = title if 0 < len(title) <= MAX_TITLE_CHARS else question
+    n = 2
+    while title.lower() in {t.lower() for t in used}:  # last resort: still never the same title
+        title = f"{title.rstrip(' 0123456789()')} ({n})"
+        n += 1
+    return title
 
 
 # --- Chat sessions and errors ---
@@ -1233,6 +1461,7 @@ class ChatSession:
 
     turns: list[tuple[str, str]] = field(default_factory=list)  # (question, answer)
     pending_question: str | None = None  # waiting on the user's answer to a clarifying question
+    titles: list[str] = field(default_factory=list)  # every box title so far, so none repeats
 
 
 def history_text(session: ChatSession) -> str:
@@ -1248,7 +1477,6 @@ async def answer(session: ChatSession, message: str, hooks: PanelHooks) -> Resea
     run = Research(hooks=hooks, question=question)
     session.pending_question = None
     history = history_text(session)
-    title = asyncio.create_task(make_title(question, history))  # made while the research runs
     failed = False
     try:
         await deep_research(run, may_clarify=pending is None, history=history)
@@ -1257,10 +1485,10 @@ async def answer(session: ChatSession, message: str, hooks: PanelHooks) -> Resea
         run.report = friendly_error(e)
         logger.exception("Research failed for %r", question)
     if run.needs_clarification:
-        title.cancel()
         session.pending_question = question
         return run
-    run.title = await title
+    run.title = await make_title(question, history, run.report, tuple(session.titles))
+    session.titles.append(run.title)
     if not failed:
         session.turns.append((question, run.report))
     return run

@@ -36,6 +36,13 @@ def uncited_facts(run: app.Research) -> list[str]:
     return problems
 
 
+def ran_in_parallel(run: app.Research) -> bool:
+    """Two researchers sent in the same Lead turn whose work overlapped in time."""
+    sent = [c for c in run.tool_calls if c["name"] == "research" and "started" in c]
+    return any(a["round"] == b["round"] and a["started"] < b["finished"] and b["started"] < a["finished"]
+               for i, a in enumerate(sent) for b in sent[i + 1:])
+
+
 def check(case: dict, run: app.Research) -> list[str]:
     report, failures = run.report.casefold(), []
     if case.get("clarify", False) != run.needs_clarification:
@@ -63,6 +70,8 @@ def check(case: dict, run: app.Research) -> list[str]:
         failures.append(f"should have no tiles: {run.tiles}")
     if "box_score" in case and bool(run.box_score) != case["box_score"]:
         failures.append(f"box score should be {case['box_score']}")
+    if case.get("parallel") and not ran_in_parallel(run):
+        failures.append("researchers did not run in parallel")
     failures += app.citation_problems(run.cited, run.tool_calls, case["q"])
     failures += uncited_facts(run)
     failures += [f"says team factors are ruled out: {m[0]}" for m in app.RULED_OUT.finditer(run.report)]

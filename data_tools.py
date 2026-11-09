@@ -294,6 +294,26 @@ def _query(query: str) -> tuple[list[str], list[list]]:
         con.close()
 
 
+def season_figures() -> list[dict]:
+    """Each team-season's official total and average, beside the cleaned games' sum and average."""
+    columns, rows = _query("""select m.team_id, m.season, m.official_home_total as official_total,
+            m.avg_attendance as official_avg, sum(g.attendance) as clean_total, avg(g.attendance) as clean_avg
+        from team_season_model m join games_clean g on g.home_team_id = m.team_id and g.season = m.season
+        group by 1, 2, 3, 4""")
+    return [dict(zip(columns, r)) for r in rows]
+
+
+def window_game(day: str, team_ids: list[int]) -> tuple[str, list[str], list[list]]:
+    """The Fox window row for one game: the two teams on that date. day is like 'June 7 2025'."""
+    from datetime import datetime
+    date = datetime.strptime(day, "%B %d %Y").date()
+    a, b = (int(t) for t in team_ids)
+    query = (f"select official_date, away_team, home_team, coverage_pct, window_total, window_games "
+             f"from game_tv_lookup where official_date = '{date}' and broadcast = 'regional window' "
+             f"and ((home_team_id = {a} and away_team_id = {b}) or (home_team_id = {b} and away_team_id = {a}))")
+    return (query, *_query(query))
+
+
 def flagged_audiences() -> tuple[str, list[str], list[list]]:
     """Audiences that are not a plain total, with the reason. Read by code."""
     query = ("select official_date, away_team, home_team, network, audience_status, viewers_total, "
@@ -342,7 +362,8 @@ def team_season_facts() -> list[dict]:
     """Facts an answer about a team-season must carry. Read by code, not by the model."""
     con = _connect()
     try:
-        rows = con.execute("""select home_team, season, avg_attendance, prior_season_avg, yoy_change_pct,
+        rows = con.execute("""select home_team, season, avg_attendance, official_home_total, record, win_pct,
+                                     prior_season_avg, yoy_change_pct,
                                      expected_avg_attendance, residual_pct, prior_residual_pct,
                                      possible_rebound from team_season_model""")
         columns = [c[0] for c in rows.description]

@@ -26,7 +26,7 @@
             section { background: var(--chalk); border: 1px solid var(--line); border-radius: 6px; padding: 1.25rem 1.5rem; }
             .top { padding: 0; overflow: hidden; border-color: var(--green); }
             .board { background: var(--green); color: var(--cream); padding: 1.5rem; box-shadow: inset 0 0 0 4px var(--green-2), inset 0 0 0 5px #2c5c48; }
-            .about { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; padding: 0 1.5rem; font-size: 0.92rem; }
+            .about { padding: 0 1.5rem; font-size: 0.95rem; max-width: 70ch; }
             .limits { color: var(--muted); font-size: 0.88rem; }
             .top .limits { padding: 0.75rem 1.5rem 1.1rem; }
             .stitch { display: block; width: 100%; height: auto; margin: 0.35rem 0; }
@@ -39,13 +39,15 @@
             button.plain { padding: 0.5rem 0.9rem; font-size: 0.92rem; font-weight: 500; background: var(--chalk); color: var(--green); border: 1px solid #b9b19c; border-radius: 4px; }
             #progress { list-style: none; color: #d9e2d8; font-size: 0.9rem; margin-top: 0.75rem; }
             #progress:empty { display: none; }
+            .chart-toggle { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; font-size: 0.88rem; color: var(--cream); cursor: pointer; }
+            .chart-toggle input { width: 1rem; height: 1rem; accent-color: var(--clay); }
             #clarify { margin-top: 0.6rem; padding: 0.45rem 0.75rem; background: var(--green-2); border-left: 3px solid var(--clay); color: var(--cream); font-size: 0.95rem; }
             #clarify[hidden] { display: none; }
             /* Moving dots on the latest line, so a long step does not look frozen. */
             #progress li:last-child::after { content: "..."; display: inline-block; width: 1.4em; text-align: left; animation: dots 1.2s steps(1) infinite; }
             @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
             @media (prefers-reduced-motion: reduce) { #progress li:last-child::after { animation: none; } }
-            #samples { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.6rem; margin-top: 1rem; }
+            #samples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 0.6rem; margin-top: 1rem; }
             /* A ticket: notches on both edges, and a perforated line beside the stub. */
             .ticket { display: flex; align-items: stretch; text-align: left; border: none; background: var(--cream); color: var(--green-2); font-size: 0.9rem; line-height: 1.35;
                 -webkit-mask: radial-gradient(circle 7px at 0 50%, transparent 96%, #000) left / 51% 100% no-repeat, radial-gradient(circle 7px at 100% 50%, transparent 96%, #000) right / 51% 100% no-repeat;
@@ -98,6 +100,14 @@
             .callout { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
             .callout b { font-family: var(--display); font-weight: 600; font-size: 1.1rem; color: var(--green); }
             .chart-source { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+            /* Phones and narrow windows: smaller title, tighter padding, nothing wider than the screen. */
+            @media (max-width: 600px) {
+                body { padding: 0.75rem; }
+                h1 { font-size: 1.5rem; overflow-wrap: anywhere; }
+                .board { padding: 1rem; }
+                .about, .top .limits { padding-left: 1rem; padding-right: 1rem; }
+                #send { padding: 0 1rem; }
+            }
             /* The context panel stays hidden until the toggle opens it. */
             body:not(.show-work) { margin-right: 0 !important; }
             body:not(.show-work) #context-panel { display: none !important; }
@@ -120,29 +130,19 @@
                         <input id="question" placeholder="Ask about a team, season, game, or comparison" autocomplete="off" aria-label="Your question" />
                         <button id="send" type="submit">Ask</button>
                     </form>
+                    <label class="chart-toggle"><input type="checkbox" id="withCharts" checked /> Include charts</label>
                     <p id="clarify" role="status" hidden></p>
                     <ul id="progress" role="status"></ul>
                     <div id="samples">
                         <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?</span></button>
                         <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Why did the Mets over-perform on attendance in 2025?</span></button>
-                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?</span></button>
+                        <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Compare the Cubs and White Sox on attendance and national TV audiences in 2025.</span></button>
                         <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">How did the Oakland A's viewership change in their final season before moving?</span></button>
                     </div>
                 </div>
                 <div id="topStitch"></div>
                 <div class="about">
-                    <div>
-                        <h2>What this explores</h2>
-                        <p>What drives MLB attendance, why teams and games beat or miss expectations, and whether smaller crowds went with smaller national TV audiences.</p>
-                    </div>
-                    <div>
-                        <h2>Who it is for</h2>
-                        <p>Sports media and sponsorship sellers preparing team pitches.</p>
-                    </div>
-                    <div>
-                        <h2>How to use it</h2>
-                        <p>Ask about a team, season, game, or comparison, then ask follow-ups. A vague question gets one clarifying question first. Every fact shows its source.</p>
-                    </div>
+                    <p>This tool helps sports media and sponsorship sellers build team pitches from MLB crowd and TV data. Ask about a specific team, season, game, or comparison. A team of research agents looks up attendance and national TV audiences, compares each team and game with what its usual crowd would predict, and adds context from Wikipedia when something stands out. The answer comes back with sources and a chart (when helpful). Vague questions will ask for clarification.</p>
                 </div>
                 <p class="limits">Attendance covers the 2024 to 2026 regular seasons. National TV audiences cover 2025 and 2026, and the 2025 figures end in early September. Local TV viewership and the postseason are not included.</p>
             </section>
@@ -366,7 +366,7 @@
 
             // The answer's box is made when the answer arrives, so a clarifying question never gets one.
             function showClarify(text) {
-                $("clarify").textContent = text;
+                $("clarify").textContent = text ? `Clarification: ${text}` : "";
                 $("clarify").hidden = !text;
                 $("question").placeholder = text ? "Your answer" : "Ask about a team, season, game, or comparison";
                 if (text) $("question").focus();
@@ -378,8 +378,8 @@
                 answer.innerHTML = renderMarkdown(event.markdown, turn);
                 // Key numbers above the text, charts and the box score below it.
                 if (event.tiles?.length) answer.prepend(scoreTiles(event.tiles));
-                if (event.chart) answer.appendChild(answerChart(event.chart));
-                if (event.team_chart) answer.appendChild(teamChart(event.team_chart));
+                if (event.chart && $("withCharts").checked) answer.appendChild(answerChart(event.chart));
+                if (event.team_chart && $("withCharts").checked) answer.appendChild(teamChart(event.team_chart));
                 if (event.box_score) answer.appendChild(boxScore(event.box_score));
                 if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
                 if (event.data_note) {
@@ -399,6 +399,7 @@
                 $("progress").replaceChildren();
                 showClarify("");
                 resetContext();
+                setRunHeader(question, "");
 
                 const params = new URLSearchParams({ question });
                 if (sessionId) params.set("session_id", sessionId);
@@ -412,6 +413,7 @@
                         sessionId = event.session_id;
                         if (event.clarify) showClarify(event.markdown);
                         else showAnswer(event);
+                        setRunHeader(event.question, event.clarify ? "Waiting for clarification" : event.title);
                         finish();
                     }
                 };
@@ -440,8 +442,14 @@
             $("toggle").addEventListener("click", () => setWork(!workOpen()));
             $("ctx-close").addEventListener("click", () => setWork(false));
             document.addEventListener("keydown", (e) => { if (e.key === "Escape" && workOpen()) setWork(false); });
+            // Remembered for this browser session. Storage can be blocked, so it is only a convenience.
+            try { $("withCharts").checked = sessionStorage.getItem("withCharts") !== "off"; } catch {}
+            $("withCharts").addEventListener("change", () => {
+                try { sessionStorage.setItem("withCharts", $("withCharts").checked ? "on" : "off"); } catch {}
+            });
             $("reset").addEventListener("click", () => {
                 sessionId = null;
+                setRunHeader("", "");
                 showClarify("");
                 $("thread").replaceChildren();
                 resetContext();

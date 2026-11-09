@@ -29,6 +29,9 @@ contextStyle.textContent = `
     #ctx-jump[hidden] { display: none; }
     #ctx-close { width: 1.9rem; height: 1.9rem; font-size: 1.2rem; line-height: 1; background: none; color: #333; border: 1px solid #ccc; }
     #ctx-close:hover { background: #eee; }
+    .ctx-run { padding: 0.5rem 1rem; border-bottom: 1px solid #e0e0e0; font-family: system-ui, sans-serif; font-size: 0.8rem; color: #333; }
+    .ctx-run:empty { display: none; }
+    .ctx-run b { display: block; font-size: 0.85rem; }
     #context-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 1.5rem; }
     #context-scroll h2, .ctx-head {
         font-family: system-ui, sans-serif;
@@ -83,6 +86,9 @@ contextShell.id = "context-panel";
 contextShell.innerHTML = `<div class="ctx-bar"><span>The agents' work</span>
     <button id="ctx-jump" type="button" hidden>Jump to latest</button>
     <button id="ctx-close" type="button" aria-label="Close the agents' work" title="Close (Esc)">&times;</button></div>`;
+const contextRun = document.createElement("div"); // which run the panel shows
+contextRun.className = "ctx-run";
+contextShell.appendChild(contextRun);
 const contextPanel = document.createElement("div"); // the part that scrolls
 contextPanel.id = "context-scroll";
 contextShell.appendChild(contextPanel);
@@ -98,6 +104,15 @@ let timeline = null; // several agents: built on the first timeline response
 let contextFollowing = true; // show the latest activity, until the reader scrolls or clicks in the panel
 let contextLatest = null; // the agent that changed last
 let contextPosition = null; // where the reader was, since a hidden panel loses its scroll position
+
+// The question and the answer's title, so it is clear which run the panel shows.
+function setRunHeader(question, title) {
+    contextRun.replaceChildren();
+    if (!question) return;
+    const name = document.createElement("b");
+    name.textContent = title || "Researching...";
+    contextRun.append(name, "Question: " + question);
+}
 
 function setContextFollowing(following) {
     contextFollowing = following;

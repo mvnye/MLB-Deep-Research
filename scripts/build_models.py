@@ -82,8 +82,10 @@ TEAM_COLUMN_COMMENTS = {
                     "market would predict. Not a year-over-year change. A rebound after a weak year "
                     "can still show here, so give a reason from context research if there is one.",
     "yoy_change_pct": "Plain change in average attendance from the season before. Report this first.",
-    "official_home_total": "MLB season total for all home games, including special events.",
-    "avg_attendance": "Average of games in the model, so it matches the year-over-year change.",
+    "official_home_total": "MLB season total for all home games, including special events. Use this, never a sum of games_clean, for a season total.",
+    "avg_attendance": "The official MLB season average per home date (Stats API). Use this, never an "
+                      "average of games_clean, for a season average.",
+    "record": "The team's final win-loss record, such as 94-68. Give this, not a win percentage.",
     "possible_rebound": "TRUE when the season before went the other way by 5% or more.",
     "prior_residual_pct": "This team residual_pct one season earlier. NULL when unavailable. "
                           "A negative value followed by a positive one suggests a rebound.",
@@ -289,9 +291,13 @@ def fit_game_model(g: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
 
 def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     team = (sample.groupby(["home_team_id", "home_team", "season"])
-            .agg(avg_attendance=("attendance", "mean"), model_games=("attendance", "size"),
-                 near_ceiling_games=("near_ceiling", "sum"))
+            .agg(model_games=("attendance", "size"), near_ceiling_games=("near_ceiling", "sum"))
             .reset_index().rename(columns={"home_team_id": "team_id"}))
+    # Season figures come from one source, MLB's season totals, so every answer agrees. The cleaned
+    # games, which leave out special events and unknown crowds, are for the game model only.
+    season_avg = con.execute("""select team_id, season, home_average as avg_attendance
+                                from team_season_attendance""").df()
+    team = team.merge(season_avg, on=["team_id", "season"])
 
     final = con.execute("""
         select team_id, season, max(wins) wins, max(losses) losses from (
@@ -299,6 +305,7 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
           union all select away_team_id, season, away_wins_after, away_losses_after from games)
         group by 1, 2""").df()
     final["win_pct"] = final["wins"] / (final["wins"] + final["losses"])
+    final["record"] = final["wins"].astype(int).astype(str) + "-" + final["losses"].astype(int).astype(str)
 
     avg = con.execute("select team_id, season, home_average from team_season_attendance").df()
     official = con.execute("""select team_id, season, home_total as official_home_total
@@ -310,7 +317,7 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
     one_back = avg.assign(season=avg["season"] + 1).rename(columns={"home_average": "prior_avg_attendance"})
     two_back = avg.assign(season=avg["season"] + 2).rename(columns={"home_average": "two_back_avg"})
 
-    team = (team.merge(final[["team_id", "season", "win_pct"]], on=["team_id", "season"])
+    team = (team.merge(final[["team_id", "season", "win_pct", "record"]], on=["team_id", "season"])
             .merge(official, on=["team_id", "season"], how="left")
             .merge(one_back, on=["team_id", "season"], how="left")
             .merge(two_back, on=["team_id", "season"], how="left")
@@ -348,7 +355,7 @@ def fit_team_model(con, sample: pd.DataFrame, markets: pd.DataFrame) -> tuple[pd
              "p_value": fit.pvalues[n]} for n in fit.params.index if n != "Intercept"]
     stats = {"n": int(fit.nobs), "r2": float(fit.rsquared)}
     cols = ["team_id", "home_team", "season", "avg_attendance", "model_games", "near_ceiling_games",
-            "win_pct", "prior_season_avg", "yoy_change_pct", "prior_two_year_avg", "market", "population", "population_year",
+            "win_pct", "record", "prior_season_avg", "yoy_change_pct", "prior_two_year_avg", "market", "population", "population_year",
             "teams_in_market", "in_model", "exclusion_reason", "expected_avg_attendance",
             "residual_pct", "prior_residual_pct", "possible_rebound", "official_home_total"]
     return team[cols], pd.DataFrame(rows), stats
@@ -657,9 +664,9 @@ def main() -> None:
     con.execute(f"COMMENT ON TABLE team_season_model IS '{TEAM_TABLE_COMMENT}'")
     con.execute(f"COMMENT ON TABLE crowd_tv_residual IS '{CROWD_TV_COMMENT}'")
     for col, text in GAME_COLUMN_COMMENTS.items():
-        con.execute(f"COMMENT ON COLUMN game_model.{col} IS '{text}'")
+        con.execute(f"COMMENT ON COLUMN game_model.{col} IS '{text.replace(chr(39), chr(39) * 2)}'")
     for col, text in TEAM_COLUMN_COMMENTS.items():
-        con.execute(f"COMMENT ON COLUMN team_season_model.{col} IS '{text}'")
+        con.execute(f"COMMENT ON COLUMN team_season_model.{col} IS '{text.replace(chr(39), chr(39) * 2)}'")
     con.execute("COMMENT ON COLUMN model_coefficients.pct_effect IS 'exp(coef) minus 1, per one "
                 "unit of the term. For win rate one unit is 1.000, so scale it down. Not "
                 "meaningful for log terms in the team model.'")
