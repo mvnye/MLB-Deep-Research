@@ -75,6 +75,7 @@ class Research:
     team_chart: dict | None = None  # one team's actual and expected by season, if it is about one team
     tiles: list[dict] = field(default_factory=list)  # key numbers shown above the answer
     box_score: dict | None = None  # a table of games, when the answer lists them
+    title: str = ""  # a short heading for the answer, such as 'Yankees attendance, 2024 vs 2025'
     cited: str = ""  # the report with inline citations, as the checks saw it
     sources: list[dict] = field(default_factory=list)  # footnotes, numbered as in the report
     data_note: str = ""
@@ -117,7 +118,8 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 - One team-season: from team_season_model, report avg_attendance, prior_season_avg, yoy_change_pct,
   expected_avg_attendance, residual_pct, prior_residual_pct, possible_rebound and exclusion_reason.
 - A team across seasons: also run one query on games_clean returning season, month(official_date) as
-  month and avg(attendance) as avg_attendance, one row per season and month, for a chart. Do not list
+  month, avg(attendance) as avg_attendance and avg(fill_pct) as avg_fill_pct, one row per season and
+  month, for a chart. Do not list
   the months in your findings unless the task asks for them.
 - Comparing games or teams: use games_clean. Your query must return each value, fill_pct, and a
   column named difference with the gap worked out in SQL. Do not add expected attendance unless the
@@ -148,7 +150,11 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 {READY_TEXT}
 
 - How many people watched a game: from game_tv_lookup, report network, broadcast, audience_status,
-  viewers_total, viewers_main, window_total, coverage_pct, window_games and can_split.
+  audience_note, viewers_total, viewers_main, window_total, coverage_pct, window_games and can_split.
+  When audience_note is set, report it: it says why the audience is not a plain total.
+- A team or the league across seasons: also run one query on game_tv_lookup returning season,
+  month(official_date) as month and avg(viewers_total) as avg_viewers for single-game broadcasts,
+  one row per season and month, for a chart. Do not list the months unless the task asks.
 - A team's TV picture: from team_tv_summary, by team_id. Report appearances, single_games,
   fox_window_games, special_event_games, avg_single_game_viewers, highest_single_game_viewers and
   network_mix. Window games have no audience of their own.
@@ -211,7 +217,7 @@ def fixed_notes(report: str, tool_calls: list[dict]) -> str:
     if queried & VIEWERSHIP_TABLES and re.search(r"viewer|audience", report, re.I):
         notes.append("Viewership figures are publicly reported and may differ from official Nielsen "
                      "data. They are the national TV audience, excluding streaming add-ons.")
-        if "2025" in report and "2026" in report:
+        if "2025" in report and "2026" in report and "Nielsen changed its method in September 2025" not in report:
             notes.append("Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures "
                          "are not like-for-like.")
     return f"\n\n*{' '.join(notes)}*" if notes else ""
@@ -229,6 +235,8 @@ SEASON_CHANGE = re.compile(r"\b(change[ds]?|year over year|rise|rose|risen|f[ae]
 WITHIN_SEASON = re.compile(r"\b(by|each|per) month\b|\bmonthly\b|\bmonth by month\b", re.I)
 ALL_SEASONS = (2024, 2025, 2026)
 MIN_ALIAS_CHARS = 4
+MIN_TILES = 3  # fewer than this and the numbers read fine in the text
+MIX_SHIFT = 0.15  # a network's share of broadcasts moving this much counts as a different mix
 ATHLETICS_ID = 133
 SEVERAL_TEAMS = re.compile(r"\bteams\b|\bcompare\b|\b(by|each) (month|weekday|day|network)\b", re.I)
 SIMPLE_LOOKUP = re.compile(r"^(how many|how much|what was|what were)\b", re.I)
@@ -238,7 +246,23 @@ NETWORK_AVERAGE = re.compile(r"averaged [\d,]+ viewers across \d+ (windows|games
 LIMIT_LIST = re.compile(r"\b(RSN|Peacock|late-September)\b")
 EXPECTED_WORDS = re.compile(r"expected (attendance|average)|model's expected", re.I)
 TEAM_LEVEL = re.compile(r"team-season|team-level|team level|each team|consistent with|prove", re.I)
-HEADLINE_PARTS = re.compile(r"^(Yes on the raw numbers|Mostly no after comparing)")
+TEAM_READING = re.compile(r"consistent with team-level|does not prove the cause|do not prove", re.I)
+HEADLINE_PARTS = re.compile(r"^(Yes, games with smaller crowds|Comparing games on the same network|After comparing each game)")
+# The adjusted result does not clear team factors: the team-level link points to them.
+RULED_OUT = re.compile(r"(?:popular teams?|team popularity|team quality|team[- ]level factors|team factors|popularity|market size)"
+                       r"[^.]{0,40}\b(?:do not|does not|don't|doesn't|did not|cannot|can't|not)\b[^.]{0,12}\b(?:drive|driving|explain|matter|affect)"
+                       r"|\brul(?:e|es|ed|ing) out\b[^.]{0,40}\b(?:team|popularity|market)"
+                       r"|\b(?:team|popularity|market)[^.]{0,40}\b(?:is|are|was|were|been) ruled out", re.I)
+DRIVER_QUESTION = re.compile(r"\bwhat (?:drives?|drove|affects?|moves?|influences?)\b|\bdrivers? of\b|\bwhat factors\b", re.I)
+MODEL_CAUSAL = re.compile(r"\b(drives?|drove|driven|causes|caused|boosts?|boosted|increases|increased|raises?|raised|"
+                          r"lifts?|lifted|reduces?|reduced|lowers|lowered)\b(?! rate)", re.I)
+CROWD_WORDS = r"(?:MLB |game |home |game-level )?(attendance|crowds?|turnout)"
+GAIN_WORDS = r"increase|boost|bump|jump|rise|gain|lift"
+FIRST_PERSON = re.compile(r"\b(?:[Ww]e|[Oo]ur|[Uu]s|I)\b(?!-)")
+VIEWERSHIP_WORDS = re.compile(r"viewer|viewership|audience|watched|ratings|\bTV\b", re.I)
+TV_SEASONS = (2025, 2026)
+NIELSEN_CLAUSE = ", though Nielsen changed its method in September 2025, which generally raised sports audiences"
+STATISTIC = re.compile(r"\bcorrelations?\b|\bn = \d|\bsample size\b|\branges? (?:of |from )?-?\d", re.I)
 CROWD_TV_QUESTION = re.compile(r"coincid|go with|went with|correlat|move together|moved together|link|relationship", re.I)
 AFTER_SEASON = re.compile(r"\b(after|following) the (\d{4} )?season\b", re.I)
 
@@ -289,17 +313,35 @@ def trim_to_headline(report: str, question: str) -> str:
         return edit_sentences(report, lambda s: None if HEADLINE_PARTS.search(s) else s)
     if NETWORK_NAMES.search(question):
         return report
-    stop = report.find(".", end)
-    if stop < 0:
+    # The answer is the stored text alone: nothing the Writer added stays. The team-level sentence
+    # is added after this, from the data.
+    return " ".join(f"{t[:-1]} (table: crowd_tv_headline)." for t in sentences(data_tools.crowd_tv_headline()))
+
+
+def fix_team_level(report: str) -> str:
+    """Any mention of the team-level link uses the fixed sentence, with its statistics in parentheses."""
+    fact = data_tools.team_crowd_tv_fact()
+    value = f"{fact['corr_team_crowd_tv']:.2f}"
+    if value not in citations.CITATION.sub("", report):
         return report
-    # After the headline, only the team-level fact and its reading may follow.
-    rest = [s for s in sentences(report[stop + 1:].strip().split("\n")[0]) if TEAM_LEVEL.search(s)]
-    return " ".join([report[:stop + 1]] + rest)
+    placed = False
+
+    def edit(sentence: str) -> str | None:
+        nonlocal placed
+        if value in sentence and TEAM_LEVEL.search(sentence) and not placed:
+            placed = True
+            return team_level_sentence(fact)
+        return None if TEAM_READING.search(sentence) else sentence
+
+    return edit_sentences(report, edit)
 
 
 def drop_stated_causes(report: str) -> str:
-    """The data shows what coincided. A claimed cause of a crowd or audience is removed."""
+    """The data shows what coincided. A claimed cause of a crowd or audience is removed, and so is a
+    claim that team factors do not matter."""
     def edit(sentence: str) -> str | None:
+        if RULED_OUT.search(sentence):
+            return None
         match = STATED_CAUSE.search(sentence)
         if not match:
             return sentence
@@ -333,7 +375,84 @@ def capacity_wording(report: str) -> str:
     report = re.sub(rf"\ban? {kinds}fill (?:rate|percentage) of (\d+(?:\.\d+)?)%", r"\1% of capacity", report)
     report = re.sub(rf"\ban? {kinds}(\d+(?:\.\d+)?)% {kinds}fill (?:rate|percentage)", r"\1% of capacity", report)
     report = re.sub(r"\bfill rates of (\d+(?:\.\d+)?)% and (\d+(?:\.\d+)?)%", r"\1% and \2% of capacity", report)
-    return re.sub(r"(of capacity)(?: of capacity)+", r"\1", report)
+    report = re.sub(r"(of capacity)(?: of capacity)+", r"\1", report)
+
+    def listed(m: re.Match) -> str:  # over 100% only makes sense against a listed figure
+        over = any(float(n) > 100 for n in re.findall(r"\d+(?:\.\d+)?", m[0]))
+        return m[0].replace("of capacity", "of listed capacity") if over else m[0]
+
+    return re.sub(r"\d+(?:\.\d+)?%(?: and \d+(?:\.\d+)?%)? of capacity", listed, report)
+
+
+def compares_tv_seasons(report: str, tool_calls: list[dict]) -> bool:
+    text = citations.CITATION.sub("", report)
+    if charts.NO_ANSWER.search(text[:200]) or re.search(r"\bunknown\b", text[:200]):
+        return False  # nothing was compared
+    return (bool(tables_queried(tool_calls) & VIEWERSHIP_TABLES) and "2025" in text and "2026" in text
+            and bool(VIEWERSHIP_WORDS.search(text)) and HEADLINE_END not in text)
+
+
+def nielsen_inline(report: str, tool_calls: list[dict]) -> str:
+    """Comparing 2025 and 2026 audiences: the measurement change is said in the comparing sentence."""
+    if not compares_tv_seasons(report, tool_calls) or "Nielsen" in report:
+        return report
+    done = False
+
+    def edit(sentence: str) -> str:
+        nonlocal done
+        plain = citations.CITATION.sub("", sentence)
+        if done or not ("2025" in plain and "2026" in plain and VIEWERSHIP_WORDS.search(plain)):
+            return sentence
+        done = True
+        cited = citations.CITATION.search(sentence)
+        cut = cited.start() if cited else len(sentence.rstrip().rstrip(".!?"))
+        return sentence[:cut].rstrip().rstrip(".") + NIELSEN_CLAUSE + sentence[cut:].rstrip().rstrip(".") + "."
+
+    return edit_sentences(report, edit)
+
+
+def mix_text(counts: dict[str, int]) -> str:
+    items = [f"{n} on {network}" for network, n in counts.items()]
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + (", and " if len(items) > 2 else " and ") + items[-1]
+
+
+def network_mix_note(report: str, question: str, tool_calls: list[dict]) -> str:
+    """When 2025 and 2026 audiences are compared, say if the networks carrying the games differ."""
+    if not compares_tv_seasons(report, tool_calls) or "network mix" in report:
+        return ""
+    named = teams_named(question)
+    team_id = next(iter(named)) if len(named) == 1 else None
+    query, columns, rows = data_tools.network_mix(team_id, list(TV_SEASONS))
+    mix = {season: {network: n for s, network, n in rows if s == season} for season in TV_SEASONS}
+    totals = {season: sum(m.values()) or 1 for season, m in mix.items()}
+    share = lambda season, network: mix[season].get(network, 0) / totals[season]
+    networks = set(mix[2025]) | set(mix[2026])
+    if set(mix[2025]) == set(mix[2026]) and all(abs(share(2025, n) - share(2026, n)) < MIX_SHIFT for n in networks):
+        return ""
+    tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
+                       "result": json.dumps({"columns": columns, "rows": rows})})
+    return (f"The network mix also differs between the seasons: {mix_text(mix[2025])} in 2025, and "
+            f"{mix_text(mix[2026])} in 2026 (table: game_tv_lookup).")
+
+
+def association_wording(report: str, tool_calls: list[dict]) -> str:
+    """A model shows what goes together, so its results say 'coincided with', not 'boosts'."""
+    if "model_coefficients" not in tables_queried(tool_calls):
+        return report
+    report = re.sub(r"\b(is|are|was|were) (?:\w+ly )?driven (?:\w+ly )?by\b", r"\1 associated with", report, flags=re.I)
+    report = re.sub(rf"\b(?:drives?|drove|boosts?|boosted|increases|increased|raises?|raised|lifts?|lifted|causes|caused) {CROWD_WORDS}",
+                    r"coincided with higher \1", report, flags=re.I)
+    report = re.sub(rf"\b(?:reduces?|reduced|lowers|lowered) {CROWD_WORDS}", r"coincided with lower \1", report, flags=re.I)
+    report = re.sub(rf"\bsees? an? (\d+(?:\.\d+)?%) (?:{GAIN_WORDS})\b", r"coincided with \1 higher attendance", report)
+    report = re.sub(r"\bsees? an? (\d+(?:\.\d+)?%) (?:drop|decrease|decline|dip)\b", r"coincided with \1 lower attendance", report)
+    return re.sub(r"\b(attendance |crowd )?boost\b", lambda m: f"{m[1] or ''}gain", report)
+
+
+def model_wording_problems(report: str, tool_calls: list[dict]) -> list[str]:
+    if "model_coefficients" not in tables_queried(tool_calls):
+        return []
+    return [f"This is a model result: say 'was associated with' or 'coincided with', not '{m[0]}'."
+            for m in MODEL_CAUSAL.finditer(citations.CITATION.sub("", report))]
 
 
 def team_level_sentence(fact: dict) -> str:
@@ -370,22 +489,18 @@ def drop_unasked(report: str, question: str) -> str:
 
 
 def missing_audience_notes(report: str, tool_calls: list[dict]) -> list[str]:
-    """An uncertain total must be called uncertain whenever the answer gives that total."""
-    if "uncertain" in report.lower():
-        return []
-    for call in tool_calls:
-        if call["name"] != "run_sql" or "uncertain" not in call["result"]:
-            continue
-        result = json.loads(call["result"])
-        columns = result.get("columns", [])
-        if "viewers_total" not in columns or "audience_status" not in columns:
-            continue
-        status, viewers = columns.index("audience_status"), columns.index("viewers_total")
-        for row in result.get("rows", []):
-            if row[status] == "uncertain" and row[viewers] and f"{row[viewers]:,}" in report:
-                return [f"The {row[viewers]:,} total is uncertain: it may not include the simulcast "
-                        "(table: game_tv_lookup)."]
-    return []
+    """An audience that is not a plain total gets its reason, whenever the answer gives that number."""
+    query, columns, rows = data_tools.flagged_audiences()
+    index = {c: i for i, c in enumerate(columns)}
+    notes = []
+    for row in rows:
+        shown = row[index["viewers_total"]] or row[index["viewers_main"]]
+        if shown and f"{int(shown):,}" in report and "simulcast" not in report:
+            notes.append(f"{row[index['audience_note']]} (table: game_tv_lookup)")
+    if notes:
+        tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
+                           "result": json.dumps({"columns": columns, "rows": rows}, default=str)})
+    return list(dict.fromkeys(notes))
 
 
 def drop_unsourced(report: str, tool_calls: list[dict]) -> str:
@@ -442,6 +557,8 @@ def attendance_team(question: str, report: str, answered: dict | None) -> tuple[
     answer settled on. A single game, several teams, TV only or a can't-answer is not about one."""
     if GAME_DATE.search(question) or charts.NO_ANSWER.search(report[:200]) or not ATTENDANCE_WORDS.search(question):
         return None
+    if any(int(y) not in ALL_SEASONS for y in re.findall(r"\b((?:19|20)\d\d)\b", question)):
+        return None  # a season the data does not have
     named = teams_named(question)
     if len(named) == 1:
         return next(iter(named.items()))
@@ -450,37 +567,49 @@ def attendance_team(question: str, report: str, answered: dict | None) -> tuple[
     return None
 
 
-def compared_seasons(question: str) -> list[int]:
+def compared_seasons(question: str, covered: tuple[int, ...] = ALL_SEASONS) -> list[int]:
     """The seasons a question compares, or none. 'by month in 2025' stays within one season."""
-    years = sorted({int(y) for y in re.findall(r"\b(202[4-6])\b", question)})
+    years = sorted({int(y) for y in re.findall(r"\b(20\d\d)\b", question)} & set(covered))
     if len(years) >= 2:
         return years
     if WITHIN_SEASON.search(question) or not SEASON_CHANGE.search(question):
         return []
     if not years:
-        return list(ALL_SEASONS)
-    return [years[0] - 1, years[0]] if years[0] > ALL_SEASONS[0] else []
+        return list(covered)
+    return [years[0] - 1, years[0]] if years[0] > covered[0] else []
+
+
+def tv_rows_query(team_id: int | None, seasons: list[int]) -> str:
+    team = f"and (home_team_id = {team_id} or away_team_id = {team_id}) " if team_id else ""
+    return ("select season, month(official_date) as month, avg(viewers_total) as avg_viewers from game_tv_lookup "
+            f"where broadcast = 'single game' and viewers_total is not null and special_event is null {team}"
+            f"and season in ({', '.join(map(str, seasons))}) group by 1, 2 order by 1, 2")
 
 
 def monthly_rows_query(team_id: int, seasons: list[int]) -> str:
-    return (f"select season, month(official_date) as month, avg(attendance) as avg_attendance from games_clean "
+    return (f"select season, month(official_date) as month, avg(attendance) as avg_attendance, "
+            f"avg(fill_pct) as avg_fill_pct from games_clean "
             f"where home_team_id = {team_id} and season in ({', '.join(map(str, seasons))}) "
             "group by 1, 2 order by 1, 2")
 
 
 def answer_tiles(report: str, question: str, team: tuple[int, str] | None) -> list[dict]:
     """The key numbers for the scoreboard, each one already stated in the answer."""
-    if charts.NO_ANSWER.search(report[:200]):
-        return []
     text = citations.CITATION.sub("", report)
+    first = sentences(text.strip().split("\n")[0])[0]
+    if charts.NO_ANSWER.search(report[:200]) and "window" not in first:  # a Fox window total is still an answer
+        return []
     years = set(re.findall(r"\b(20\d\d)\b", question))
+    tiles = key_tiles(text, question, team, years)
+    return tiles if len(tiles) >= MIN_TILES else []
+
+
+def key_tiles(text: str, question: str, team: tuple[int, str] | None, years: set[str]) -> list[dict]:
     if team and len(years) == 1:
         fact = next((t for t in data_tools.team_season_facts() if t["season"] == int(next(iter(years)))
                      and club_name(t["home_team"]) == club_name(team[1])), None)
         if fact and f"{fact['avg_attendance']:,.0f}" in text:
             return scoreboard.team_tiles(fact)
-    if HEADLINE_END in text:
-        return scoreboard.headline_tiles(text)
     return scoreboard.sentence_tiles(sentences(text.strip().split("\n")[0])[0])[:scoreboard.MAX_TILES]
 
 
@@ -491,18 +620,27 @@ def add_charts(run: Research, asked: str, answered: dict | None) -> None:
     run.chart = charts.pick_chart(run.report, run.question, run.tool_calls, tables)
     team = attendance_team(asked, run.report, answered)
     seasons = compared_seasons(asked) if team else []
-    if seasons:
-        run.chart = charts.monthly_chart(run.tool_calls, tables, seasons)
+    named = teams_named(asked)
+    tv_team = next(iter(named)) if len(named) == 1 else None
+    tv_seasons = ([] if seasons or not VIEWERSHIP_WORDS.search(asked) or CROWD_TV_QUESTION.search(asked)
+                  or charts.NO_ANSWER.search(run.report[:200]) else compared_seasons(asked, TV_SEASONS))
+    if seasons or tv_seasons:  # one line per season, by month: crowds, or else TV audiences
+        wanted = seasons or tv_seasons
+        query = monthly_rows_query(team[0], seasons) if seasons else tv_rows_query(tv_team, tv_seasons)
+        run.chart = charts.monthly_chart(run.tool_calls, tables, wanted, "viewers" if tv_seasons else "attendance")
         if not run.chart:
-            query = monthly_rows_query(team[0], seasons)
             run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "result": data_tools.run_sql(query),
                                    "agent": "Required facts check"})
-            run.chart = charts.monthly_chart(run.tool_calls, tables, seasons)
+            run.chart = charts.monthly_chart(run.tool_calls, tables, wanted, "viewers" if tv_seasons else "attendance")
+    if DRIVER_QUESTION.search(asked):
+        query, rows = data_tools.game_drivers()
+        run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
+                               "result": json.dumps({"columns": ["label", "effect_pct", "clear_effect"], "rows": rows})})
+        run.chart = charts.driver_chart(rows)
     run.box_score = scoreboard.box_score(run.report, run.tool_calls, lambda q: charts.tables_in(q, tables))
     if run.chart:
         run.box_score = None  # the chart is the answer: the games were a side note
     run.tiles = [] if run.box_score else answer_tiles(run.report, asked, team)
-    named = teams_named(asked)
     if run.chart:
         one_team = team[1] if team else next(iter(named.values())) if len(named) == 1 else None
         charts.paint(run.chart, one_team)
@@ -755,7 +893,10 @@ writer = Agent(
 Write a short answer in markdown for a sports media or sponsorship seller, using only the findings
 you're given.
 
-1. Answer the question in the first sentence. A simple question gets one short paragraph with no
+1. Write in natural, active sentences, the way a sports reporter would. Lead with the number or the
+   team, not "The attendance for...". Answer the question in the first sentence, as a plain takeaway
+   a sponsorship seller could repeat to a client. Correlations, n, and ranges never lead a sentence: say the point in plain words and
+   put them in parentheses after it. A simple question gets one short paragraph with no
    headings. Use sections only for a question with several parts. Stay under 300 words, or 500 for
    a broad question.
 2. A bullet that starts READY: is a finished sentence. Use it word for word, without the label and
@@ -765,7 +906,8 @@ you're given.
    show attendance and viewers as whole numbers, percents to one decimal, correlations to two. An
    average of a count, such as appearances per team, is one decimal and must be called an average.
    Never work out a difference or an average yourself: use the one in the findings.
-4. When comparing, say the result directly: who was higher, by how much, and both fill rates. Give
+4. A team's opener means its home opener: answer with that, and add a road opener only if asked.
+   When comparing, say the result directly: who was higher, by how much, and both fill rates. Give
    only the compared values, the difference, and the fill rates. A gap between fill rates is in
    percentage points. Do not say why a gap exists: the data shows what coincided, not the reason.
 5. A team result: the first sentence states the conclusion with the key numbers: the average, how
@@ -789,19 +931,25 @@ you're given.
     with no citation for them. A researcher failing is a technical problem, not a limit of the data.
 11. Write for a seller: everyday words, no column names or game IDs, and no mention of research,
     findings or rules. Say what is true and move on.
-12. If the findings have both the adjusted game-level result and the team-level correlation, give
-    the team-level correlation with n and its range. You may then say the pattern is consistent with
-    team-level factors such as popularity and market size driving both, and you must say the data
-    does not prove the cause.
+12. If the findings have both the adjusted game-level result and the team-level correlation, say in
+    plain words that teams with bigger crowds also had bigger TV audiences, with the correlation, n,
+    and range in parentheses. You may then say the pattern is consistent with team-level factors such
+    as popularity and market size driving both, and you must say the data does not prove the cause.
+    Never add your own reasoning to a READY sentence, and never say team factors are ruled out.
 13. Do not add notes about data sources, Nielsen, streaming, promotions, cause and effect, or which
     season was assumed. Those are added automatically.
 14. A chart is added automatically when it fits: do not mention one.
 15. If the question only asks what something in an earlier answer means, explain it from How the
     numbers work, in a few sentences, with no citation.
-16. Use the Oxford comma in every list of three or more: "Fox, NBC, and ABC".
-    Name the unit of every count the first time it appears: fans or viewers.
-17. Give a fill rate as a share of capacity, such as "99.3% of capacity". Never say a park was
-    "filled", because reported crowds can pass 100%.
+16. Use the Oxford comma in every list of three or more: "Fox, NBC, and ABC". Never write "I",
+    "we", or "our": use neutral wording such as "The data does not cover 2024".
+    Put the unit next to a count the first time it appears, as in "42,390 fans" or "708,000 viewers".
+17. Model results are associations: say "was associated with" or "coincided with", never that a
+    factor increases, drives, causes, or boosts attendance.
+19. When an audience has an audience_note, say why in the same sentence, such as "the truTV
+    simulcast number is missing".
+18. Give a fill rate as a share of capacity, such as "99.3% of capacity". Over 100%, say "of listed
+    capacity". Never say a park was "filled", because reported crowds can pass 100%.
 
 How the numbers work:
 - Expected attendance for a game comes from a model of that park's normal crowd that season, plus
@@ -875,7 +1023,7 @@ def tables_queried(tool_calls: list[dict]) -> set[str]:
             if re.search(rf"\b{t}\b", call["args"]["query"], re.I)}
 
 
-JARGON = re.compile(r"\b(residual|coefficient|game_pk|capped attendance|raw average|raw correlation|raw fill"
+JARGON = re.compile(r"(?<![\d])\.100\b|\b(residual|coefficient|game_pk|capped attendance|raw average|raw correlation|raw fill"
                     r"|technical problem|technical issue|ceiling game|r-squared|driven (?:primarily |mainly |mostly )?by|drove)", re.I)
 
 
@@ -902,6 +1050,32 @@ def read_urls(tool_calls: list[dict]) -> set[str]:
     return urls
 
 
+def neutral_voice(report: str) -> str:
+    """Answers speak for the data, not as 'we'."""
+    for old, new in [(r"\bour data\b", "the data"), (r"\bOur data\b", "The data"),
+                     (r"\bWe (?:cannot|can't)\b", "The data cannot"), (r"\bwe (?:cannot|can't)\b", "the data cannot"),
+                     (r"\bWe do not have\b", "The data does not have"), (r"\bwe do not have\b", "the data does not have"),
+                     (r"\bWe don't have\b", "The data does not have"), (r"\bwe don't have\b", "the data does not have")]:
+        report = re.sub(old, new, report)
+    return report
+
+
+def plain_language_problems(report: str, question: str) -> list[str]:
+    """Statistics belong in parentheses after a plain sentence, team factors are never ruled out, and
+    the answer never speaks as 'we'."""
+    problems = []
+    for line in citations.CITATION.sub("", report).split("\n"):
+        for sentence in sentences(line):
+            if FIRST_PERSON.search(re.sub(r"\([^()]*\)", "", sentence)):
+                problems.append(f"Use neutral wording, not I, we, or our: {sentence[:120]}")
+            if RULED_OUT.search(sentence):
+                problems.append(f"The data does not rule out team factors. Remove this claim: {sentence[:120]}")
+            outside = re.sub(r"\([^()]*\)", "", sentence)
+            if STATISTIC.search(outside) and not re.search("correlat", question, re.I):
+                problems.append(f"Say this in plain words, with the statistics in parentheses after it: {sentence[:120]}")
+    return problems
+
+
 def citation_problems(report: str, tool_calls: list[dict], question: str = "") -> list[str]:
     """Links the run never read, tables it never queried, and numbers no tool returned."""
     read = read_urls(tool_calls)
@@ -917,7 +1091,8 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
     team, gaps = opening_gaps(report, question, tool_calls)
     missing = [f"The first sentence must state the conclusion with its key numbers. Start with: {team_opening(team)}"] if gaps else []
     return (list(dict.fromkeys(problems)) + unverified_numbers(report, tool_calls)
-            + sample_size_problems(report) + jargon_problems(report) + missing)
+            + sample_size_problems(report) + jargon_problems(report) + plain_language_problems(report, question)
+            + model_wording_problems(report, tool_calls) + missing)
 
 
 async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
@@ -981,6 +1156,12 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
             or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
     run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
     run.report = capacity_wording(fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question)))))
+    run.report = association_wording(neutral_voice(run.report), run.tool_calls)
+    run.report = nielsen_inline(run.report, run.tool_calls)
+    mix = network_mix_note(run.report, asked, run.tool_calls)
+    if mix:
+        run.report += f" {mix}"
+    run.report = fix_team_level(run.report)
     if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):
         fact = data_tools.team_crowd_tv_fact()
         run.report += f" {team_level_sentence(fact)}"
@@ -1009,6 +1190,37 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     return run
 
 
+# --- Titles: a short heading for each answer ---
+
+titler = Agent(
+    name="Titler",
+    instructions="""\
+Write a short title for an answer to the user's question about MLB attendance or national TV
+audiences: 3 to 8 words, naming the team or topic and the seasons, such as "Yankees attendance,
+2024 vs 2025", "Mets attendance above expectations, 2025", or "What drives MLB attendance". For a
+follow-up, use the conversation so far to name what it is about: after a question on Yankees
+attendance, "What about TV?" becomes "Yankees national TV audience, 2025 vs 2026". Name only seasons
+the data has: attendance covers 2024 to 2026, and national TV audiences cover 2025 and 2026 only.
+Reply with the title only, with no quotation marks and no ending period.""",
+    model=RESEARCHER_MODEL,
+    model_settings=SETTINGS,
+)
+TITLE_SECONDS = 30
+MAX_TITLE_CHARS = 80
+
+
+async def make_title(question: str, history: str) -> str:
+    """A short title, or the question itself if the model fails or rambles."""
+    prompt = f"Conversation so far:\n{history}\n\nNew question: {question}" if history else question
+    try:
+        result = await asyncio.wait_for(Runner.run(titler, prompt), TITLE_SECONDS)
+        title = str(result.final_output).strip().strip('"').rstrip(".").replace("—", ", ").split("\n")[0]
+    except Exception:
+        logger.exception("Title failed for %r", question)
+        title = ""
+    return title if 0 < len(title) <= MAX_TITLE_CHARS else question
+
+
 # --- Chat sessions and errors ---
 
 MAX_HISTORY_TURNS = 3
@@ -1035,15 +1247,21 @@ async def answer(session: ChatSession, message: str, hooks: PanelHooks) -> Resea
                 if pending else message)
     run = Research(hooks=hooks, question=question)
     session.pending_question = None
+    history = history_text(session)
+    title = asyncio.create_task(make_title(question, history))  # made while the research runs
+    failed = False
     try:
-        await deep_research(run, may_clarify=pending is None, history=history_text(session))
+        await deep_research(run, may_clarify=pending is None, history=history)
     except Exception as e:
+        failed = True
         run.report = friendly_error(e)
         logger.exception("Research failed for %r", question)
-        return run
     if run.needs_clarification:
+        title.cancel()
         session.pending_question = question
-    else:
+        return run
+    run.title = await title
+    if not failed:
         session.turns.append((question, run.report))
     return run
 
@@ -1100,7 +1318,8 @@ async def chat(request: ChatRequest):
     result = await answer(chats.setdefault(session_id, ChatSession()), request.message, hooks)
     return {"response": citations.to_markdown(result.report, result.sources, result.data_note),
             "session_id": session_id, "tool_calls": result.tool_calls, "chart": result.chart,
-            "team_chart": result.team_chart, "tiles": result.tiles, "box_score": result.box_score}
+            "team_chart": result.team_chart, "tiles": result.tiles, "box_score": result.box_score,
+            "title": result.title, "clarify": result.needs_clarification}
 
 
 @app.get("/run")
@@ -1124,7 +1343,8 @@ async def run(question: str, session_id: str | None = None):
         result = await answer(chats.setdefault(session_id, ChatSession()), question, hooks)
         queue.put_nowait({"type": "done", "markdown": result.report, "session_id": session_id,
                           "chart": result.chart, "team_chart": result.team_chart,
-                          "tiles": result.tiles, "box_score": result.box_score, "sources": result.sources, "data_note": result.data_note})
+                          "tiles": result.tiles, "box_score": result.box_score, "title": result.title,
+                          "clarify": result.needs_clarification, "question": result.question, "sources": result.sources, "data_note": result.data_note})
 
     task = asyncio.create_task(work())
 

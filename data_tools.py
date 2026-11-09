@@ -285,6 +285,50 @@ def team_aliases() -> list[tuple[str, int, str]]:
         con.close()
 
 
+def _query(query: str) -> tuple[list[str], list[list]]:
+    con = _connect()
+    try:
+        result = con.execute(query)
+        return [d[0] for d in result.description], [list(r) for r in result.fetchall()]
+    finally:
+        con.close()
+
+
+def flagged_audiences() -> tuple[str, list[str], list[list]]:
+    """Audiences that are not a plain total, with the reason. Read by code."""
+    query = ("select official_date, away_team, home_team, network, audience_status, viewers_total, "
+             "viewers_main, audience_note from game_tv_lookup where audience_note is not null")
+    return (query, *_query(query))
+
+
+def network_mix(team_id: int | None, seasons: list[int]) -> tuple[str, list[str], list[list]]:
+    """National broadcasts by network and season, for a team or the league. Read by code."""
+    team = f"and (home_team_id = {int(team_id)} or away_team_id = {int(team_id)}) " if team_id else ""
+    query = (f"select season, network, count(*) as broadcasts from game_tv_lookup where special_event is null "
+             f"and season in ({', '.join(str(int(s)) for s in seasons)}) {team}group by 1, 2 order by 1, 3 desc")
+    return (query, *_query(query))
+
+
+def game_drivers() -> tuple[str, list[list]]:
+    """The game model's associations, as the query and its rows. Read by code for the driver chart."""
+    query = ("select label, effect_pct, clear_effect from model_coefficients "
+             "where model = 'game' and label is not null order by effect_pct desc")
+    con = _connect()
+    try:
+        return query, [list(r) for r in con.execute(query).fetchall()]
+    finally:
+        con.close()
+
+
+def crowd_tv_headline() -> str:
+    """The fixed answer on crowds and TV. Read by code, so no model can reword it."""
+    con = _connect()
+    try:
+        return con.execute("select headline_text from crowd_tv_headline").fetchone()[0]
+    finally:
+        con.close()
+
+
 def team_crowd_tv_fact() -> dict:
     """The team-level correlation across both seasons. Read by code, not by the model."""
     con = _connect()

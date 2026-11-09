@@ -65,9 +65,19 @@ def check(case: dict, run: app.Research) -> list[str]:
         failures.append(f"box score should be {case['box_score']}")
     failures += app.citation_problems(run.cited, run.tool_calls, case["q"])
     failures += uncited_facts(run)
+    failures += [f"says team factors are ruled out: {m[0]}" for m in app.RULED_OUT.finditer(run.report)]
+    failures += [f"first person: {m[0]}" for m in app.FIRST_PERSON.finditer(re.sub(r"\([^()]*\)", "", run.report.split("\n\n*")[0]))]
     if app.word_count(run.report) > app.BROAD_WORD_LIMIT + 60:
         failures.append(f"{app.word_count(run.report)} words")
     return failures
+
+
+def check_ruled_out_test() -> None:
+    """The ruled-out check must catch the old wording, and the fixed answer must pass it."""
+    old = "Mostly no after comparing each game, so popular teams do not drive the result."
+    assert app.RULED_OUT.search(old), "the ruled-out check no longer catches the old wording"
+    fixed = f"{app.data_tools.crowd_tv_headline()} {app.team_level_sentence(app.data_tools.team_crowd_tv_fact())}"
+    assert not app.RULED_OUT.search(fixed), "the fixed crowds vs TV answer rules out team factors"
 
 
 async def run_case(case: dict, gate: asyncio.Semaphore) -> dict:
@@ -76,19 +86,21 @@ async def run_case(case: dict, gate: asyncio.Semaphore) -> dict:
         run = app.Research(hooks=PanelHooks(AgentContexts(), lambda event: None), question=case["q"])
         try:
             await app.deep_research(run)
+            run.title = await app.make_title(case["q"], "")
             failures = check(case, run)
         except Exception as e:
             failures = [f"crashed: {type(e).__name__}: {str(e)[:200]}"]
         result = {"id": case["id"], "q": case["q"], "passed": not failures, "failures": failures,
                   "seconds": round(time.time() - start), "researchers": run.researchers,
                   "retries": run.retries, "errors": run.errors, "chart": run.chart, "team_chart": run.team_chart,
-                  "tiles": run.tiles, "box_score": run.box_score,
+                  "tiles": run.tiles, "box_score": run.box_score, "title": run.title,
                   "report": run.report, "sources": run.sources, "data_note": run.data_note}
         print(f"{'PASS' if not failures else 'FAIL'} {case['id']} ({result['seconds']}s) {failures}", flush=True)
         return result
 
 
 async def main() -> None:
+    check_ruled_out_test()
     cases = json.loads((ROOT / "evals" / "questions.json").read_text())
     if sys.argv[1:]:
         cases = [c for c in cases if c["id"] in sys.argv[1:]]

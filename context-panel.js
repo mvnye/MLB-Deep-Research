@@ -15,23 +15,31 @@ contextStyle.textContent = `
     #context-panel {
         position: fixed; top: 0; right: 0; bottom: 0;
         width: var(--context-width);
-        overflow-y: auto;
-        padding: 1.5rem;
+        display: flex; flex-direction: column;
         background: #fafafa;
         border-left: 1px solid #e0e0e0;
         font-family: ui-monospace, monospace;
         font-size: 0.75rem;
     }
-    #context-panel h2, .ctx-head {
+    /* The bar sits outside the scrolling area, so it stays put however far the timeline scrolls. */
+    .ctx-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem 0.4rem 1rem; border-bottom: 1px solid #e0e0e0; font-family: system-ui, sans-serif; }
+    .ctx-bar span { flex: 1; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #555; }
+    .ctx-bar button { font: inherit; font-size: 0.8rem; cursor: pointer; border-radius: 4px; }
+    #ctx-jump { padding: 0.2rem 0.6rem; background: #12402e; color: #fff; border: 1px solid #12402e; }
+    #ctx-jump[hidden] { display: none; }
+    #ctx-close { width: 1.9rem; height: 1.9rem; font-size: 1.2rem; line-height: 1; background: none; color: #333; border: 1px solid #ccc; }
+    #ctx-close:hover { background: #eee; }
+    #context-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 1.5rem; }
+    #context-scroll h2, .ctx-head {
         font-family: system-ui, sans-serif;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: #999;
     }
-    #context-panel h2 { margin-bottom: 1rem; }
+    #context-scroll h2 { margin-bottom: 1rem; }
     /* Several agents: a timeline grid, one column per agent */
-    #context-panel.timeline { overflow-x: auto; padding: 0 1rem 1rem; scroll-padding: 0 1rem; }
+    #context-scroll.timeline { overflow-x: auto; padding: 0 1rem 1rem; scroll-padding: 0 1rem; }
     /* Columns share the width, down to 16rem each; only then does the panel scroll sideways */
     .ctx-grid { display: grid; grid-template-columns: repeat(var(--ctx-cols, 1), minmax(16rem, 1fr)); column-gap: 1rem; }
     .ctx-head {
@@ -65,14 +73,21 @@ contextStyle.textContent = `
     @media (max-width: 800px) {
         body { margin-right: 0; height: auto !important; flex-direction: column; }
         #context-panel { position: static; width: 100%; border-left: none; }
-        #context-panel.timeline { height: 70vh; }
+        #context-scroll.timeline { height: 70vh; flex: none; }
     }
 `;
 document.head.appendChild(contextStyle);
 
-const contextPanel = document.createElement("aside");
-contextPanel.id = "context-panel";
-document.body.appendChild(contextPanel);
+const contextShell = document.createElement("aside");
+contextShell.id = "context-panel";
+contextShell.innerHTML = `<div class="ctx-bar"><span>The agents' work</span>
+    <button id="ctx-jump" type="button" hidden>Jump to latest</button>
+    <button id="ctx-close" type="button" aria-label="Close the agents' work" title="Close (Esc)">&times;</button></div>`;
+const contextPanel = document.createElement("div"); // the part that scrolls
+contextPanel.id = "context-scroll";
+contextShell.appendChild(contextPanel);
+document.body.appendChild(contextShell);
+const contextJump = contextShell.querySelector("#ctx-jump");
 
 const CONTEXT_FOLD = 1500; // longer messages (a fetched article, say) fold to their start
 const TIMELINE_FOLD = 700; // tighter in the timeline: a tall cell stretches its whole row
@@ -80,6 +95,39 @@ const TIMELINE_FOLD = 700; // tighter in the timeline: a tall cell stretches its
 let contextShown = 0; // single agent: how many messages were already shown
 let contextQueue = Promise.resolve(); // one fetch at a time, so timeline events arrive in order
 let timeline = null; // several agents: built on the first timeline response
+let contextFollowing = true; // show the latest activity, until the reader scrolls or clicks in the panel
+let contextLatest = null; // the agent that changed last
+let contextPosition = null; // where the reader was, since a hidden panel loses its scroll position
+
+function setContextFollowing(following) {
+    contextFollowing = following;
+    contextJump.hidden = following;
+}
+
+function showLatest() {
+    const head = timeline?.heads[contextLatest];
+    if (head) { // sideways by hand: scrollIntoView can also move the page behind the panel
+        const box = contextPanel.getBoundingClientRect(), column = head.getBoundingClientRect();
+        if (column.left < box.left) contextPanel.scrollLeft -= box.left - column.left + 16;
+        else if (column.right > box.right) contextPanel.scrollLeft += column.right - box.right + 16;
+    }
+    contextPanel.scrollTop = contextPanel.scrollHeight;
+}
+
+function rememberContextPosition() {
+    contextPosition = { top: contextPanel.scrollTop, left: contextPanel.scrollLeft };
+}
+
+function restoreContextPosition() {
+    if (contextFollowing || !contextPosition) return showLatest();
+    contextPanel.scrollTop = contextPosition.top;
+    contextPanel.scrollLeft = contextPosition.left;
+}
+
+for (const event of ["wheel", "touchmove", "pointerdown", "keydown"]) {
+    contextPanel.addEventListener(event, () => setContextFollowing(false), { passive: true });
+}
+contextJump.addEventListener("click", () => { setContextFollowing(true); showLatest(); });
 
 function showContext(sessionId) {
     contextQueue = contextQueue.then(() => loadContext(sessionId)).catch((e) => console.error(e));
@@ -89,6 +137,9 @@ function showContext(sessionId) {
 function resetContext() {
     contextShown = 0;
     timeline = null;
+    contextLatest = null;
+    contextPosition = null;
+    setContextFollowing(true);
     contextPanel.className = "";
     contextPanel.innerHTML = "";
     document.documentElement.style.removeProperty("--context-width");
@@ -128,7 +179,6 @@ function renderTimeline(events) {
         contextPanel.appendChild(grid);
         timeline = { grid, seq: 0, row: 1, agents: [], heads: {}, rows: {}, waiting: {}, rowOf: {}, taken: new Set() };
     }
-    const atBottom = contextPanel.scrollTop + contextPanel.clientHeight >= contextPanel.scrollHeight - 40;
     let last = null;
     for (const e of events) {
         if (e.seq < timeline.seq) continue; // already drawn
@@ -160,10 +210,10 @@ function renderTimeline(events) {
         if (e.type === "message" && !e.from) timeline.waiting[e.agent] = e.message.role === "assistant" && !!e.message.tool_calls;
     }
     if (!last) return;
-    // Mark the agent that changed last, and bring its column into view
+    // Mark the agent that changed last. The view moves only while following.
+    contextLatest = last;
     for (const [agent, head] of Object.entries(timeline.heads)) head.classList.toggle("active", agent === last);
-    timeline.heads[last].scrollIntoView({ inline: "nearest", block: "nearest" });
-    if (atBottom) contextPanel.scrollTop = contextPanel.scrollHeight;
+    if (contextFollowing) showLatest();
 }
 
 function addTimelineAgent(agent) {

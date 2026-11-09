@@ -4,6 +4,7 @@ The chart follows the shape of the result:
   line    a value over seasons or months, 4 or more points; one line per season for season by month
   bar     one value across 4 or more items
   paired  actual and expected across items
+  diverging  the game model's associations, for a question about what drives attendance
   none    single values, 2 to 3 values, or an answer that says the data cannot answer
 
 Charts are built only from query results, never from the Writer's text.
@@ -20,17 +21,18 @@ MIN_PAIRED_ITEMS = 3
 MAX_ITEMS = 31
 MAX_LABEL_CHARS = 40
 MONTHS = {3: "March", 4: "April", 5: "May", 6: "June", 7: "July", 8: "August", 9: "September", 10: "October"}
-TIME_COLUMN = re.compile(r"(^|_)(month|season|year)(_name|_num|_number)?$", re.I)
+TIME_COLUMN = re.compile(r"(^|_)(month|season|year)(_name|_num|_number)?$|^(m|mo|mon)$", re.I)
 ID_COLUMN = re.compile(r"(_id|_pk|^n|^rank|^row_number|count|games|_games|num_|^number|corr|ci_low|ci_high)", re.I)
 CHANGE_COLUMN = re.compile(r"diff|delta|prev|prior|lag", re.I)  # the step between rows, not the value
 EXPECTED_COLUMN = re.compile(r"expected|predict", re.I)
 ACTUAL_COLUMN = re.compile(r"actual|attendance|crowd", re.I)
 MEASURE_ORDER = [r"(avg|average|mean).*(attendance|crowd)", r"attendance|crowd", r"viewers|audience", r"fill", r"pct|percent|change", r"avg|average|mean|total|sum"]
 EXPECTED_QUESTION = re.compile(r"expected|predict|over-?perform|under-?perform", re.I)
-NO_ANSWER = re.compile(r"cannot|can't|not in our data|no number|no audience|does not cover|outside", re.I)
+NO_ANSWER = re.compile(r"cannot|can't|not in our data|no number|no audience|does not cover|outside|not available|only covers", re.I)
 MONTH_NUMBERS = {name.lower(): number for number, name in MONTHS.items()}
 SEASON_COLUMN = re.compile(r"^(season|year)$", re.I)
-MONTH_COLUMN = re.compile(r"(^|_)month(_name|_num|_number)?$", re.I)
+MONTH_COLUMN = re.compile(r"(^|_)month(_name|_num|_number)?$|^(m|mo|mon)$", re.I)
+FILL_COLUMN = re.compile(r"fill", re.I)
 LABELS = {"home_team": "Team", "away_team": "Opponent", "team": "Team", "network": "Network", "weekday": "Day",
           "month": "Month", "month_name": "Month", "season": "Season", "day_night": "Time of day",
           "label": "Factor", "effect_pct": "Change in attendance"}
@@ -89,17 +91,27 @@ def main_measure(columns: list[str], measures: list[int]) -> int:
 
 
 def label_text(column: str, value) -> str:
-    if re.search("month", column, re.I):
-        match = re.fullmatch(r"(?:\d{4}-)?(\d{1,2})(?:\.0)?", str(value))  # 4, 2025-04
-        if match:
-            return MONTHS.get(int(match[1]), str(value))
+    """Month numbers and dates become month names: 4, 2025-04 and 2025-04-01 are all April."""
+    if MONTH_COLUMN.search(column):
+        return MONTHS.get(month_number(value), str(value))
     return str(value)
+
+
+def fill_values(columns: list[str], rows: list[list]) -> list | None:
+    """A fill rate column, as percents, to show in the tooltip beside the main value."""
+    index = next((i for i, c in enumerate(columns) if FILL_COLUMN.search(c)), None)
+    if index is None or not any(is_number(r[index]) for r in rows):
+        return None
+    scale = 100.0 if max(abs(r[index]) for r in rows if is_number(r[index])) <= 1.5 else 1.0
+    return [round(r[index] * scale, 1) if is_number(r[index]) else None for r in rows]
 
 
 def month_number(value) -> int:
     text = str(value).strip().lower()
-    match = re.fullmatch(r"(?:\d{4}-)?(\d{1,2})(?:\.0)?", text)
-    return int(match[1]) if match else MONTH_NUMBERS.get(text, 0)
+    match = re.fullmatch(r"(?:\d{4}-)?(\d{1,2})(?:\.0)?|\d{4}-(\d{2})-\d{2}.*", text)
+    if match:
+        return int(match[1] or match[2])
+    return MONTH_NUMBERS.get(text, 0)
 
 
 def season_lines(columns: list[str], rows: list[list], labels: list[int], measures: list[int], source: list[str]) -> dict | None:
@@ -117,17 +129,20 @@ def season_lines(columns: list[str], rows: list[list], labels: list[int], measur
     if len(seasons) < 2 or len(months) < MIN_PAIRED_ITEMS:
         return None
     found = {(r[season], month_number(r[month])): r[measure] for r in rows}
+    fills = fill_values(columns, rows)
+    fill_at = {(r[season], month_number(r[month])): f for r, f in zip(rows, fills)} if fills else {}
     unit, scale = unit_of(columns[measure], [v for v in found.values() if v is not None])
     name = words(columns[measure])
     return {
         "type": "line",
-        "title": f"{name} by month, one line per season",
+        "title": f"{name} by month, {' vs '.join(str(x) for x in seasons)}",
         "x_label": "Month",
         "y_label": name if not unit or unit in name.lower() else f"{name} ({unit})",
         "unit": unit,
         "labels": [MONTHS.get(m, str(m)) for m in months],
         "series": [{"name": str(s), "values": [None if found.get((s, m)) is None else round(found[(s, m)] * scale, 1)
-                                               for m in months]} for s in seasons],
+                                               for m in months],
+                    **({"fill": [fill_at.get((s, m)) for m in months]} if fill_at else {})} for s in seasons],
         "source": source,
     }
 
@@ -156,10 +171,15 @@ def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wan
         return None
     if any(re.search(r"_\d+$", c) for c in columns):
         return None  # network_1, network_2: a pairwise comparison, not one value per item
+    if any(re.search(r"(^|_)date$", c, re.I) for c in columns):
+        return None  # one row per game: a box score shows these, not a chart
     labels, measures = split_columns(columns, rows)
     lines = season_lines(columns, rows, labels, measures, source)
     if lines:
         return lines
+    unique = [i for i in labels if len({str(r[i]) for r in rows}) == len(rows)]
+    if len(labels) > 1 and unique:
+        labels = unique  # a text column that repeats, such as a unit, does not name the rows
     time_labels = [i for i in labels if TIME_COLUMN.search(columns[i])]
     if len(labels) > 1 and len(time_labels) >= 1:
         labels = time_labels[:1]  # month and month_name are one label said twice
@@ -183,7 +203,11 @@ def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wan
     measure = main_measure(columns, measures)
     if TIME_COLUMN.search(columns[label]):
         ordered = sorted(rows, key=lambda r: r[label]) if all(is_number(r[label]) for r in rows) else rows
-        return build("line", columns, ordered, label, [measure], source)
+        chart = build("line", columns, ordered, label, [measure], source)
+        fills = fill_values(columns, ordered) if not FILL_COLUMN.search(columns[measure]) else None
+        if fills:
+            chart["series"][0]["fill"] = fills
+        return chart
     return build("bar", columns, sorted(rows, key=lambda r: -r[measure]), label, [measure], source)
 
 
@@ -193,7 +217,7 @@ def relevant(chart: dict, report: str) -> bool:
     named = sum(1 for label in chart["labels"] if label.lower() in text)
     values = sum(1 for v in chart["series"][0]["values"]
                  if v is not None and (f"{v:,.0f}" in report or f"{v:.1f}%" in report))
-    return max(named, values) >= 2
+    return max(named, values) >= max(2, len(chart["labels"]) / 2)  # mostly about what the answer says
 
 
 def pick_chart(report: str, question: str, tool_calls: list[dict], tables: list[str]) -> dict | None:
@@ -213,8 +237,8 @@ def pick_chart(report: str, question: str, tool_calls: list[dict], tables: list[
     return None
 
 
-def monthly_chart(tool_calls: list[dict], tables: list[str], seasons: list[int]) -> dict | None:
-    """The latest season-by-month chart a researcher's query supports, for these seasons."""
+def monthly_chart(tool_calls: list[dict], tables: list[str], seasons: list[int], kind: str = "attendance") -> dict | None:
+    """The latest season-by-month chart a query supports, for these seasons. kind is attendance or viewers."""
     for call in reversed(tool_calls):
         if call["name"] != "run_sql":
             continue
@@ -222,9 +246,49 @@ def monthly_chart(tool_calls: list[dict], tables: list[str], seasons: list[int])
         if "rows" not in result or result.get("truncated"):
             continue
         chart = chart_from_rows(result["columns"], result["rows"], tables_in(call["args"]["query"], tables))
-        if chart and len(chart["series"]) >= 2 and {str(s) for s in seasons} <= {s["name"] for s in chart["series"]}:
+        unit = "viewers" if kind == "viewers" else "fans"
+        if (chart and len(chart["series"]) >= 2 and chart["unit"] == unit
+                and {str(s) for s in seasons} <= {s["name"] for s in chart["series"]}):
             return chart
     return None
+
+
+# --- What drives attendance ---
+
+DRIVER_BARS_EACH_WAY = 7
+OUTLIER = "Home openers"  # far larger than the rest, so it is stated apart to keep the scale readable
+PER_UNIT = re.compile(r"^(Each|A win rate)")
+UP_COLOR, DOWN_COLOR = "#12402E", "#A8501F"
+
+
+def short_factor(label: str) -> str:
+    label = re.sub(r"^Games against the (.+), compared with the average opponent$", r"vs \1", label)
+    label = re.sub(r"^(.+) games, compared with (?:day games|(.+))$", lambda m: f"{m[1]} vs {m[2] or 'day'}", label)
+    return re.sub(r", which partly reflects bad weather$", "", label)
+
+
+def driver_chart(rows: list[list]) -> dict:
+    """A diverging bar chart of the clear game-level associations, largest each way."""
+    clear = [(label, effect) for label, effect, is_clear in rows if is_clear and not PER_UNIT.search(label)]
+    outlier = [(label, effect) for label, effect in clear if label == OUTLIER]
+    rest = sorted((c for c in clear if c[0] != OUTLIER), key=lambda c: -c[1])
+    up = [c for c in rest if c[1] > 0][:DRIVER_BARS_EACH_WAY]
+    down = [c for c in rest if c[1] < 0][-DRIVER_BARS_EACH_WAY:]
+    shown = up + down
+    return {
+        "type": "diverging",
+        "title": "Game factors associated with attendance",
+        "x_label": "Factor",
+        "y_label": "Attendance, % vs a typical game",
+        "unit": "%",
+        "labels": [short_factor(label) for label, _ in shown],
+        "series": [{"name": "Difference", "values": [round(effect * 100, 1) for _, effect in shown], "style": "solid", "color": UP_COLOR}],
+        "item_colors": [UP_COLOR if effect > 0 else DOWN_COLOR for _, effect in shown],
+        "callouts": [{"label": label, "value": f"{effect:+.1%}"} for label, effect in outlier],
+        "note": "Each bar is compared with its own baseline: Friday for days, August for months, and the "
+                "average opponent for opponents. Only the largest clear associations are shown.",
+        "source": ["model_coefficients"],
+    }
 
 
 # --- Colors ---
@@ -328,6 +392,8 @@ def assign_colors(teams: list[str]) -> list[str]:
 
 def paint(chart: dict, team: str | None = None) -> dict:
     """Give a chart its colors. team is the one team the question is about, if any."""
+    if chart["type"] == "diverging":
+        return chart  # up and down have their own colors
     series = chart["series"]
     main = team_color(team)
     if chart["type"] == "line" and len(series) > 1:  # the newest season stands out, earlier ones recede

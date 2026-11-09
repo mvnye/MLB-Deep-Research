@@ -144,11 +144,14 @@ EFFECT_LABELS = {
     "precipitation": "Games with rain, drizzle, or snow",
     "home_opener_term": "Home openers",
 }
+WIN_RATE_STEP = 0.1  # the win rate gap reported, in the plain terms below
+SEASON_GAMES = 162
+EXTRA_WINS = round(WIN_RATE_STEP * SEASON_GAMES)
 PER_UNIT_LABELS = {  # term: (label, how much of one unit to report)
-    "home_win_pct_shrunk": ("A home win rate .100 higher", 0.1),
+    "home_win_pct_shrunk": (f"A win rate worth about {EXTRA_WINS} more wins in a {SEASON_GAMES}-game season", WIN_RATE_STEP),
     "home_games_back_before": ("Each game further behind the division leader", 1),
     "wind_mph": ("Each extra mph of wind", 1),
-    "win_pct": ("A season win rate .100 higher", 0.1),
+    "win_pct": (f"A season record about {EXTRA_WINS} wins better in a {SEASON_GAMES}-game season", WIN_RATE_STEP),
     "log_prior_two_year_avg": ("A prior two-year crowd 10% higher", np.log(1.1)),
     "log_population": ("A metro population 10% larger, after accounting for prior crowds", np.log(1.1)),
 }
@@ -422,14 +425,14 @@ def crowd_tv_headline(table: pd.DataFrame) -> pd.DataFrame:
     for r in (a, b):
         assert r.crowd_ci_low > 0 and r.residual_ci_low <= 0 <= r.residual_ci_high, "headline is stale"
     text = (
-        "Yes on the raw numbers: comparing games on the same network, smaller crowds went with smaller "
-        f"national TV audiences (correlation {a.corr_crowd_tv:.2f} in {a.season}, n = {a.n}, range "
+        "Yes, games with smaller crowds tended to have smaller national TV audiences, but a crowd that was "
+        "small for its own park did not clearly mean a smaller audience. Comparing games on the same "
+        f"network, the two moved together (correlation {a.corr_crowd_tv:.2f} in {a.season}, n = {a.n}, range "
         f"{a.crowd_ci_low:.2f} to {a.crowd_ci_high:.2f}; {b.corr_crowd_tv:.2f} in {b.season}, n = {b.n}, "
-        f"range {b.crowd_ci_low:.2f} to {b.crowd_ci_high:.2f}). Mostly no after comparing each game with "
-        "its own park's usual crowd, so popular teams do not drive the result: the correlation falls to "
-        f"{a.corr_residual_tv:.2f} in {a.season} (range {a.residual_ci_low:.2f} to "
-        f"{a.residual_ci_high:.2f}) and {b.corr_residual_tv:.2f} in {b.season} (range "
-        f"{b.residual_ci_low:.2f} to {b.residual_ci_high:.2f}), and both ranges include zero.")
+        f"range {b.crowd_ci_low:.2f} to {b.crowd_ci_high:.2f}). After comparing each game with its own "
+        f"park's usual crowd, the link mostly disappears ({a.corr_residual_tv:.2f} in {a.season}, range "
+        f"{a.residual_ci_low:.2f} to {a.residual_ci_high:.2f}; {b.corr_residual_tv:.2f} in {b.season}, range "
+        f"{b.residual_ci_low:.2f} to {b.residual_ci_high:.2f}; both ranges include zero).")
     return pd.DataFrame([{"headline_text": text}])
 
 
@@ -476,12 +479,25 @@ def network_audience_table(con) -> pd.DataFrame:
     return d
 
 
+def audience_note(status: str, network: str, simulcast) -> str | None:
+    """Why an audience is not a plain total, in words an answer can use."""
+    simulcast = SIMULCAST_NAMES.get(str(simulcast), simulcast) if isinstance(simulcast, str) else "simulcast"
+    if status == "main_network_only":
+        return f"The {simulcast} simulcast number is missing, so this is the {network} audience alone."
+    if status == "uncertain":
+        return f"The source gives one number without saying whether it includes the {simulcast} simulcast."
+    return None
+
+
+SIMULCAST_NAMES = {"TruTV": "truTV"}
+
+
 def tv_lookup_table(con) -> pd.DataFrame:
     """One row per nationally televised game, as facts."""
     single = con.execute("""
         select g.game_pk, g.official_date, g.season, g.home_team_id, g.home_team, g.away_team_id,
                g.away_team, g.special_event, v.network, v.viewers_total, v.viewers_main,
-               v.viewers_basis, v.total_uncertain
+               v.viewers_basis, v.total_uncertain, v.additional_networks
         from viewership_games v join games g using (game_pk)""").df()
     window = con.execute("""
         select g.game_pk, g.official_date, g.season, g.home_team_id, g.home_team, g.away_team_id,
@@ -499,7 +515,8 @@ def tv_lookup_table(con) -> pd.DataFrame:
                      "away_team_id": g.away_team_id, "away_team": g.away_team,
                      "special_event": g.special_event, "network": g.network, "broadcast": "single game",
                      "audience_status": status, "viewers_total": g.viewers_total,
-                     "viewers_main": g.viewers_main, "can_split": True})
+                     "viewers_main": g.viewers_main, "can_split": True,
+                     "audience_note": audience_note(status, g.network, g.additional_networks)})
     for g in window.itertuples():
         others = window[(window.window_id == g.window_id) & (window.game_pk != g.game_pk)]
         rows.append({"game_pk": g.game_pk, "official_date": g.official_date, "season": g.season,

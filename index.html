@@ -39,6 +39,8 @@
             button.plain { padding: 0.5rem 0.9rem; font-size: 0.92rem; font-weight: 500; background: var(--chalk); color: var(--green); border: 1px solid #b9b19c; border-radius: 4px; }
             #progress { list-style: none; color: #d9e2d8; font-size: 0.9rem; margin-top: 0.75rem; }
             #progress:empty { display: none; }
+            #clarify { margin-top: 0.6rem; padding: 0.45rem 0.75rem; background: var(--green-2); border-left: 3px solid var(--clay); color: var(--cream); font-size: 0.95rem; }
+            #clarify[hidden] { display: none; }
             /* Moving dots on the latest line, so a long step does not look frozen. */
             #progress li:last-child::after { content: "..."; display: inline-block; width: 1.4em; text-align: left; animation: dots 1.2s steps(1) infinite; }
             @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
@@ -93,6 +95,8 @@
             th:first-child, td:first-child { text-align: left; }
             .answer-chart, .team-chart { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
             .answer-chart h3, .team-chart h3 { font-family: var(--display); font-weight: 500; font-size: 1.05rem; color: var(--green); margin: 0 0 0.25rem; }
+            .callout { font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
+            .callout b { font-family: var(--display); font-weight: 600; font-size: 1.1rem; color: var(--green); }
             .chart-source { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
             /* The context panel stays hidden until the toggle opens it. */
             body:not(.show-work) { margin-right: 0 !important; }
@@ -116,6 +120,7 @@
                         <input id="question" placeholder="Ask about a team, season, game, or comparison" autocomplete="off" aria-label="Your question" />
                         <button id="send" type="submit">Ask</button>
                     </form>
+                    <p id="clarify" role="status" hidden></p>
                     <ul id="progress" role="status"></ul>
                     <div id="samples">
                         <button class="ticket" type="button"><span class="stub">Admit one</span><span class="q">Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?</span></button>
@@ -300,11 +305,11 @@
                 return wrap;
             }
 
-            function addTurn(question) {
+            function addTurn(title) {
                 const turn = document.createElement("section");
                 const asked = document.createElement("p");
                 asked.className = "asked";
-                asked.textContent = question;
+                asked.textContent = title[0].toUpperCase() + title.slice(1);
                 const answer = document.createElement("div");
                 answer.className = "answer";
                 turn.append(asked, stitch(), answer);
@@ -359,14 +364,40 @@
                 source.close();
             }
 
+            // The answer's box is made when the answer arrives, so a clarifying question never gets one.
+            function showClarify(text) {
+                $("clarify").textContent = text;
+                $("clarify").hidden = !text;
+                $("question").placeholder = text ? "Your answer" : "Ask about a team, season, game, or comparison";
+                if (text) $("question").focus();
+            }
+
+            function showAnswer(event) {
+                const answer = addTurn(event.title || event.question);
+                const turn = ++turnCount;
+                answer.innerHTML = renderMarkdown(event.markdown, turn);
+                // Charts sit above the text, and the key numbers above the charts.
+                if (event.team_chart) answer.prepend(teamChart(event.team_chart));
+                if (event.chart) answer.prepend(answerChart(event.chart));
+                if (event.tiles?.length) answer.prepend(scoreTiles(event.tiles));
+                if (event.box_score) answer.appendChild(boxScore(event.box_score));
+                if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
+                if (event.data_note) {
+                    const note = document.createElement("p");
+                    note.className = "data-note";
+                    note.innerHTML = inline(event.data_note, turn);
+                    answer.appendChild(note);
+                }
+            }
+
             function ask(question) {
                 if (!question || $("send").disabled) return;
-                const answer = addTurn(question);
                 $("question").value = "";
                 $("send").disabled = true;
                 document.querySelectorAll("#samples button").forEach((b) => (b.disabled = true));
                 scrollTo({ top: 0, behavior: "smooth" });  // progress shows in the top box
                 $("progress").replaceChildren();
+                showClarify("");
                 resetContext();
 
                 const params = new URLSearchParams({ question });
@@ -379,23 +410,13 @@
                     if (event.type === "activity") addProgress(event.agent, event.text);
                     else if (event.type === "done") {
                         sessionId = event.session_id;
-                        const turn = ++turnCount;
-                        answer.innerHTML = renderMarkdown(event.markdown, turn);
-                        if (event.tiles?.length) answer.prepend(scoreTiles(event.tiles));
-                        if (event.box_score) answer.appendChild(boxScore(event.box_score));
-                        if (event.chart) answer.appendChild(answerChart(event.chart));
-                        if (event.team_chart) answer.appendChild(teamChart(event.team_chart));
-                        if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
-                        if (event.data_note) {
-                            const note = document.createElement("p");
-                            note.className = "data-note";
-                            note.innerHTML = inline(event.data_note, turn);
-                            answer.appendChild(note);
-                        }
+                        if (event.clarify) showClarify(event.markdown);
+                        else showAnswer(event);
                         finish();
                     }
                 };
                 source.onerror = () => {
+                    const answer = addTurn(question);
                     answer.className = "answer error";
                     answer.textContent = "The connection to the server was lost. Please try your question again.";
                     finish();
@@ -407,15 +428,21 @@
                 ask($("question").value.trim());
             });
             document.querySelectorAll("#samples button").forEach((b) => b.addEventListener("click", () => ask(b.querySelector(".q").textContent)));
-            $("toggle").addEventListener("click", () => {
-                const open = document.body.classList.toggle("show-work");
+            function setWork(open) {
+                if (!open) rememberContextPosition();
+                document.body.classList.toggle("show-work", open);
                 $("toggle").textContent = open ? "Hide the agents' work" : "Show the agents' work";
                 $("toggle").setAttribute("aria-expanded", open);
-                // A hidden panel loses its scroll position, so open at the latest activity.
-                if (open) { contextPanel.scrollTop = contextPanel.scrollHeight; contextPanel.scrollLeft = contextPanel.scrollWidth; }
-            });
+                if (open) restoreContextPosition();
+                else $("toggle").focus({ preventScroll: true });
+            }
+            const workOpen = () => document.body.classList.contains("show-work");
+            $("toggle").addEventListener("click", () => setWork(!workOpen()));
+            $("ctx-close").addEventListener("click", () => setWork(false));
+            document.addEventListener("keydown", (e) => { if (e.key === "Escape" && workOpen()) setWork(false); });
             $("reset").addEventListener("click", () => {
                 sessionId = null;
+                showClarify("");
                 $("thread").replaceChildren();
                 resetContext();
             });
@@ -450,6 +477,18 @@
             };
             const short = (value) => Math.abs(value) >= 1e6 ? (value / 1e6).toFixed(1) + "M" : Math.round(value).toLocaleString();
 
+            function niceStep(span) {
+                const power = 10 ** Math.floor(Math.log10(Math.max(span, 1e-9)));
+                return [1, 2, 2.5, 5, 10].map((k) => k * power).find((v) => v >= span);
+            }
+
+            // Low, high and tick step around the data, about four ticks, never below zero for positive data.
+            function axisRange(min, max) {
+                const step = niceStep(((max - min) || Math.abs(max) || 1) / 4);
+                const low = Math.max(Math.floor(min / step) * step - (min % step === 0 ? step : 0), min >= 0 ? 0 : -Infinity);
+                return [low, Math.ceil(max / step) * step + (max % step === 0 ? step : 0), step];
+            }
+
             function niceMax(value) {
                 const power = 10 ** Math.floor(Math.log10(Math.max(value, 1)));
                 return [1, 2, 2.5, 5, 10].map((m) => m * power).find((v) => v >= value);
@@ -465,12 +504,12 @@
                 const W = 680, H = 300, m = { l: 74, r: many ? 52 : 36, t: 16, b: 48 }, w = W - m.l - m.r, h = H - m.t - m.b;
                 svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
                 const all = c.series.flatMap((s) => s.values).filter((v) => v !== null);
-                const count = c.labels.length, top = niceMax(Math.max(...all)), low = Math.min(0, ...all);
+                // The axis spans the data, not zero to the top, so month-to-month changes show.
+                const count = c.labels.length, [low, top, step] = axisRange(Math.min(...all), Math.max(...all));
                 const x = (i) => m.l + (count === 1 ? w / 2 : (i / (count - 1)) * w);
                 const y = (v) => m.t + h - ((v - low) / (top - low)) * h;
-                for (let i = 0; i <= 4; i++) {
-                    const v = low + ((top - low) * i) / 4;
-                    el("line", { x1: m.l, x2: m.l + w, y1: y(v), y2: y(v), class: i === 0 ? "axis0" : "grid" }, svg);
+                for (let v = low; v <= top + step / 2; v += step) {
+                    el("line", { x1: m.l, x2: m.l + w, y1: y(v), y2: y(v), class: v === low ? "axis0" : "grid" }, svg);
                     el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end" }, svg, short(v) + (c.unit === "%" ? "%" : ""));
                 }
                 c.labels.forEach((label, i) => el("text", { x: x(i), y: m.t + h + 16, "text-anchor": "middle" }, svg, label));
@@ -487,7 +526,9 @@
                     s.values.forEach((v, i) => {
                         if (v === null) return;
                         el("circle", { cx: x(i), cy: y(v), r: 4, fill: s.color, stroke: "#fff", "stroke-width": 2 }, svg);
-                        tip(el("circle", { cx: x(i), cy: y(v), r: 12, fill: "transparent" }, svg), `${c.labels[i]}${many ? " " + s.name : ""}: ${fmt(v, c.unit)}`);
+                        const fill = s.fill?.[i] != null ? `, ${s.fill[i].toFixed(1)}% of listed capacity` : "";
+                        const average = /^average/i.test(c.y_label) ? "average " : "";
+                        tip(el("circle", { cx: x(i), cy: y(v), r: 12, fill: "transparent" }, svg), `${c.labels[i]}${many ? " " + s.name : ""}: ${average}${fmt(v, c.unit)}${fill}`);
                     });
                     const last = s.values.findLastIndex((v) => v !== null);
                     if (many) ends.push({ name: s.name, x: x(last), y: y(s.values[last]) });
@@ -502,7 +543,7 @@
 
             function barChart(svg, c) {
                 const pair = c.series.length === 2, rowH = pair ? 30 : 24;
-                const W = 680, m = { l: 170, r: 76, t: 8, b: 44 }, w = W - m.l - m.r, h = c.labels.length * rowH, H = h + m.t + m.b;
+                const wide = c.type === "diverging", W = 680, m = { l: wide ? 150 : 170, r: wide ? 56 : 76, t: 8, b: 44 }, w = W - m.l - m.r, h = c.labels.length * rowH, H = h + m.t + m.b;
                 svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
                 const all = c.series.flatMap((s) => s.values);
                 const top = niceMax(Math.max(...all, 0)), low = Math.min(0, ...all);
@@ -521,7 +562,8 @@
                         const left = Math.min(x(0), x(v)), width = Math.max(Math.abs(x(v) - x(0)), 1);
                         const bar = el("rect", { x: left, y: top2, width, height: thick, rx: 3, fill: k === 0 && c.item_colors ? c.item_colors[i] : paintOf(s) }, svg);
                         tip(bar, `${label}, ${s.name}: ${fmt(v, c.unit)}`);
-                        if (!pair) el("text", { x: left + width + 5, y: center + 4 }, svg, short(v) + (c.unit === "%" ? "%" : ""));
+                        if (wide) el("text", v < 0 ? { x: left - 5, y: center + 4, "text-anchor": "end" } : { x: left + width + 5, y: center + 4 }, svg, `${v > 0 ? "+" : ""}${v.toFixed(1)}%`);
+                        else if (!pair) el("text", { x: left + width + 5, y: center + 4 }, svg, short(v) + (c.unit === "%" ? "%" : ""));
                     });
                 });
                 axisTitles(svg, c.x_label, c.y_label, W, H, false);
@@ -558,6 +600,14 @@
                     const names = c.item_colors ? c.series.map((s, k) => (k ? s : { ...s, name: `${s.name} (team colors)` })) : c.series;
                     wrap.appendChild(legend(names, c.type === "line"));
                 }
+                for (const callout of c.callouts || []) {
+                    const line = document.createElement("p");
+                    line.className = "callout";
+                    const value = document.createElement("b");
+                    value.textContent = callout.value;
+                    line.append(`${callout.label}: `, value, " (shown here so the bars below stay readable)");
+                    wrap.appendChild(line);
+                }
                 const svg = document.createElementNS(SVG, "svg");
                 svg.setAttribute("role", "img");
                 svg.setAttribute("aria-label", c.title);
@@ -565,7 +615,7 @@
                 wrap.appendChild(svg);
                 const source = document.createElement("p");
                 source.className = "chart-source";
-                source.textContent = "Source: " + (c.source.join(", ") || "database query");
+                source.textContent = (c.note ? c.note + " " : "") + "Source: " + (c.source.join(", ") || "database query");
                 wrap.appendChild(source);
                 return wrap;
             }

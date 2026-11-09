@@ -7,9 +7,10 @@
    "0.47",
    "0.16",
    "0.14",
-   "Mostly no",
    "0.52",
-   "prove"
+   "prove",
+   "Yes, games with smaller crowds",
+   "did not clearly mean"
   ],
   "must_not": [
    "raw correlation",
@@ -18,7 +19,7 @@
   ],
   "chart": null,
   "team_chart": false,
-  "tile": "0.34"
+  "no_tiles": true
  },
  {
   "id": "sample_mets",
@@ -55,7 +56,7 @@
   "max_researchers": 2,
   "chart": null,
   "team_chart": false,
-  "tile": "3,094,000"
+  "no_tiles": true
  },
  {
   "id": "capped_game",
@@ -84,8 +85,7 @@
    "prevented"
   ],
   "context": false,
-  "team_chart": false,
-  "no_tiles": true
+  "team_chart": false
  },
  {
   "id": "rays_game",
@@ -137,7 +137,8 @@
   "q": "How many people watched Dodgers vs Blue Jays on TBS on April 7, 2026?",
   "must": [
    "708,000",
-   "uncertain"
+   "uncertain",
+   "truTV"
   ],
   "must_not": [
    "technical"
@@ -148,7 +149,8 @@
   "id": "main_only",
   "q": "How many people watched Tigers vs Yankees on TBS on June 30, 2026?",
   "must": [
-   "279,000"
+   "279,000",
+   "truTV"
   ],
   "must_not": [
    "676",
@@ -166,7 +168,7 @@
    "technical"
   ],
   "max_researchers": 2,
-  "tile": "3,616,000"
+  "no_tiles": true
  },
  {
   "id": "rsn",
@@ -176,7 +178,8 @@
    "not available",
    "not in the data",
    "does not",
-   "no data"
+   "no data",
+   "unavailable"
   ],
   "must_not": [
    "technical"
@@ -260,12 +263,14 @@
    "coefficient of",
    "shrunk",
    "technical",
-   "driven"
+   "driven",
+   ".100"
   ],
   "must": [
    "Home openers"
   ],
-  "team_chart": false
+  "team_chart": false,
+  "chart": "diverging"
  },
  {
   "id": "new_cubs",
@@ -284,8 +289,8 @@
    "June 19",
    "demand may have been higher",
    "limited by the park",
-   "Yes on the raw",
-   "Mostly no"
+   "Yes, games with smaller crowds",
+   "the link mostly disappears"
   ]
  },
  {
@@ -331,7 +336,8 @@
   "id": "plain_lookup",
   "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
   "must": [
-   "46,326"
+   "46,326",
+   "listed capacity"
   ],
   "must_not": [
    "demand may have been higher",
@@ -339,7 +345,7 @@
   ],
   "chart": null,
   "team_chart": false,
-  "tile": "46,326"
+  "no_tiles": true
  },
  {
   "id": "new_cubs_day_night",
@@ -402,5 +408,33 @@
   "q": "List the five biggest Cubs home crowds in 2025, with date, opponent and attendance.",
   "box_score": true,
   "chart": null
+ },
+ {
+  "id": "crowd_tv_popular_teams",
+  "q": "Do popular teams explain the link between crowds and TV audiences?",
+  "must": [
+   "prove"
+  ],
+  "no_tiles": true
+ },
+ {
+  "id": "win_rate_plain",
+  "q": "How much does a team's winning go with higher attendance?",
+  "must": [
+   "162"
+  ],
+  "must_not": [
+   ".100"
+  ]
+ },
+ {
+  "id": "tv_seasons_team",
+  "q": "How did Yankees national TV audiences change from 2025 to 2026?",
+  "chart": "line",
+  "season_lines": 2,
+  "must": [
+   "Nielsen"
+  ],
+  "team_chart": false
  }
 ]

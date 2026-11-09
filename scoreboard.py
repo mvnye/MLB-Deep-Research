@@ -1,6 +1,6 @@
 """Scoreboard tiles and box scores for an answer. Built from checked text and query rows, never by a model.
 
-Tiles are a few key numbers above the answer. A box score is a tight table for an answer that lists
+Tiles are a few key numbers above the answer: only ones a reader needs no help with, so no correlations. A box score is a tight table for an answer that lists
 games. Both stay empty when the answer has nothing that fits, so a label can never misdescribe a number.
 """
 
@@ -11,8 +11,7 @@ MAX_TILES = 4
 MAX_BOX_ROWS = 15
 MIN_BOX_ROWS = 3
 THOUSANDS = re.compile(r"\b\d{1,3}(?:,\d{3})+\b")
-CORRELATION = re.compile(r"(-?0\.\d+) in (2025|2026)")
-FILL = re.compile(r"(\d+(?:\.\d)?%) (?:fill|of capacity)|fill[^.]*?(\d+(?:\.\d)?%)", re.I)
+FILL = re.compile(r"(\d+(?:\.\d)?%) (?:fill|of (?:listed )?capacity)|fill[^.]*?(\d+(?:\.\d)?%)", re.I)
 BOX_COLUMNS = {"official_date": "DATE", "game_date": "DATE", "date": "DATE", "away_team": "AWAY", "home_team": "HOME",
                "opponent": "OPP", "network": "NET", "day_night": "D/N", "attendance": "ATT",
                "expected_attendance": "EXP", "fill_pct": "% CAP", "viewers_total": "VIEWERS"}
@@ -27,18 +26,9 @@ def team_tiles(fact: dict) -> list[dict]:
     return tiles
 
 
-def headline_tiles(text: str) -> list[dict]:
-    """The four correlations of the crowds vs TV headline: raw first, then adjusted."""
-    found = CORRELATION.findall(text)
-    if len(found) < 4:
-        return []
-    names = ["Raw link", "Raw link", "Adjusted link", "Adjusted link"]
-    return [{"label": f"{name} {year}", "value": value} for name, (value, year) in zip(names, found)]
-
-
 def sentence_tiles(sentence: str) -> list[dict]:
     """A single audience, crowd and fill rate stated in the answer's first sentence."""
-    numbers = THOUSANDS.findall(sentence)
+    numbers = [m[0] for m in THOUSANDS.finditer(sentence) if not sentence[m.end():].startswith(" seats")]
     lowered = sentence.lower()
     # Two numbers need the sentence to say which is which, and an average or a high is not one crowd.
     if len(numbers) != 1 or re.search(r"season high|averag|peak", lowered):
@@ -53,7 +43,8 @@ def sentence_tiles(sentence: str) -> list[dict]:
     tiles = [{"label": label, "value": numbers[0]}]
     fill = FILL.search(sentence)
     if fill and label == "Crowd":
-        tiles.append({"label": "Of capacity", "value": fill[1] or fill[2]})
+        share = fill[1] or fill[2]
+        tiles.append({"label": "Of listed capacity" if float(share[:-1]) > 100 else "Of capacity", "value": share})
     return tiles
 
 
