@@ -376,10 +376,10 @@
                 const answer = addTurn(event.title || event.question);
                 const turn = ++turnCount;
                 answer.innerHTML = renderMarkdown(event.markdown, turn);
-                // Charts sit above the text, and the key numbers above the charts.
-                if (event.team_chart) answer.prepend(teamChart(event.team_chart));
-                if (event.chart) answer.prepend(answerChart(event.chart));
+                // Key numbers above the text, charts and the box score below it.
                 if (event.tiles?.length) answer.prepend(scoreTiles(event.tiles));
+                if (event.chart) answer.appendChild(answerChart(event.chart));
+                if (event.team_chart) answer.appendChild(teamChart(event.team_chart));
                 if (event.box_score) answer.appendChild(boxScore(event.box_score));
                 if (event.sources?.length) answer.appendChild(sourceList(event.sources, turn));
                 if (event.data_note) {
