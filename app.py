@@ -947,14 +947,33 @@ def task_words(task: str) -> set[str]:
     return {w for w in re.findall(r"[a-z0-9']+", task.lower()) if w not in TASK_STOPWORDS}
 
 
+BREAKDOWNS = {"month": "month", "monthly": "month", "weekday": "weekday", "weekdays": "weekday", "day": "weekday",
+              "days": "weekday", "network": "network", "networks": "network", "opponent": "opponent",
+              "opponents": "opponent", "expected": "expected", "prediction": "expected", "predicted": "expected",
+              "game": "game", "games": "game", "night": "day_night", "daytime": "day_night", "total": "total",
+              "viewers": "viewers", "audience": "viewers", "audiences": "viewers", "fill": "fill", "capacity": "fill"}
+
+
+def task_scope(task: str) -> set[str]:
+    """What a task asks for beyond its wording: teams, seasons, dates, and breakdowns."""
+    scope = {f"team:{t}" for t in teams_named(task)}
+    scope |= {f"season:{y}" for y in re.findall(r"\b(20\d\d)\b", task)}
+    scope |= {f"date:{d[0].lower()}" for d in GAME_DATE.finditer(task)}
+    scope |= {f"by:{BREAKDOWNS[w]}" for w in re.findall(r"[a-z]+", task.lower()) if w in BREAKDOWNS}
+    return scope
+
+
 def repeated_task(run: "Research", role: str, task: str) -> bool:
-    """A second researcher on the same role and topic, when the first succeeded and found no gap."""
-    words = task_words(task)
+    """A second researcher on the same role and topic, when the first succeeded and found no gap.
+    A task that asks for something the first did not, such as another team, season, or breakdown
+    (by month, weekday, network, opponent, or expected attendance), is a real follow-up."""
+    words, scope = task_words(task), task_scope(task)
     for done in run.tasks:
         if done["role"] != role or done["failed"] or GAP_WORDS.search(done["findings"]):
             continue
         other = done["words"]
-        if words and other and len(words & other) / min(len(words), len(other)) >= SAME_TOPIC:
+        similar = words and other and len(words & other) / min(len(words), len(other)) >= SAME_TOPIC
+        if similar and scope <= done["scope"]:
             return True
     return False
 
@@ -1010,7 +1029,8 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
         failed = True
         findings = f"The {role} researcher failed on this task and found no answer ({type(e).__name__})."
         run.errors.append(f"{agent.name}: {type(e).__name__}: {str(e)[:300]}")
-    run.tasks.append({"role": role, "words": task_words(task), "failed": failed, "findings": findings})
+    run.tasks.append({"role": role, "words": task_words(task), "scope": task_scope(task), "failed": failed,
+                      "findings": findings})
     if failed:
         # A follow-up that fails after this role already delivered leaves the answer whole.
         if run.answered_round.get(role, turn) >= turn:
