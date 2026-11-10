@@ -1,10 +1,9 @@
 # MLB-Deep-Research
 
-A multi-agent deep research app on MLB attendance. It explores what drives attendance, why specific teams and games over- or under-perform against a regression baseline, and whether smaller crowds went with smaller national TV audiences in 2025 and 2026. A Lead sends parallel Researchers to query a DuckDB database and read Wikipedia, goes back for gaps, and a Writer produces a footnoted answer, with a chart when the result suits one. Code fills in every number the Writer cites from the researchers' query results, and checks the answer before it is shown.
-
+A multi-agent deep research app for sports media and sponsorship sellers preparing team pitches. It explores what drives MLB attendance, why specific teams and games over- or under-perform, and whether smaller crowds went with smaller national TV audiences in 2025 and 2026. A Lead clarifies vague questions and sends Attendance, Viewership and Context Researchers in parallel, and a Writer turns their findings into a footnoted answer, with every number checked against its source.
 **Target user:** a sports media or sponsorship seller preparing team pitches.
 
-**Live app:** https://mlb-deep-research-git-636637173930.europe-west1.run.app (restricted to columbia.edu accounts).
+**Live app:** https://mlb-deep-research-git-636637173930.europe-west1.run.app 
 
 ## Data sources
 
