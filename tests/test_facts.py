@@ -165,5 +165,10 @@ def test_computed_gaps_count_as_sourced():
     assert app.drop_unsourced(out, run.tool_calls) == out
 
 
+def test_unit_after_more_is_not_doubled():
+    out = app.fill_report(make_run(), "The Rays drew {diff:Q1.r2.avg_attendance,Q1.r1.avg_attendance} more fans in 2024.")
+    assert "6,802 more fans" in out and "fans more fans" not in out, out
+
+
 if __name__ == "__main__":
     run_tests(globals())

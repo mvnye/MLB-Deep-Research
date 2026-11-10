@@ -21,7 +21,7 @@ MINUS = re.compile(rf"\{{\s*({REF})\s*-\s*({REF})\s*\}}")  # {A - B} is read as 
 PHRASE = re.compile(r"\{([a-z][a-z0-9_]*)(?::(\d{4}))?\}")
 ANY = re.compile(r"\{[A-Za-z_][^{}\n]{0,80}\}")
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
-UNIT_AFTER = re.compile(r"^\s+(fans|viewers|people|of capacity|of listed capacity|percentage points?)\b")
+UNIT_AFTER = re.compile(r"^\s+(?:(?:more|fewer|less|additional|extra)\s+)?(fans|viewers|people|of capacity|of listed capacity|percentage points?)\b")
 SHOWN_BEFORE = re.compile(r"(\d[\d,]*(?:\.\d+)?%?)(?:\s+(?:fans|viewers))?\s*$")
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
           "October", "November", "December"]
