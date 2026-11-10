@@ -111,5 +111,55 @@ def test_nielsen_clause_needs_a_viewer_number():
     assert "Nielsen" in app.nielsen_inline(numbers, calls)
 
 
+def test_only_mention_of_a_team_is_kept():
+    calls = [{"name": "run_sql", "args": {"query": "select home_team, avg_attendance from team_season_model"}, "agent": "A",
+              "result": json.dumps({"columns": ["home_team", "avg_attendance"],
+                                    "rows": [["New York Yankees", 40803], ["Tampa Bay Rays", 9713], ["Boston Red Sox", 32518]]})}]
+    run = run_for("In the AL East, the Yankees averaged 40,803 fans and the Red Sox averaged 32,518 fans. "
+                  "The Rays averaged 9,713 fans as a result of their temporary park. "
+                  "The Yankees led as a result of their market.",
+                  question="How did AL East attendance compare in 2025?", tool_calls=calls)
+    run.findings = ["- Yankees 40,803, Red Sox 32,518, Rays 9,713 (table: team_season_model)."]
+    app.drop_failing(run, app.check_report(run, run.question, final=True))
+    assert "The Rays averaged 9,713 fans" in run.report, run.report
+    assert "led as a result of their market" not in run.report, run.report  # the Yankees are named elsewhere
+    assert any(f.get("reason") == "only mention of Rays" for f in run.check_failures), run.check_failures
+
+
+def test_quota_errors_are_retried_then_raised():
+    import asyncio
+    calls = []
+
+    class Fake(app.QuotaRetryModel):
+        pass
+
+    async def flaky(self, *a, **k):
+        calls.append(1)
+        if len(calls) < 3:
+            raise RuntimeError("429 RESOURCE_EXHAUSTED")
+        return "ok"
+
+    waits, app.QUOTA_WAITS = app.QUOTA_WAITS, (0, 0)
+    base = app.LitellmModel.get_response
+    try:
+        app.LitellmModel.get_response = flaky
+        model = Fake(model="vertex_ai/x", api_key="unused")
+        assert asyncio.run(model.get_response()) == "ok" and len(calls) == 3
+        calls.clear()
+
+        async def always(self, *a, **k):
+            calls.append(1)
+            raise RuntimeError("429 quota")
+        app.LitellmModel.get_response = always
+        try:
+            asyncio.run(model.get_response())
+            raise AssertionError("expected the quota error")
+        except RuntimeError as e:
+            assert "429" in str(e) and len(calls) == 3, calls
+            assert app.friendly_error(e).startswith("The model has hit its usage limit")
+    finally:
+        app.LitellmModel.get_response, app.QUOTA_WAITS = base, waits
+
+
 if __name__ == "__main__":
     run_tests(globals())

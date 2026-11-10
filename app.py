@@ -36,10 +36,35 @@ logger = logging.getLogger(__name__)
 # Traces upload to OpenAI by default, which needs an OpenAI key. We're on Gemini.
 set_tracing_disabled(True)
 
+QUOTA_TRIES = 3
+QUOTA_WAITS = (10, 30)  # seconds before the 2nd and 3rd try: Vertex quotas refill per minute
+
+
+def is_quota_error(error: Exception) -> bool:
+    text = f"{type(error).__name__} {error}".lower()
+    return any(k in text for k in ("ratelimit", "resource_exhausted", "resourceexhausted", "quota", "429"))
+
+
+class QuotaRetryModel(LitellmModel):
+    """A Gemini call that hits a 429 quota error waits and tries again (3 tries in all) before the
+    error reaches the user as the usage-limit message."""
+
+    async def get_response(self, *args, **kwargs):
+        for attempt in range(QUOTA_TRIES):
+            try:
+                return await super().get_response(*args, **kwargs)
+            except Exception as e:
+                if not is_quota_error(e) or attempt == QUOTA_TRIES - 1:
+                    raise
+                wait = QUOTA_WAITS[min(attempt, len(QUOTA_WAITS) - 1)]
+                logger.warning("quota error on %s, try %d of %d: waiting %ss", self.model, attempt + 1, QUOTA_TRIES, wait)
+                await asyncio.sleep(wait)
+
+
 # LiteLLM routes the call to Gemini. api_key is unused: Vertex AI uses your gcloud credentials.
-MODEL = LitellmModel(model="vertex_ai/gemini-3.5-flash", api_key="unused")
+MODEL = QuotaRetryModel(model="vertex_ai/gemini-3.5-flash", api_key="unused")
 # Researchers only query and take notes: the cheaper model is enough.
-RESEARCHER_MODEL = LitellmModel(model="vertex_ai/gemini-3.5-flash-lite", api_key="unused")
+RESEARCHER_MODEL = QuotaRetryModel(model="vertex_ai/gemini-3.5-flash-lite", api_key="unused")
 # A stalled model call would hang the page: give up after 90 s, and retry twice.
 # vertex_project is set so calls never depend on the machine's default quota project.
 SETTINGS = ModelSettings(extra_args={
@@ -1541,9 +1566,24 @@ def problem_text(p: dict) -> str:
     return f'{p["message"]} Sentence: "{p["sentence"].strip()}"' if p["sentence"] else p["message"]
 
 
+NETWORKS = ("ESPN", "FS1", "TBS", "NBC", "ABC", "Fox", "Netflix", "truTV")
+
+
+def mentions(text: str, name: str) -> bool:
+    return bool(re.search(rf"\b{re.escape(name)}\b", citations.CITATION.sub("", text)))
+
+
+def finding_names(run: Research) -> list[str]:
+    """Teams (club names, such as 'Rays') and networks the researchers' findings mention."""
+    text = "\n".join(run.findings)
+    clubs = {club_name(team) for _, _, team in data_tools.team_aliases()}
+    return [n for n in sorted(clubs) + list(NETWORKS) if mentions(text, n)]
+
+
 def drop_failing(run: Research, problems: list[dict]) -> None:
     """After the retry: drop each sentence that still fails a sentence-level check, unless it holds the last
-    copy of a required fact. Never leave an empty answer. Everything not dropped is logged."""
+    copy of a required fact or is the only mention of a team or network from the findings (a list of
+    teams must not lose one). Never leave an empty answer. Everything not dropped is logged."""
     failing: dict[int, list[dict]] = {}
     for p in problems:
         if p["check"] in SENTENCE_CHECKS and p["index"] is not None:
@@ -1553,15 +1593,18 @@ def drop_failing(run: Research, problems: list[dict]) -> None:
     if not failing:
         return
     by_index = dict(each_sentence(run.report))
+    names = finding_names(run)
     drop = set()
     for i, ps in failing.items():
         s = by_index[i]
         rest = " ".join(t for j, t in by_index.items() if j != i and j not in drop)
         held = [n for n in shown_numbers(s) if n in run.required and n not in rest]
-        if held:
+        only = [n for n in names if mentions(s, n) and not mentions(rest, n)]
+        if held or only:
+            reason = f"holds required fact {held[0]}" if held else f"only mention of {only[0]}"
             for p in ps:
                 run.check_failures.append({"check": p["check"], "message": p["message"], "kept": True,
-                                           "reason": f"holds required fact {held[0]}"})
+                                           "reason": reason})
             continue
         drop.add(i)
         for p in ps:
@@ -1848,7 +1891,7 @@ async def answer(session: ChatSession, message: str, hooks: PanelHooks) -> Resea
 def friendly_error(error: Exception) -> str:
     """What to tell the user. Raw exception text stays in the logs."""
     text = f"{type(error).__name__} {error}".lower()
-    if any(k in text for k in ("ratelimit", "resource_exhausted", "resourceexhausted", "quota", "429")):
+    if is_quota_error(error):
         return "The model has hit its usage limit for now. Please wait a minute and try again."
     if any(k in text for k in ("timeout", "timed out", "deadline")):
         return "The model took too long to respond. Please try again, or ask a narrower question."
