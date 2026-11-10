@@ -17,7 +17,8 @@ QUERY_ID = re.compile(r"^Q\d+$")
 REF = r"Q\d+\.r\d+\.[A-Za-z_]\w*"
 FACT = re.compile(r"\{(Q\d+)\.r(\d+)\.([A-Za-z_]\w*)\}")
 DERIVED = re.compile(rf"\{{(diff|change):\s*({REF})\s*,\s*({REF})\s*\}}")
-PHRASE = re.compile(r"\{([a-z_]+)(?::(\d{4}))?\}")
+MINUS = re.compile(rf"\{{\s*({REF})\s*-\s*({REF})\s*\}}")  # {A - B} is read as {diff:A,B}
+PHRASE = re.compile(r"\{([a-z][a-z0-9_]*)(?::(\d{4}))?\}")
 ANY = re.compile(r"\{[A-Za-z_][^{}\n]{0,80}\}")
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
 UNIT_AFTER = re.compile(r"^\s+(fans|viewers|people|of capacity|of listed capacity|percentage points?)\b")
@@ -277,6 +278,7 @@ class Filled:
         self.phrases = 0  # ready-made phrases used
         self.unresolved: list[str] = []
         self.queries: list[str] = []  # the query IDs used, in order
+        self.computed: list[dict] = []  # each gap or change worked out here, for the tool log
 
 
 def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tuple[str, list[str]]:
@@ -295,6 +297,10 @@ def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tu
                 value = format_value(found[1], found[0], found[2])
                 used.append(fm[1])
                 out.facts += 1
+        elif mm := MINUS.fullmatch(token):
+            token = f"{{diff:{mm[1]},{mm[2]}}}"
+        if value is not None or FACT.fullmatch(token):
+            pass
         elif dm := DERIVED.fullmatch(token):
             parts = [FACT.fullmatch("{" + r + "}") for r in (dm[2], dm[3])]
             looked = [book.lookup(p[1], int(p[2]), p[3]) for p in parts]
@@ -303,6 +309,7 @@ def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tu
             if value:
                 used += [parts[0][1], parts[1][1]]
                 out.derived += 1
+                out.computed.append({"op": dm[1], "facts": [dm[2], dm[3]], "value": value})
             else:
                 out.unresolved.append(f"{token}: " + (bad[0] if bad else "these two facts cannot be compared that way"))
         elif pm := PHRASE.fullmatch(token):
@@ -372,6 +379,14 @@ def tag_findings(findings: str, tool_calls: list[dict], agent: str) -> str:
             for column, value in zip(result["columns"], row):
                 for v in _cell_numbers(value):
                     cells.append((abs(v), f"{{{qid}.r{r}.{column}}}"))
+
+    def valid(m: re.Match) -> str:
+        fm = FACT.fullmatch(m[0])
+        return m[0] if fm and not isinstance(book.lookup(fm[1], int(fm[2]), fm[3]), str) else ""
+
+    # A made-up ID, such as {attendance.r1.x} or {Q6.row_count}, is removed, and the number before
+    # it is tagged again below.
+    findings = re.sub(r" ?" + ANY.pattern, lambda m: (" " + valid(m)) if valid(m) else "", findings)
 
     def tag(m: re.Match) -> str:
         if re.match(r"\s*\{", m.string[m.end():]):

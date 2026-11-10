@@ -1292,7 +1292,7 @@ def add_missing_total(report: str, question: str, team: dict | None) -> str:
 
 
 NUMBER = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?:\s?(million|M\b|K\b))?", re.IGNORECASE)
-SOURCE_TOOLS = {"run_sql", "read_wikipedia", "search_wikipedia"}
+SOURCE_TOOLS = {"run_sql", "read_wikipedia", "search_wikipedia", "compute_fact"}
 
 
 def source_numbers(tool_calls: list[dict]) -> list[float]:
@@ -1523,6 +1523,10 @@ def fill_report(run: Research, text: str) -> str:
             filled, used = facts.fill_sentence(sentence, book, phrase, out)
             parts.append(facts.cite(filled, used, book, known))
         lines.append(" ".join(parts))
+    # A gap or change worked out from two facts is logged, so the checks find its number in a tool result.
+    for c in out.computed:
+        run.tool_calls.append({"name": "compute_fact", "args": {"op": c["op"], "facts": c["facts"]},
+                               "result": json.dumps({"value": c["value"]}), "agent": "Fact formatter"})
     stats = run.fact_stats
     for k, v in (("filled", out.facts), ("derived", out.derived), ("phrases", out.phrases), ("raw_numbers", raw)):
         stats[k] = stats.get(k, 0) + v

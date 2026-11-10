@@ -145,5 +145,25 @@ def test_renamed_columns_keep_their_units():
     assert out.startswith("They averaged 29,796 fans, up 25.1% from 23,824 fans"), out
 
 
+def test_made_up_ids_in_findings_are_replaced():
+    run = make_run()
+    findings = "- Rays averaged 9,713 {attendance.r1.avg_attendance} fans, {Q1.row_count} games, 16,515 {Q1.r2.avg_attendance} (table: x)."
+    tagged = facts.tag_findings(findings, run.tool_calls, "Attendance Researcher 1")
+    assert tagged == "- Rays averaged 9,713 fans {Q1.r1.avg_attendance}, games, 16,515 {Q1.r2.avg_attendance} (table: x).", tagged
+
+
+def test_minus_form_and_digit_phrase_keys():
+    run = make_run()
+    out = app.fill_report(run, "The gap was {Q1.r1.avg_attendance - Q1.r2.avg_attendance}. {late_2025}.")
+    assert "6,802 fans" in out and "early September" in out and not run.fact_stats["unresolved"], (out, run.fact_stats)
+
+
+def test_computed_gaps_count_as_sourced():
+    run = make_run()
+    out = app.fill_report(run, "The gap was {diff:Q1.r1.avg_attendance,Q1.r2.avg_attendance}.")
+    assert not app.unverified_numbers(out, run.tool_calls), app.unverified_numbers(out, run.tool_calls)
+    assert app.drop_unsourced(out, run.tool_calls) == out
+
+
 if __name__ == "__main__":
     run_tests(globals())
