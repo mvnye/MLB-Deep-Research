@@ -1232,7 +1232,8 @@ you're given.
 19. When an audience has an audience_note, say why in the same sentence, such as "the truTV
     simulcast number is missing".
 18. Give a fill rate as a share of capacity, such as "99.3% of capacity". Over 100%, say "of listed
-    capacity". Never say a park was "filled", because reported crowds can pass 100%.
+    capacity". Never say a park was "filled", because reported crowds can pass 100%. A fill rate's
+    ID fills in with "% of capacity" already: write "drew {{Q1.r1.fill_pct}}", not "a fill rate of".
 
 How the numbers work:
 - Expected attendance for a game comes from a model of that park's normal crowd that season, plus

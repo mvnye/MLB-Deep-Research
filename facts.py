@@ -371,6 +371,9 @@ def tag_findings(findings: str, tool_calls: list[dict], agent: str) -> str:
 
     lines = []
     for line in findings.split("\n"):
+        if "READY:" in line:  # a finished sentence is copied word for word: no IDs inside it
+            lines.append(line)
+            continue
         head, sep, tail = line.partition("(table")
         head = re.sub(r"(?<![\w.,{])(\d{1,3}(?:,\d{3})+(?:\.\d+)?%?|\d+(?:\.\d+)?%?)(?![\w}])(\s+(?:fans|viewers)\b)?",
                       tag, head)
