@@ -236,3 +236,8 @@ CLAUDE.md
 
 # Eval run output (rewritten on every run)
 evals/latest_results.json
+
+# Evals and tests (kept locally, not in the submission)
+evals/
+tests/
+scripts/eval_agent.py
