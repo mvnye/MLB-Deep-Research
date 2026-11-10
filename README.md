@@ -10,8 +10,23 @@ A multi-agent deep research app for sports media and sponsorship sellers prepari
 - [MLB Stats API](https://statsapi.mlb.com): 2024 to 2026 regular season games (`/api/v1/schedule?sportId=1&gameType=R`), per-game attendance, weather, venue and capacity (`/api/v1.1/game/{gamePk}/feed/live`), and official season totals (`/api/v1/attendance`), back to 2022 for the model's prior years. Postseason is out of scope.
 - TV Media Blog viewership archives: [2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database) and [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive), saved as CSVs in `data/raw/`. The 2025 tables end in early September.
 - Wikipedia team-season articles, read live through the public MediaWiki API.
-- Metro population, described under Market size data below.
+- Metro population, described under Market size data.
 
+
+### Viewership figures
+
+Viewership figures are publicly reported average audience (P2+), compiled by TV Media Blog from network press releases and trade coverage (Sports Business Journal, Sports Media Watch). They may differ from official Nielsen data. `viewers_total` is the national TV audience, excluding streaming add-ons (Peacock/Adobe, HBO Max): the main network plus TV simulcasts (Deportes, ESPN2, truTV). Netflix games are streaming-only. Nielsen changed its method in September 2025, so 2025 and 2026 figures are not like-for-like.
+
+### Market size data
+
+Team market size uses metro population, one figure per team and season:
+
+- US teams: [US Census Bureau Vintage 2025 metro population estimates](https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv).
+- Blue Jays: [Statistics Canada table 17-10-0148-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710014801), because the US Census does not cover Toronto.
+
+Estimates end at 2025, so 2026 uses the 2025 figure. Two-team metros are not split between teams. The Athletics use San Francisco-Oakland for 2024 and Sacramento for 2025 and 2026.
+
+To load it, run `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`.
 
 ## Loading the data and running the app
 
@@ -30,7 +45,7 @@ These are the four sample questions on the app's front page.
 
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
-**Expected answer:** Yes on the raw numbers, but there is no clear link after adjusting. Comparing games on the same network, smaller crowds tended to come with smaller TV audiences: correlation 0.34 in 2025 (n = 82, range 0.14 to 0.52) and 0.47 in 2026 (n = 83, range 0.29 to 0.62), where 0 means no link and 1 means a perfect match. After comparing each game with its own park's usual crowd, the correlation falls to 0.16 in 2025 (range -0.05 to 0.37) and 0.14 in 2026 (range -0.08 to 0.34). Both ranges include zero. At the team level, teams with higher average home attendance also tended to have larger average national TV audiences (correlation 0.51, n = 56, range 0.29 to 0.68). This is consistent with team-level factors such as popularity and market size, but the data does not show that one causes the other.
+**Expected answer:** Yes on the raw numbers, but no clear link after adjusting. Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
 
 **Source:** `crowd_tv_headline` (built from `crowd_tv_residual`) and `team_crowd_tv`.
 
@@ -46,7 +61,7 @@ These are the four sample questions on the app's front page.
 
 ### 2. Why did the Mets over-perform on attendance in 2025?
 
-**Expected answer:** The Mets averaged 39,316 fans a game in 2025 (MLB's official season average), up 33.3% from 29,485 in 2024. That is 21.4% above the 32,383 that their prior two years of crowds, win rate, and market would predict. They were 18.6% below that prediction in 2024, so part of this may be a rebound. The rise coincided with signing Juan Soto in December 2024, though the data cannot show the signing caused it.
+**Expected answer:** 39,316 fans a game in 2025 (official), up 33.3% from 29,485 in 2024 and 21.4% above the 32,383 the model predicts. They were 18.6% below prediction in 2024, so part may be a rebound. The rise coincided with signing Juan Soto in December 2024; the data cannot show the signing caused it.
 
 **Source:** `team_season_model` (`SELECT * FROM team_season_model WHERE team_id = 121 AND season = 2025`), and the Wikipedia article [2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season).
 
@@ -60,7 +75,7 @@ These are the four sample questions on the app's front page.
 
 ### 3. Compare the Cubs and White Sox on attendance and national TV audiences in 2025.
 
-**Expected answer:** The Cubs averaged 37,259 fans a game in 2025 (3,017,983 in all, 89.9% of capacity). The White Sox averaged 18,072 (1,445,738, 45.0% of capacity), 19,187 fewer a game. The Cubs had 15 national TV appearances in the 2025 data (10 single games and 5 in Fox regional windows; ESPN 5, Fox 5, TBS 3, FS1 2). Their 9 single games with a known audience averaged 1,126,444 viewers, with a high of 2,041,000. The White Sox had no national TV broadcasts in the 2025 data, which ends in early September.
+**Expected answer:** Cubs 37,259 fans a game (3,017,983 total, 89.9% of capacity); White Sox 18,072 (1,445,738, 45.0%), 19,187 fewer a game. The Cubs had 15 national TV appearances in the 2025 data, and their 9 single games with a known audience averaged 1,126,444 viewers. The White Sox had none in the data, which ends in early September.
 
 **Source:** `team_season_model` and `team_season_attendance` (official averages and totals), `games_clean` (fill), `team_tv_summary` (`SELECT * FROM team_tv_summary WHERE season = 2025 AND team_id IN (112, 145)`).
 
@@ -70,6 +85,8 @@ These are the four sample questions on the app's front page.
 >
 > *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*
 
+The 1,126,444 average covers the 9 single games with a known audience, not all 10.
+
 **No-tools baseline** (shortened; full text in `samples/baseline_3.md`):
 
 > Because my knowledge cutoff is in January 2025, actual attendance figures and national TV ratings for the 2025 Major League Baseball season are not yet available. [...] In 2024, the Cubs drew **2,907,591 fans** (averaging 35,896 per game) [...] In 2024, they [the White Sox] drew just **1,380,183 fans** (averaging 17,039 per game) [...] the Cubs are expected to vastly outpace the White Sox in both stadium attendance and national television viewership [...]
@@ -78,7 +95,7 @@ The baseline gives no 2025 figures, and its 2024 figures are close to but not th
 
 ### 4. Why did Rays attendance drop in 2025?
 
-**Expected answer:** The Rays averaged 9,713 fans a game in 2025 (786,750 in all), down 41.2% from 16,515 in 2024. Hurricane Milton damaged Tropicana Field, so they played 2025 at George M. Steinbrenner Field, a temporary park with 11,026 seats instead of 25,025. Because of the smaller park, they drew 88.1% of capacity, up from 66.0% in 2024. The model gives no expected attendance for a season in a temporary park, so the data cannot say whether 2025 beat expectations.
+**Expected answer:** 9,713 fans a game in 2025 (786,750 total), down 41.2% from 16,515 in 2024, after moving to Steinbrenner Field (11,026 seats) because Hurricane Milton damaged Tropicana Field. Fill rose from 66.0% to 88.1%. The model gives no expected attendance for a temporary park.
 
 **Source:** `team_season_model` (`WHERE team_id = 139 AND season IN (2024, 2025)`), `games_clean` (venue, capacity and fill), and the Wikipedia article [2025 Tampa Bay Rays season](https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season).
 
@@ -147,21 +164,6 @@ The agent also says so for postseason games, seasons outside 2024 to 2026, local
 }
 ```
 
-## Viewership figures
-
-Viewership figures are publicly reported average audience (P2+), compiled by TV Media Blog from network press releases and trade coverage (Sports Business Journal, Sports Media Watch). They may differ from official Nielsen data. `viewers_total` is the national TV audience, excluding streaming add-ons (Peacock/Adobe, HBO Max): the main network plus TV simulcasts (Deportes, ESPN2, truTV). Netflix games are streaming-only. Nielsen changed its method in September 2025, so 2025 and 2026 figures are not like-for-like.
-
 ## Using the deployed app
 
 Answers can take a few minutes. Conversations are kept in memory, so sessions reset when the service restarts. Raw tool calls are not shown in the answer: "Show the agents' work" opens a panel with each agent's prompts, tool calls and findings.
-
-## Market size data
-
-Team market size uses metro population, one figure per team and season:
-
-- US teams: [US Census Bureau Vintage 2025 metro population estimates](https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv).
-- Blue Jays: [Statistics Canada table 17-10-0148-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710014801), because the US Census does not cover Toronto.
-
-Estimates end at 2025, so 2026 uses the 2025 figure. Two-team metros are not split between teams. The Athletics use San Francisco-Oakland for 2024 and Sacramento for 2025 and 2026.
-
-To load it, run `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`.
