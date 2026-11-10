@@ -90,6 +90,7 @@ class Research:
     removals: list[dict] = field(default_factory=list)  # each number a step removed, and why
     query_ids: list[str] = field(default_factory=list)  # Q1, Q2, ...: one per researcher query result
     fact_stats: dict = field(default_factory=dict)  # values filled from fact IDs, phrases, raw numbers
+    check_failures: list[dict] = field(default_factory=list)  # checks still failing after the retry
 
     def step(self, name: str, text: str) -> None:
         """Take a step's output, unless it removes the last copy of a required fact.
@@ -401,19 +402,8 @@ def drop_stated_causes(report: str) -> str:
 
 
 def fix_units(report: str) -> str:
-    """A gap between fill rates is percentage points, and coverage is a whole percent."""
-    report = re.sub(r"(\d+)\.0%( of the country)", r"\1%\2", report)
-
-    def edit(sentence: str) -> str:
-        # One sentence at a time: "drew 89.9% of capacity. Crowds were 0.9% higher than expected" is two
-        # facts, and the second is a relative change. A gap against a prediction is a percent too.
-        if re.search(r"\b(?:expected|predict|model)", sentence, re.I):
-            return sentence
-        sentence = re.sub(r"(fill.{0,70}?\b)(\d+(?:\.\d+)?)%( higher| lower| more| less)",
-                          r"\1\2 percentage points\3", sentence, flags=re.I)
-        return re.sub(r"(fill.{0,90}?difference of )(\d+(?:\.\d+)?)%", r"\1\2 percentage points",
-                      sentence, flags=re.I)
-    return edit_sentences(report, edit)
+    """Coverage is a whole percent. (A fill gap given in percent is now the 'units' check.)"""
+    return re.sub(r"(\d+)\.0%( of the country)", r"\1%\2", report)
 
 
 def capacity_wording(report: str) -> str:
@@ -457,7 +447,8 @@ def nielsen_inline(report: str, tool_calls: list[dict]) -> str:
     def edit(sentence: str) -> str:
         nonlocal done
         plain = citations.CITATION.sub("", sentence)
-        if done or not ("2025" in plain and "2026" in plain and VIEWERSHIP_WORDS.search(plain)):
+        audience = re.search(r"\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?\s?(?:million|M)\b", plain)  # a viewer number, not a count
+        if done or not ("2025" in plain and "2026" in plain and VIEWERSHIP_WORDS.search(plain) and audience):
             return sentence
         done = True
         cited = citations.CITATION.search(sentence)
@@ -715,20 +706,8 @@ def first_sentence(report: str) -> str:
 
 def drop_unsourced(report: str, tool_calls: list[dict]) -> str:
     """Remove any sentence that still has an unread link or a number no tool returned."""
-    read = read_urls(tool_calls)
-    sources = source_numbers(tool_calls)
-
-    def edit(sentence: str) -> str | None:
-        links = [unquote(u).split("#")[0] for u in re.findall(r"https?://[^\s)\]>]+", sentence)]
-        if any(u not in read for u in links) or unverified_numbers(sentence, tool_calls, sources):
-            return None
-        if facts.ANY.search(sentence):  # an ID or phrase code could not fill
-            return None
-        if links and AFTER_SEASON.search(sentence):  # a later event cannot relate to that season
-            return None
-        return sentence
-
-    return edit_sentences(report, edit)
+    read, sources = read_urls(tool_calls), source_numbers(tool_calls)
+    return edit_sentences(report, lambda s: None if unsourced_reason(s, read, sources, tool_calls) else s)
 
 
 def club_name(team: str) -> str:
@@ -1423,6 +1402,180 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
                if derived_seats(report) else []))
 
 
+# --- Checks: detect only. They never change the text: the Writer retries, then a failing sentence goes ---
+
+CAUSE_WORDS = re.compile(r"\b(?:driv(?:e|es|ing|en)|drove|caus(?:e|es|ed|ing)|because|due to|thanks to)\b", re.I)
+TOPIC_WORDS = re.compile(rf"{ATTENDANCE_WORDS.pattern}|{VIEWERSHIP_WORDS.pattern}", re.I)
+DATA_REASON = re.compile(r"\b(?:because|due to|since)\b[^.;]*?\b(?:data|source|tables?|figures?|reported|Nielsen)\b[^.;]*", re.I)
+IN_THE_DATA = re.compile(r"\bin (?:the |this )?(?:\d{4} )?data\b", re.I)
+FILL_GAP_PERCENT = re.compile(r"fill.{0,70}?\b\d+(?:\.\d+)?%(?: higher| lower| more| less)|fill.{0,90}?difference of \d+(?:\.\d+)?%", re.I)
+# Sentence-level checks: a sentence that still fails after the retry is dropped (unless it holds a required fact).
+SENTENCE_CHECKS = ("first_person", "stated_cause", "repeated_numbers", "repeated_point", "untraced",
+                   "derived_seats", "units", "official_total")
+
+
+def fixed_patterns(tool_calls: list[dict]) -> list[re.Pattern]:
+    """Ready-made words the code wrote, which no check may flag: phrases, the team-level sentence, the
+    Nielsen clause, and finished sentences from *_text columns."""
+    pats = [re.compile(re.escape(text).replace(re.escape("{season}"), r"\d{4}"), re.I) for text, _ in facts.PHRASES.values()]
+    pats.append(re.compile(r"Across team-seasons, teams with higher average home attendance.*?" + re.escape(facts.TEAM_CROWD_TV_END)))
+    pats.append(re.compile(re.escape(NIELSEN_CLAUSE.lstrip(", "))))
+    texts = set()
+    for call in tool_calls:
+        try:
+            result = json.loads(call.get("result") or "")
+        except (TypeError, ValueError):
+            continue
+        if not isinstance(result, dict):
+            continue
+        cols = [i for i, c in enumerate(result.get("columns") or []) if str(c).lower().endswith("_text")]
+        for row in result.get("rows") or []:
+            texts.update(str(row[i]).strip() for i in cols if i < len(row) and row[i])
+    pats += [re.compile(re.escape(t.rstrip("."))) for t in texts if len(t) > 20]
+    return pats
+
+
+def strip_fixed(text: str, pats: list[re.Pattern]) -> str:
+    for p in pats:
+        text = p.sub(" ", text)
+    return text
+
+
+def each_sentence(report: str):
+    """(index, sentence) in the same order edit_sentences visits them, so a check can name one to drop."""
+    i = 0
+    for line in report.split("\n"):
+        for s in sentences(line):
+            yield i, s
+            i += 1
+
+
+def unsourced_reason(sentence: str, read: set[str], sources: list[float], tool_calls: list[dict]) -> str | None:
+    """Why a sentence has no source, or None: an unread link, a number no tool returned, an unfilled ID."""
+    links = [unquote(u).split("#")[0] for u in re.findall(r"https?://[^\s)\]>]+", sentence)]
+    if any(u not in read for u in links):
+        return "It cites a link that was not read."
+    bad = unverified_numbers(sentence, tool_calls, sources)
+    if bad:
+        return bad[0]
+    if facts.ANY.search(sentence):
+        return "A fact ID or phrase code in braces could not be filled."
+    if links and AFTER_SEASON.search(sentence):
+        return "A later event cannot relate to that season."
+    return None
+
+
+def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
+    """Every check, on run.report. Each problem is {check, index, sentence, message}; index and sentence
+    are None for a problem with the whole answer. Nothing is changed here."""
+    report, calls = run.report, run.tool_calls
+    pats = fixed_patterns(calls)
+    read, sources = read_urls(calls), source_numbers(calls)
+    model = "model_coefficients" in tables_queried(calls)
+    swaps = {f"{round(c):,}" for f in data_tools.season_figures()
+             for c, o in ((f["clean_total"], f["official_total"]), (f["clean_avg"], f["official_avg"]))
+             if c and o and round(c) != round(o)}
+    problems, seen_numbers, said_points = [], set(), []
+
+    def add(check, i, s, message):
+        problems.append({"check": check, "index": i, "sentence": s, "message": message})
+
+    for i, s in each_sentence(report):
+        if not s.strip() or s.lstrip().startswith("#"):
+            continue
+        plain = citations.CITATION.sub("", s)
+        free = strip_fixed(plain, pats)
+        if not re.search(r"[A-Za-z]{3}", free):
+            continue  # all ready-made words
+        if FIRST_PERSON.search(re.sub(r'"[^"]*"', "", free)):
+            add("first_person", i, s, "Write in the third person: no 'we', 'our', 'us' or 'I'.")
+        claim = DATA_REASON.sub(" ", free)  # "because the source gives one number" explains a limit, not a crowd
+        if (STATED_CAUSE.search(claim) or RULED_OUT.search(claim)
+                or (CAUSE_WORDS.search(claim) and TOPIC_WORDS.search(claim) and not LIMIT_PHRASE.search(claim))):
+            add("stated_cause", i, s, "The data shows what went together, not causes: remove the stated cause.")
+        elif model and MODEL_CAUSAL.search(free):
+            add("stated_cause", i, s, "This is a model result: say 'was associated with' or 'coincided with'.")
+        numbers = {n for n in re.findall(r"\d+(?:,\d{3})*(?:\.\d+)?%?", free)
+                   if len(n.replace(",", "").rstrip("%")) >= 3 and not re.fullmatch(r"20\d\d", n)}
+        if numbers and numbers <= seen_numbers and not TEAM_LEVEL.search(free):
+            add("repeated_numbers", i, s, "This sentence only repeats numbers already given: remove it.")
+        seen_numbers.update(numbers)
+        if LIMIT_PHRASE.search(free):
+            words = {"<seasons not covered>"} if COVERAGE_LIMIT.search(free) else task_words(free) - LIMIT_WORDS
+            new_number = re.search(r"\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?%", free)
+            if not new_number and any(words and old and len(words & old) / min(len(words), len(old)) >= SAME_POINT
+                                      for old in said_points):
+                add("repeated_point", i, s, "This limit was already stated: say it once.")
+            else:
+                said_points.append(words)
+        reason = unsourced_reason(s, read, sources, calls)
+        if reason:
+            add("untraced", i, s, reason)
+        if derived_seats(free):
+            add("derived_seats", i, s, "A park holds tens of thousands: remove the season seat total and compare capacities.")
+        if not re.search(r"\b(?:expected|predict|model)", free, re.I) and FILL_GAP_PERCENT.search(free):
+            add("units", i, s, "A gap between two fill rates is in percentage points, not percent.")
+        if final:
+            wrong = [n for n in re.findall(r"(?<![\d,.])\d{1,3}(?:,\d{3})+(?![\d,]*\.\d)", free) if n in swaps]
+            if wrong:
+                add("official_total", i, s, f"{wrong[0]} is a sum of cleaned games, not MLB's official season figure.")
+        if len(IN_THE_DATA.findall(free)) >= 2:
+            add("double_in_data", None, s, "Say 'in the data' once in this sentence.")
+
+    text = citations.CITATION.sub("", report)
+    teams = teams_named(run.question)
+    if len(teams) >= 2:
+        with_numbers = [s for _, s in each_sentence(text) if re.search(r"\d{1,3},\d{3}|\d%|\d+\.\d", s)]
+        for team in teams.values():
+            name = club_name(team)
+            if not any(name.lower() in s.lower() for s in with_numbers):
+                add("both_sides", None, None, f"The comparison must give the {name}' figures too, from the findings.")
+    limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
+    if word_count(report) > limit:
+        add("length", None, None, f"Shorten to under {limit} words: cut the least important sentences and repeated "
+                                  "caveats, and keep every remaining citation and number as it is.")
+    return problems
+
+
+def problem_text(p: dict) -> str:
+    return f'{p["message"]} Sentence: "{p["sentence"].strip()}"' if p["sentence"] else p["message"]
+
+
+def drop_failing(run: Research, problems: list[dict]) -> None:
+    """After the retry: drop each sentence that still fails a sentence-level check, unless it holds the last
+    copy of a required fact. Never leave an empty answer. Everything not dropped is logged."""
+    failing: dict[int, list[dict]] = {}
+    for p in problems:
+        if p["check"] in SENTENCE_CHECKS and p["index"] is not None:
+            failing.setdefault(p["index"], []).append(p)
+        else:
+            run.check_failures.append({"check": p["check"], "message": p["message"], "kept": True})
+    if not failing:
+        return
+    by_index = dict(each_sentence(run.report))
+    drop = set()
+    for i, ps in failing.items():
+        s = by_index[i]
+        rest = " ".join(t for j, t in by_index.items() if j != i and j not in drop)
+        held = [n for n in shown_numbers(s) if n in run.required and n not in rest]
+        if held:
+            for p in ps:
+                run.check_failures.append({"check": p["check"], "message": p["message"], "kept": True,
+                                           "reason": f"holds required fact {held[0]}"})
+            continue
+        drop.add(i)
+        for p in ps:
+            run.check_failures.append({"check": p["check"], "message": p["message"], "kept": False})
+    counter = iter(range(10 ** 6))
+    text = edit_sentences(run.report, lambda s: None if next(counter) in drop else s)
+    if not re.search(r"[A-Za-z]{3}", citations.CITATION.sub("", text)):
+        for f in run.check_failures:
+            f["kept"] = True
+        run.check_failures.append({"check": "never_empty", "message": "every sentence failed: kept the retry's text", "kept": True})
+        return
+    run.step("check_drop", text)
+
+
 def clean_report(run: Research, asked: str) -> dict | None:
     """Every code step after the Writer, in order. Returns the team-season the answer is about, if any.
 
@@ -1436,7 +1589,6 @@ def clean_report(run: Research, asked: str) -> dict | None:
     run.step("trim_to_headline", trim_to_headline(run.report, run.question))
     run.step("limit_capped_line", limit_capped_line(run.report, run.question))
     run.step("drop_unasked", drop_unasked(run.report, run.question))
-    run.step("drop_stated_causes", drop_stated_causes(run.report))
     run.step("add_thousands", add_thousands(run.report))
     run.step("fix_units", fix_units(run.report))
     run.step("capacity_wording", capacity_wording(run.report))
@@ -1444,12 +1596,9 @@ def clean_report(run: Research, asked: str) -> dict | None:
     run.step("association_wording", association_wording(run.report, run.tool_calls))
     run.step("official_season_figures", official_season_figures(run.report, run.tool_calls))
     run.step("fix_window_coverage", fix_window_coverage(run.report, asked, run.tool_calls))
-    run.step("drop_repeated_limits", drop_repeated_limits(run.report))
     run.step("gaps_from_shown", gaps_from_shown(run.report))
     run.step("absent_in_data", absent_in_data(run.report))
     run.step("records_not_rates", records_not_rates(run.report))
-    run.step("drop_derived_seats", drop_derived_seats(run.report))
-    run.step("drop_repeated_numbers", drop_repeated_numbers(run.report))
     run.step("nielsen_inline", nielsen_inline(run.report, run.tool_calls))
     mix = network_mix_note(run.report, asked, run.tool_calls)
     if mix:
@@ -1576,35 +1725,25 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     run.report = fill_report(run, str(result.final_output))
     run.required = required_facts(asked, answer_team(run, asked))
 
-    # 4. Check citations in code, and give the Writer one chance to fix them
-    problems = citation_problems(run.report, run.tool_calls, asked)
+    # 4. Check in code, and give the Writer one retry with the specific problems
     team, gaps = opening_gaps(run.report, asked, run.tool_calls)
     if gaps:  # the fix message gives the opening's numbers: log the row they come from
         log_team_row(run, team)
+    checks = check_report(run, asked)
+    listed = {p["message"] for p in checks if p["check"] == "untraced"} | {
+        "A park holds tens of thousands: remove the season seat total and compare capacities."}
+    problems = list(dict.fromkeys(citation_problems(run.report, run.tool_calls, asked)
+                                  + [problem_text(p) for p in checks if p["message"] not in listed]))
     if problems:
-        fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nFix these problems. Correct the "
-               "number from the findings, or remove the fact. You may use fact IDs in braces, as before:\n- " + "\n- ".join(problems))
+        fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite the draft to fix these problems, and keep "
+               "everything else as it is. Correct a number from the findings, or remove the fact. You may use "
+               "fact IDs and phrases in braces, as before:\n- " + "\n- ".join(problems))
         result = await Runner.run(writer, fix, context=run, hooks=hooks)
-        run.step("writer_fix_pass", fill_report(run, str(result.final_output)))
-        bad = unverified_numbers(first_sentence(run.report), run.tool_calls)
-        if bad:  # deleting the opening would leave an answer with no conclusion: rewrite it instead
-            fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite only the first sentence, using "
-                   "numbers from the findings, and keep the rest as it is:\n- " + "\n- ".join(bad))
-            result = await Runner.run(writer, fix, context=run, hooks=hooks)
-            run.step("first_sentence_rewrite", fill_report(run, str(result.final_output)))
-        run.step("drop_unsourced", drop_unsourced(run.report, run.tool_calls))
-    # 5. Enforce the length in code: one pass, kept only if the citations survive it
-    limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
-    if word_count(run.report) > limit:
-        shorten = (f"Shorten this report to under {limit} words. Cut the least important sentences "
-                   f"and repeated caveats. Keep every remaining sentence's citation exactly as it "
-                   f"is, and do not change any number.\n\n{run.report}")
-        result = await Runner.run(writer, shorten, context=run, hooks=hooks)
-        shorter = fill_report(run, str(result.final_output))
-        if not citation_problems(shorter, run.tool_calls, asked) and word_count(shorter) < word_count(run.report):
-            run.step("shorten_pass", shorter)
+        run.step("writer_retry", fill_report(run, str(result.final_output)))
 
     team = clean_report(run, asked)
+    # 5. Checks again: a sentence still failing goes, unless it holds a required fact; the rest is logged
+    drop_failing(run, check_report(run, asked, final=True))
     add_charts(run, asked, team)
     run.cited = run.report
     run.report, run.sources, run.data_note = citations.apply(
