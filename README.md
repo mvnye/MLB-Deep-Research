@@ -85,36 +85,30 @@ The agent also says so for postseason games, seasons outside 2024 to 2026, local
 
 ## The /chat endpoint
 
-`POST /chat` takes `{"message": "...", "session_id": "..."}` (omit `session_id` to start a conversation; pass it back for follow-ups). The response has `response` (the answer in markdown, with footnotes), `session_id`, and `tool_calls`: every call made for that message, by every agent, each with `name`, `args`, `result` and `agent`. Researcher calls are included, labeled by researcher. It also returns `chart`, `team_chart`, `tiles`, `box_score`, `title` and `clarify` for the page. A shortened example, from `samples/sample_4.json` (most tool calls and long text cut, marked `...`):
+`POST /chat` takes `{"message": "...", "session_id": "..."}` (omit `session_id` to start a conversation; pass it back for follow-ups). The response has `response` (the answer in markdown, with footnotes), `session_id`, and `tool_calls`: every call made for that message, by every agent, each with `name`, `args`, `result` and `agent`. Researcher calls are included, labeled by researcher. It also returns `chart`, `team_chart`, `tiles`, `box_score`, `title` and `clarify` for the page. A shortened example, from `samples/sample_3.json` (most tool calls and long text cut, marked `...`):
 
 ```json
 {
-  "response": "The Tampa Bay Rays averaged 9,713 fans a game in 2025, a decrease of 41.2% from the season before, ... [1]. ...\n\n**Sources**\n\n1. team_season_model: `SELECT season, avg_attendance, ... FROM team_season_model WHERE team_id = 139 AND season IN (2024, 2025) ORDER BY season` ...",
-  "session_id": "76d5c95c-bb5e-444b-917d-90e276c9d884",
+  "response": "The Chicago Cubs dominated the Chicago White Sox in both ticket sales and media presence in 2025, drawing 1,572,245 more fans at home ... [1]. ...\n\n**Sources**\n\n...",
+  "session_id": "07f3d934-5781-45dd-8195-71503b098a3b",
   "tool_calls": [
     {
       "name": "research",
-      "args": {"task": "Compare Tampa Bay Rays attendance, expected attendance, and fill rates between the 2024 and 2025 seasons, including the difference.", "role": "attendance"},
-      "result": "- In 2024, the Tampa Bay Rays averaged 16,515 fans {Q2.r1.avg_attendance} per home game ... (table: team_season_model). ...",
+      "args": {"task": "Compare the Chicago Cubs (team_id 112) and Chicago White Sox (team_id 145) in the 2025 season on national TV audiences. ...", "role": "viewership"},
+      "result": "- Chicago Cubs 2025 appearances: 15 (table: team_tv_summary)\n- Chicago Cubs 2025 single-game broadcasts: 10 (table: team_tv_summary)\n- Chicago Cubs 2025 average single-game viewers: 1,126,444 {Q1.r1.avg_single_game_viewers} (table: team_tv_summary)\n...",
       "agent": "Lead"
     },
     {
       "name": "run_sql",
-      "args": {"query": "SELECT season, avg_attendance, expected_avg_attendance, official_home_total, record, yoy_change_pct, residual_pct, exclusion_reason, market FROM team_season_model WHERE team_id = 139 AND season IN (2024, 2025) ORDER BY season"},
-      "result": "{\"query_id\": \"Q2\", \"columns\": [\"season\", \"avg_attendance\", ...], \"row_count\": 2, \"rows\": [[2024, 16515, 18343.18, 1337739, \"80-82\", ...], [2025, 9713, null, 786750, \"77-85\", ...]]}",
+      "args": {"query": "SELECT team, season, appearances, single_games, avg_single_game_viewers, highest_single_game_viewers FROM team_tv_summary WHERE season = 2025 AND team_id IN (112, 145) ORDER BY team_id"},
+      "result": "{\"query_id\": \"Q1\", \"columns\": [\"team\", \"season\", \"appearances\", \"single_games\", ...], \"row_count\": 2, \"rows\": [[\"Chicago Cubs\", 2025, 15, 10, 1126444.0, 2041000], [\"Chicago White Sox\", 2025, 0, 0, null, null]], ...}",
+      "agent": "Viewership Researcher 2"
+    },
+    {
+      "name": "describe_schema",
+      "args": {"table": "team_season_model"},
+      "result": "{\"table\": \"team_season_model\", \"description\": \"Expected average attendance per team-season. Key: team_id, season.\", ...}",
       "agent": "Attendance Researcher 1"
-    },
-    {
-      "name": "read_wikipedia",
-      "args": {"title": "2025 Tampa Bay Rays season", "offset": 0},
-      "result": "{\"title\": \"2025 Tampa Bay Rays season\", \"url\": \"https://en.wikipedia.org/wiki/2025_Tampa_Bay_Rays_season\", ...}",
-      "agent": "Context Researcher 2"
-    },
-    {
-      "name": "compute_fact",
-      "args": {"op": "change", "facts": ["Q2.r1.avg_attendance", "Q2.r2.avg_attendance"]},
-      "result": "{\"value\": \"41.2%\"}",
-      "agent": "Fact formatter"
     }
   ],
   "title": "...",
