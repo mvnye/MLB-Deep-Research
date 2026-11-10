@@ -11,6 +11,7 @@ import re
 CITATION = re.compile(r"\s*\((?=\s*(?:\[|tables?:))(?:[^()]|\([^()]*\))*\)")
 LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 TABLE_LIST = re.compile(r"tables?:\s*([\w, ]+)")  # 'table: a; table: b' gives one match each
+QUERY_IDS = re.compile(r"query:\s*(Q\d+(?:\s*,\s*Q\d+)*)")  # the exact queries behind filled facts
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 NO_FOOTNOTE = re.compile(r"^(we cannot|the data cannot|our data|the data has no)", re.I)
 MAX_ROWS_SHOWN = 3
@@ -49,6 +50,8 @@ def holds(text: str, number: str) -> bool:
 
 def result_rows(call: dict) -> tuple[list[str], list[list]]:
     result = json.loads(call["result"])
+    result.pop("query_id", None)
+    result.pop("cite_as", None)
     if "columns" in result:
         return result["columns"], result.get("rows", [])
     return list(result), [list(result.values())]  # a single fact logged by the app
@@ -96,11 +99,24 @@ class Footnotes:
     def for_article(self, title: str, url: str) -> int:
         return self.number("a:" + url, lambda: {"kind": "article", "title": title, "url": url})
 
+    def by_id(self, qid: str) -> dict | None:
+        for call in self.calls:
+            try:
+                if json.loads(call["result"]).get("query_id") == qid:
+                    return call
+            except ValueError:
+                continue
+        return None
+
     def citation_markers(self, citation: str, numbers: set[str]) -> list[int]:
         found = []
         for title, url in LINK.findall(citation):
             if url.split("#")[0] in self.read_urls:
                 found.append(self.for_article(title, url))
+        exact = [call for group in QUERY_IDS.findall(citation) for q in re.split(r"\s*,\s*", group)
+                 if (call := self.by_id(q))]
+        if exact:  # the facts name their queries: no guessing from the numbers
+            return found + [self.for_query(call, numbers) for call in exact]
         for group in TABLE_LIST.findall(citation):
             for table in re.split(r",\s*", group.strip()):
                 call = best_query(self.calls, table.strip(), numbers)

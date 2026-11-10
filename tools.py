@@ -11,6 +11,7 @@ from agents import function_tool
 from agents.tool_context import ToolContext
 
 import data_tools
+import facts
 import wikipedia
 
 MAX_QUERIES = 6  # per researcher
@@ -27,7 +28,8 @@ async def _logged(ctx: ToolContext, name: str, args: dict, call: Callable[[], st
 @function_tool
 async def run_sql(ctx: ToolContext, query: str) -> str:
     """Run one read-only SELECT on the MLB DuckDB database. Returns up to 200 rows as JSON, with
-    any caveats about the data in `notes`. On failure, returns the error and a hint to fix it.
+    any caveats about the data in `notes`, and a query_id such as Q3: cite a value from it as
+    {Q3.r1.column}, where r1 is the first row. On failure, returns the error and a hint to fix it.
 
     Args:
         query: One DuckDB SELECT statement, e.g. 'SELECT home_team, avg(attendance) FROM games
@@ -45,7 +47,9 @@ async def run_sql(ctx: ToolContext, query: str) -> str:
         cached = json.loads(run.query_cache[key])
         cached["note"] = "Already run: this is the same result as before. Do not run it again."
         return await _logged(ctx, "run_sql", {"query": query}, lambda: json.dumps(cached))
-    result = await _logged(ctx, "run_sql", {"query": query}, lambda: data_tools.run_sql(query))
+    # The query ID is added here, in the event loop, so parallel researchers never share one.
+    result = facts.add_query_id(run, await asyncio.to_thread(data_tools.run_sql, query))
+    run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "result": result, "agent": agent})
     run.query_cache[key] = result
     return result
 

@@ -8,7 +8,7 @@
    "0.16",
    "0.14",
    "0.51",
-   "prove",
+   "does not show that one causes",
    "Yes, games with smaller crowds",
    "did not clearly mean"
   ],
@@ -396,7 +396,7 @@
   "id": "crowd_tv_popular_teams",
   "q": "Do popular teams explain the link between crowds and TV audiences?",
   "must": [
-   "prove"
+   "does not show that one causes"
   ],
   "no_tiles": true
  },

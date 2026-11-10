@@ -26,6 +26,7 @@ import charts
 import scoreboard
 import citations
 import data_tools
+import facts
 from context_panel import AgentContexts, PanelHooks, add_context_panel
 from tools import describe_schema, read_wikipedia, run_sql, search_wikipedia
 
@@ -87,6 +88,8 @@ class Research:
     repairs: list[str] = field(default_factory=list)  # each step after the Writer that changed the text
     required: dict[str, str] = field(default_factory=dict)  # number as shown -> what it is; must survive
     removals: list[dict] = field(default_factory=list)  # each number a step removed, and why
+    query_ids: list[str] = field(default_factory=list)  # Q1, Q2, ...: one per researcher query result
+    fact_stats: dict = field(default_factory=dict)  # values filled from fact IDs, phrases, raw numbers
 
     def step(self, name: str, text: str) -> None:
         """Take a step's output, unless it removes the last copy of a required fact.
@@ -117,7 +120,7 @@ class Research:
 
 FINDINGS_FORMAT = """\
 Reply with the facts that answer your task and nothing else, at most 8 bullets.
-{citation}
+{citation}{fact_ids}
 If the data cannot answer part of the task, say so in a last bullet and say why. Never guess or
 fill a gap from memory. If a tool returns an error, follow its hint."""
 
@@ -133,6 +136,11 @@ For which is biggest or smallest, return every candidate ranked, not LIMIT 1, so
 compare the leader with the next."""
 
 SQL_CITATION = "End every bullet with the tables it came from, e.g. (table: games, game_model)."
+FACT_IDS = """
+Each run_sql result has a query_id, such as Q2. Put a value's fact ID in braces right after it:
+{Q2.r1.avg_attendance}, where r1 is the row (the first row is r1) and the last part is the column
+name, e.g. "- The Mets averaged 39,316 fans {Q2.r1.avg_attendance} a game in 2025 (table:
+team_season_model)." Keep the sign the data has, e.g. -41.2% {Q2.r1.yoy_change_pct}."""
 
 attendance_researcher = Agent(
     name="Attendance Researcher",
@@ -168,7 +176,7 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 - NULL attendance is unknown, never zero. Fill rate is descriptive only: never rank by it.
 - Mention temporary_park when comparing the Rays in 2025 or the A's in Sacramento.
 
-{FINDINGS_FORMAT.format(citation=SQL_CITATION)}""",
+{FINDINGS_FORMAT.format(citation=SQL_CITATION, fact_ids=FACT_IDS)}""",
     model=RESEARCHER_MODEL,
     model_settings=SETTINGS,
     tools=[describe_schema, run_sql],
@@ -205,7 +213,7 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 - The data cannot answer: local RSN viewership, Peacock-only games, late-September 2025 games, or the
   postseason. Mention one of these only if the task asks about it.
 
-{FINDINGS_FORMAT.format(citation=SQL_CITATION)}""",
+{FINDINGS_FORMAT.format(citation=SQL_CITATION, fact_ids=FACT_IDS)}""",
     model=RESEARCHER_MODEL,
     model_settings=SETTINGS,
     tools=[describe_schema, run_sql],
@@ -229,7 +237,7 @@ season the task asks about: a later event cannot relate to that season's crowds.
 and when. Say an event coincided with a change in crowds, never that it
 caused one, because Wikipedia does not measure that. Only report what the articles say.
 
-{FINDINGS_FORMAT.format(citation="End every bullet with the url from read_wikipedia as a link, e.g. ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). Never cite an article you did not read.")}""",
+{FINDINGS_FORMAT.format(citation="End every bullet with the url from read_wikipedia as a link, e.g. ([2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season)). Never cite an article you did not read.", fact_ids="")}""",
     model=RESEARCHER_MODEL,
     model_settings=SETTINGS,
     tools=[search_wikipedia, read_wikipedia],
@@ -285,7 +293,7 @@ NETWORK_AVERAGE = re.compile(r"averaged [\d,]+ viewers across \d+ (windows|games
 LIMIT_LIST = re.compile(r"\b(RSN|Peacock|late-September)\b")
 EXPECTED_WORDS = re.compile(r"expected (attendance|average)|model's expected", re.I)
 TEAM_LEVEL = re.compile(r"team-season|team-level|team level|each team|consistent with|prove", re.I)
-TEAM_READING = re.compile(r"consistent with team-level|does not prove the cause|do not prove", re.I)
+TEAM_READING = re.compile(r"consistent with team-level|does not prove the cause|do not prove|does not show that one causes", re.I)
 HEADLINE_PARTS = re.compile(r"^(Yes, games with smaller crowds|Comparing games on the same network|After comparing each game)")
 # The adjusted result does not clear team factors: the team-level link points to them.
 RULED_OUT = re.compile(r"(?:popular teams?|team popularity|team quality|team[- ]level factors|team factors|popularity|market size)"
@@ -650,21 +658,19 @@ def association_wording(report: str, tool_calls: list[dict]) -> str:
 def model_wording_problems(report: str, tool_calls: list[dict]) -> list[str]:
     if "model_coefficients" not in tables_queried(tool_calls):
         return []
+    text = citations.CITATION.sub("", report).replace(facts.TEAM_CROWD_TV_END, "")  # fixed words, not a model claim
     return [f"This is a model result: say 'was associated with' or 'coincided with', not '{m[0]}'."
-            for m in MODEL_CAUSAL.finditer(citations.CITATION.sub("", report))]
+            for m in MODEL_CAUSAL.finditer(text)]
 
 
 def team_level_sentence(fact: dict) -> str:
-    return (f"Across team-seasons, teams with bigger average crowds also had bigger average national TV "
-            f"audiences (correlation {fact['corr_team_crowd_tv']:.2f}, n = {fact['n']}, range "
-            f"{fact['ci_low']:.2f} to {fact['ci_high']:.2f}), which is consistent with team-level factors "
-            "such as popularity and market size driving both, though the data does not prove the cause "
-            "(table: team_crowd_tv).")
+    """The team-level finding in fixed words (two sentences), so no causal verb can slip in."""
+    return facts.team_crowd_tv_text(fact)
 
 
 def require_no_proof_note(report: str) -> str:
     """The team-level reading always comes with the statement that the data does not prove it."""
-    if re.search(r"consistent with", report, re.I) and not re.search(r"prove", report, re.I):
+    if re.search(r"consistent with", report, re.I) and not re.search(r"prove|does not show that one causes", report, re.I):
         return f"{report} The data does not prove the cause."
     return report
 
@@ -715,6 +721,8 @@ def drop_unsourced(report: str, tool_calls: list[dict]) -> str:
     def edit(sentence: str) -> str | None:
         links = [unquote(u).split("#")[0] for u in re.findall(r"https?://[^\s)\]>]+", sentence)]
         if any(u not in read for u in links) or unverified_numbers(sentence, tool_calls, sources):
+            return None
+        if facts.ANY.search(sentence):  # an ID or phrase code could not fill
             return None
         if links and AFTER_SEASON.search(sentence):  # a later event cannot relate to that season
             return None
@@ -1063,7 +1071,8 @@ async def research(ctx: ToolContext, task: str, role: Literal["attendance", "vie
         except ModelBehaviorError:  # Gemini sometimes emits a malformed tool call: try once more
             run.retries += 1
             result = await Runner.run(agent, f"Task: {task}", context=run, hooks=run.hooks, max_turns=14)
-        findings = str(result.final_output)
+        # Every number from this researcher's own queries gets its fact ID, if it lacks one.
+        findings = facts.tag_findings(str(result.final_output), run.tool_calls, agent.name)
     except MaxTurnsExceeded:
         failed = True
         findings = f"The {role} researcher ran out of turns on this task and found no answer."
@@ -1150,7 +1159,7 @@ relate to national TV audiences in 2025 and 2026.
 
 writer = Agent(
     name="Writer",
-    instructions="""\
+    instructions=f"""\
 Write a short answer in markdown for a sports media or sponsorship seller, using only the findings
 you're given.
 
@@ -1163,10 +1172,17 @@ you're given.
 2. A bullet that starts READY: is a finished sentence. Use it word for word, without the label and
    without quotation marks.
 3. Phrase everything else yourself from the facts, in natural sentences. Answer only what was
-   asked: no extra games, networks or seasons, even if the findings have them. Copy numbers exactly:
-   show attendance and viewers as whole numbers, percents to one decimal, correlations to two. An
-   average of a count, such as appearances per team, is one decimal and must be called an average.
-   Never work out a difference or an average yourself: use the one in the findings.
+   asked: no extra games, networks or seasons, even if the findings have them.
+   Numbers come from fact IDs. The findings tag numbers with an ID in braces, such as
+   39,316 fans {{Q2.r1.avg_attendance}}. Where the number goes, write its ID in braces instead of the
+   number: code fills in the value with its rounding and unit (fans, viewers, % of capacity,
+   a record). Write "The Mets averaged {{Q2.r1.avg_attendance}} a game", not "39,316 fans". For the
+   gap between two facts, write {{diff:ID1,ID2}}; for the percent change from the first to the
+   second, write {{change:ID1,ID2}}: code works them out from the values as shown. Filled percents
+   and gaps are positive, so say the direction in words (up, down, above, below, more, fewer) from
+   the sign in the findings. Use only IDs the findings give. A number with no ID, such as a small
+   count or a Wikipedia fact, is copied exactly. An average of a count, such as appearances per
+   team, must be called an average. Never work out a difference or an average yourself.
 4. A team's opener means its home opener: answer with that, and add a road opener only if asked.
    When comparing, say the result directly: who was higher, by how much, and both fill rates. Give
    only the compared values, the difference, and the fill rates. A gap between fill rates is in
@@ -1186,20 +1202,20 @@ you're given.
 9. Events coincide with crowds: never say they drove, caused or explained them. Use at most three
    context facts, the ones most tied to crowds or viewership, dated before or during the season
    asked about.
-10. If the data cannot answer something the question asks, state the limit once, plainly, with the
-    reason, then give the closest data that does exist: "There is no 2024 viewership in the data.
-    The closest data is attendance: the A's averaged <their 2024 average from the findings> fans a
-    game in 2024. In the data, the A's had no national TV appearances in 2025 and one in 2026, on
-    FS1, with the audience unknown." Never make the same point twice in different words. The data
+10. If the data cannot answer something the question asks, state the limit once with a ready-made
+    phrase in braces, then give the closest data that does exist. Code fills in the phrase:
+{facts.PHRASE_HELP}
+    Example: "{{no_viewership:2024}}. The closest data is attendance: the A's averaged
+    {{Q1.r1.home_average}} a game in 2024. The A's had {{no_tv:2025}} and one broadcast in 2026, on
+    FS1, with {{unknown_audience}}." Never make the same point twice in different words. The data
     covers attendance for 2024 to 2026 and viewership from 2025. Mention only limits the question touches,
     with no citation for them. A researcher failing is a technical problem, not a limit of the data.
 11. Write for a seller: everyday words, no column names or game IDs, and no mention of research,
     findings or rules. Say what is true and move on.
-12. If the findings have both the adjusted game-level result and the team-level correlation, say in
-    plain words that teams with bigger crowds also had bigger TV audiences, with the correlation, n,
-    and range in parentheses. You may then say the pattern is consistent with team-level factors such
-    as popularity and market size driving both, and you must say the data does not prove the cause.
-    Never add your own reasoning to a READY sentence, and never say team factors are ruled out.
+12. If the findings have the team-level correlation (team-seasons' crowds against their TV
+    audiences), write {{team_crowd_tv}} as its own sentence: code fills in the finding with its
+    statistics and what it does and does not show. Never describe the team-level link in your own
+    words. Never add your own reasoning to a READY sentence, and never say team factors are ruled out.
 13. Do not add notes about data sources, Nielsen, streaming, promotions, cause and effect, or which
     season was assumed. Those are added automatically.
 14. A chart is added automatically when it fits: do not mention one.
@@ -1212,8 +1228,7 @@ you're given.
     factor increases, drives, causes, or boosts attendance.
 20. Do not repeat a number already given in the answer. Do not invent derived figures, such as
     seats across a season: compare the values the findings give, such as each park's capacity.
-21. Say an absence is in the data: "no national TV appearances in the data for 2025", since the
-    2025 tables end in early September.
+21. Say an absence with its phrase, {{no_tv:2025}}, since the 2025 tables end in early September.
 19. When an audience has an audience_note, say why in the same sentence, such as "the truTV
     simulcast number is missing".
 18. Give a fill rate as a share of capacity, such as "99.3% of capacity". Over 100%, say "of listed
@@ -1392,15 +1407,15 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
             problems.append(f"The link {url} was not read in this research.")
     for group in re.findall(r"\(tables?: ([^)]+)\)", report):
         for table in re.split(r"[,;]\s*(?:tables?:\s*)?", group.strip()):
-            if table.startswith("[") or "http" in table:
-                continue  # a link in the same citation: checked with the links above
+            if table.startswith("[") or "http" in table or re.match(r"(?:query:\s*)?Q\d+$", table.strip()):
+                continue  # a link or a query ID in the same citation: checked elsewhere
             if table not in queried:
                 problems.append(f"The table {table} was not queried in this research.")
     team, gaps = opening_gaps(report, question, tool_calls)
     missing = [f"The first sentence must state the conclusion with its key numbers. Start with: {team_opening(team)}"] if gaps else []
     return (list(dict.fromkeys(problems)) + unverified_numbers(report, tool_calls)
             + sample_size_problems(report) + jargon_problems(report) + plain_language_problems(report, question)
-            + model_wording_problems(report, tool_calls) + missing
+            + model_wording_problems(report, tool_calls) + unfilled_problems(report) + missing
             + (["A park holds tens of thousands: remove the season seat total and compare capacities."]
                if derived_seats(report) else []))
 
@@ -1467,6 +1482,52 @@ def answer_team(run: Research, asked: str) -> dict | None:
             or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
 
 
+def phrase_for(run: Research):
+    """The ready-made phrase for a key, or None. The team-level phrase logs the query behind it."""
+    def text(key: str, season: str | None) -> str | None:
+        if key == "team_crowd_tv":
+            fact = data_tools.team_crowd_tv_fact()
+            if not any(c["name"] == "run_sql" and "team_crowd_tv" in c["args"]["query"] for c in run.tool_calls):
+                run.tool_calls.append({"name": "run_sql", "args": {"query": "select * from team_crowd_tv where scope = '2025 and 2026'"},
+                                       "result": json.dumps(fact), "agent": "Required facts check"})
+            return team_level_sentence(fact)
+        if key not in facts.PHRASES:
+            return None
+        phrase, needs_season = facts.PHRASES[key]
+        if needs_season != bool(season):
+            return None
+        return phrase.format(season=season)
+    return text
+
+
+def fill_report(run: Research, text: str) -> str:
+    """Fill the Writer's fact IDs and phrases with values code formats, and name each sentence's
+    exact queries in its citation. Unknown IDs stay in braces, for the checks to report."""
+    book = facts.FactBook(run.tool_calls)
+    out = facts.Filled()
+    raw = facts.raw_numbers(text)
+    known = list(data_tools.TABLE_DOCS)
+    phrase = phrase_for(run)
+    lines = []
+    for line in text.split("\n"):
+        parts = []
+        for sentence in sentences(line):
+            filled, used = facts.fill_sentence(sentence, book, phrase, out)
+            parts.append(facts.cite(filled, used, book, known))
+        lines.append(" ".join(parts))
+    stats = run.fact_stats
+    for k, v in (("filled", out.facts), ("derived", out.derived), ("phrases", out.phrases), ("raw_numbers", raw)):
+        stats[k] = stats.get(k, 0) + v
+    stats.setdefault("unresolved", []).extend(out.unresolved)
+    return "\n".join(lines)
+
+
+def unfilled_problems(report: str) -> list[str]:
+    """IDs or phrases that code could not fill: the Writer must fix or remove them."""
+    return [f"{m[0]} is not a fact ID from the findings or a ready-made phrase: use one from the findings, "
+            "or write the number from the findings." for m in facts.ANY.finditer(report)]
+
+
 async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
     """Research run.question. Fills in a report, or one clarifying question for a vague question.
 
@@ -1500,22 +1561,22 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
         "The question is outside what the data covers: the 2024 to 2026 regular seasons.")
     prompt = f"Question: {question}\n\nFindings:\n\n{findings}"
     result = await Runner.run(writer, prompt, context=run, hooks=hooks)
-    run.report = str(result.final_output)
+    run.report = fill_report(run, str(result.final_output))
     run.required = required_facts(asked, answer_team(run, asked))
 
     # 4. Check citations in code, and give the Writer one chance to fix them
     problems = citation_problems(run.report, run.tool_calls, asked)
     if problems:
         fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nFix these problems. Correct the "
-               "number from the findings, or remove the fact:\n- " + "\n- ".join(problems))
+               "number from the findings, or remove the fact. You may use fact IDs in braces, as before:\n- " + "\n- ".join(problems))
         result = await Runner.run(writer, fix, context=run, hooks=hooks)
-        run.step("writer_fix_pass", str(result.final_output))
+        run.step("writer_fix_pass", fill_report(run, str(result.final_output)))
         bad = unverified_numbers(first_sentence(run.report), run.tool_calls)
         if bad:  # deleting the opening would leave an answer with no conclusion: rewrite it instead
             fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite only the first sentence, using "
                    "numbers from the findings, and keep the rest as it is:\n- " + "\n- ".join(bad))
             result = await Runner.run(writer, fix, context=run, hooks=hooks)
-            run.step("first_sentence_rewrite", str(result.final_output))
+            run.step("first_sentence_rewrite", fill_report(run, str(result.final_output)))
         run.step("drop_unsourced", drop_unsourced(run.report, run.tool_calls))
     # 5. Enforce the length in code: one pass, kept only if the citations survive it
     limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
@@ -1524,7 +1585,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
                    f"and repeated caveats. Keep every remaining sentence's citation exactly as it "
                    f"is, and do not change any number.\n\n{run.report}")
         result = await Runner.run(writer, shorten, context=run, hooks=hooks)
-        shorter = str(result.final_output)
+        shorter = fill_report(run, str(result.final_output))
         if not citation_problems(shorter, run.tool_calls, asked) and word_count(shorter) < word_count(run.report):
             run.step("shorten_pass", shorter)
 
