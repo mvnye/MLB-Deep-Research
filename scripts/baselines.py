@@ -19,7 +19,6 @@ QUESTIONS = [
     "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
     "Why did the Mets over-perform on attendance in 2025?",
     "Compare the Cubs and White Sox on attendance and national TV audiences in 2025.",
-    "Why did Rays attendance drop in 2025?",
 ]
 
 
