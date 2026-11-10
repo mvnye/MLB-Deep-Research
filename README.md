@@ -6,7 +6,7 @@ A multi-agent deep research app for sports media and sponsorship sellers prepari
 
 ## Loading the data and running the app
 
-`data/mlb.duckdb` and the raw files are in the repo, so the app runs without a data step. Vertex AI access comes from gcloud credentials.
+To run the app on your own computer:
 
 ```bash
 uv sync
