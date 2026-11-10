@@ -1,0 +1,417 @@
+[
+ {
+  "id": "held_tigers",
+  "q": "How did Tigers crowds change in 2025, and why?",
+  "passed": true,
+  "failures": [],
+  "seconds": 50,
+  "researchers": 2,
+  "retries": 0,
+  "errors": [],
+  "chart": {
+   "type": "line",
+   "title": "Average attendance by month, 2024 vs 2025",
+   "x_label": "Month",
+   "y_label": "Average attendance (fans)",
+   "unit": "fans",
+   "labels": [
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September"
+   ],
+   "series": [
+    {
+     "name": "2024",
+     "values": [
+      18327.0,
+      22523.3,
+      23835.4,
+      26719.2,
+      24420.5,
+      29022.7
+     ],
+     "fill": [
+      44.6,
+      54.8,
+      58.0,
+      65.0,
+      59.4,
+      70.6
+     ],
+     "color": "#5F6670",
+     "style": "dashed"
+    },
+    {
+     "name": "2025",
+     "values": [
+      22653.6,
+      28762.5,
+      33932.7,
+      31305.4,
+      31089.3,
+      32336.6
+     ],
+     "fill": [
+      55.1,
+      70.0,
+      82.6,
+      76.2,
+      75.7,
+      78.7
+     ],
+     "color": "#0C2340",
+     "style": "solid"
+    }
+   ],
+   "source": [
+    "games_clean"
+   ]
+  },
+  "team_chart": {
+   "team": "Detroit Tigers",
+   "color": "#0C2340",
+   "expected_color": "#8A8F98",
+   "seasons": [
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2024,
+     "avg_attendance": 23824,
+     "expected_avg_attendance": 23221.614215438283,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2025,
+     "avg_attendance": 29796,
+     "expected_avg_attendance": 24433.358754415454,
+     "exclusion_reason": null
+    },
+    {
+     "home_team": "Detroit Tigers",
+     "season": 2026,
+     "avg_attendance": 28677,
+     "expected_avg_attendance": 26501.306439904838,
+     "exclusion_reason": null
+    }
+   ]
+  },
+  "tiles": [
+   {
+    "label": "Avg crowd",
+    "value": "29,796"
+   },
+   {
+    "label": "Vs expected",
+    "value": "+21.9%"
+   },
+   {
+    "label": "Vs last year",
+    "value": "+25.1%"
+   }
+  ],
+  "box_score": null,
+  "title": "Detroit Tigers attendance changes and reasons, 2025",
+  "repairs": [
+   "writer_fix_pass",
+   "strip_quoted_phrases"
+  ],
+  "removals": [],
+  "facts": {
+   "filled": 6,
+   "derived": 0,
+   "phrases": 0,
+   "raw_numbers": 15,
+   "unresolved": []
+  },
+  "cited": "The Detroit Tigers averaged 29,796 fans a game in 2025, 21.9% above the 24,433 their prior two years of crowds, win rate, and market would predict, up 25.1% from 23,824 the season before (table: team_season_model). Detroit welcomed 2,413,442 total fans to the ballpark in 2025, an increase of 555,147 fans over the 1,858,295 who attended in 2024 (table: team_season_model; query: Q3). This jump represented an average increase of 5,972 fans per game, with Comerica Park filling 72.53% of capacity in 2025 compared to 58.99% of capacity the year before, a rise of 13.5 percentage points (table: team_season_model; query: Q3). Public records do not contain details on the roster changes or team performance that coincided with the surge ([2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season)).",
+  "report": "The Detroit Tigers averaged 29,796 fans a game in 2025, 21.9% above the 24,433 their prior two years of crowds, win rate, and market would predict, up 25.1% from 23,824 the season before[1]. Detroit welcomed 2,413,442 total fans to the ballpark in 2025, an increase of 555,147 fans over the 1,858,295 who attended in 2024[2]. This jump represented an average increase of 5,972 fans per game, with Comerica Park filling 72.53% of capacity in 2025 compared to 58.99% of capacity the year before, a rise of 13.5 percentage points[2]. Public records do not contain details on the roster changes or team performance that coincided with the surge[3].",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "team_season_model"
+    ],
+    "query": "select * from team_season_model where home_team = 'Detroit Tigers' and season = 2025",
+    "columns": [
+     "home_team",
+     "season",
+     "avg_attendance",
+     "official_home_total",
+     "record",
+     "win_pct",
+     "prior_season_avg",
+     "yoy_change_pct",
+     "expected_avg_attendance",
+     "residual_pct",
+     "prior_residual_pct",
+     "possible_rebound"
+    ],
+    "rows": [
+     [
+      "Detroit Tigers",
+      2025,
+      29796,
+      2413442,
+      "87-75",
+      0.5370370370370371,
+      23824.0,
+      0.25067159167226327,
+      24433.358754415454,
+      0.21948031375815003,
+      0.02594073689163423,
+      false
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "games_clean",
+     "team_season_model"
+    ],
+    "query": "SELECT 2024 AS season_2024, t2024.official_home_total AS total_2024, t2025.official_home_total AS total_2025, t2025.official_home_total - t2024.official_home_total AS total_diff, t2024.avg_attendance AS avg_2024, t2025.avg_attendance AS avg_2025, t2025.avg_attendance - t2024.avg_attendance AS avg_diff, f2024.avg_fill AS fill_2024, f2025.avg_fill AS fill_2025, f2025.avg_fill - f2024.avg_fill AS fill_diff FROM team_season_model t2024 JOIN team_season_model t2025 ON t2024.team_id = t2025.team_id JOIN (SELECT season, AVG(fill_pct) AS avg_fill FROM games_clean WHERE home_team_id = 116 GROUP BY season) f2024 ON f2024.season = 2024 JOIN (SELECT season, AVG(fill_pct) AS avg_fill FROM games_clean WHERE home_team_id = 116 GROUP BY season) f2025 ON f2025.season = 2025 WHERE t2024.team_id = 116 AND t2024.season = 2024 AND t2025.season = 2025",
+    "columns": [
+     "season_2024",
+     "total_2024",
+     "total_2025",
+     "total_diff",
+     "avg_2024",
+     "avg_2025",
+     "avg_diff",
+     "fill_2024",
+     "fill_2025",
+     "fill_diff"
+    ],
+    "rows": [
+     [
+      2024,
+      1858295,
+      2413442,
+      555147,
+      23824,
+      29796,
+      5972,
+      58.991891891891896,
+      72.52716049382714,
+      13.535268601935243
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "article",
+    "title": "2025 Detroit Tigers season",
+    "url": "https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season"
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com); Wikipedia."
+ },
+ {
+  "id": "plain_lookup",
+  "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
+  "passed": true,
+  "failures": [],
+  "seconds": 25,
+  "researchers": 1,
+  "retries": 0,
+  "errors": [],
+  "chart": null,
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "title": "Dodgers at Padres attendance, August 23, 2025",
+  "repairs": [
+   "limit_capped_line"
+  ],
+  "removals": [
+   {
+    "step": "limit_capped_line",
+    "number": "47,345",
+    "reason": "not a required fact"
+   }
+  ],
+  "facts": {
+   "filled": 2,
+   "derived": 0,
+   "phrases": 0,
+   "raw_numbers": 2,
+   "unresolved": []
+  },
+  "cited": "The Padres drew 46,326 fans for their home game against the Dodgers on August 23, 2025, which was 116.1% of listed capacity in their 39,909-seat stadium (table: games_clean; query: Q1).",
+  "report": "The Padres drew 46,326 fans for their home game against the Dodgers on August 23, 2025, which was 116.1% of listed capacity in their 39,909-seat stadium[1].",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT attendance, capacity_used AS capacity, fill_pct, expected_attendance, residual_pct_capped FROM games_clean WHERE official_date = '2025-08-23' AND ((home_team = 'San Diego Padres' AND away_team = 'Los Angeles Dodgers') OR (home_team = 'Los Angeles Dodgers' AND away_team = 'San Diego Padres'))",
+    "columns": [
+     "attendance",
+     "capacity",
+     "fill_pct",
+     "expected_attendance",
+     "residual_pct_capped"
+    ],
+    "rows": [
+     [
+      46326,
+      39909,
+      116.1,
+      null,
+      null
+     ]
+    ]
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com)."
+ },
+ {
+  "id": "cubs_white_sox",
+  "q": "Compare the Cubs and White Sox on attendance and national TV audiences in 2025.",
+  "passed": true,
+  "failures": [],
+  "seconds": 48,
+  "researchers": 2,
+  "retries": 0,
+  "errors": [],
+  "chart": null,
+  "team_chart": null,
+  "tiles": [],
+  "box_score": null,
+  "title": "Cubs and White Sox attendance and TV, 2025",
+  "repairs": [
+   "strip_quoted_phrases"
+  ],
+  "removals": [],
+  "facts": {
+   "filled": 8,
+   "derived": 2,
+   "phrases": 1,
+   "raw_numbers": 1,
+   "unresolved": []
+  },
+  "cited": "The Chicago Cubs dominated the Chicago White Sox in 2025, outdrawing them by 19,187 fans per game and drawing a massive national television audience while the White Sox had none (table: team_season_model; table: team_tv_summary; query: Q6).\n\n### Attendance\nThe Cubs averaged 37,259 fans per game, which was 320 fans above what their prior crowds, win rate, and market would predict (table: team_season_model; query: Q3). Wrigley Field drew 89.9% of capacity (table: games_clean), bringing their season total to 3,017,983 fans, 1,572,245 more fans than their crosstown rivals overall (table: team_season_model; query: Q5, Q3, Q6). Meanwhile, the White Sox averaged 18,072 fans per game, which was 1,548 fans below what their prior crowds, win rate, and market would predict (table: team_season_model; query: Q3). Guaranteed Rate Field drew 45.0% of capacity (table: games_clean) for a total of 1,445,738 fans (table: team_season_model; query: Q5, Q3).\n\n### National TV Audiences\nThe Cubs averaged 1,126,444 viewers across their 15 national TV appearances in 2025 (table: team_tv_summary). The White Sox had no national TV broadcasts in the 2025 data (table: team_tv_summary).",
+  "report": "The Chicago Cubs dominated the Chicago White Sox in 2025, outdrawing them by 19,187 fans per game and drawing a massive national television audience while the White Sox had none[1].\n\n### Attendance\nThe Cubs averaged 37,259 fans per game, which was 320 fans above what their prior crowds, win rate, and market would predict[2]. Wrigley Field drew 89.9% of capacity, bringing their season total to 3,017,983 fans, 1,572,245 more fans than their crosstown rivals overall[3][2][1]. Meanwhile, the White Sox averaged 18,072 fans per game, which was 1,548 fans below what their prior crowds, win rate, and market would predict[2]. Guaranteed Rate Field drew 45.0% of capacity for a total of 1,445,738 fans[3][2].\n\n### National TV Audiences\nThe Cubs averaged 1,126,444 viewers across their 15 national TV appearances in 2025[4]. The White Sox had no national TV broadcasts in the 2025 data[4].\n\n*Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons.*",
+  "sources": [
+   {
+    "n": 1,
+    "kind": "query",
+    "tables": [
+     "team_season_model"
+    ],
+    "query": "SELECT cubs.avg_attendance - sox.avg_attendance AS attendance_diff, cubs.official_home_total - sox.official_home_total AS total_diff FROM (SELECT avg_attendance, official_home_total FROM team_season_model WHERE season = 2025 AND team_id = 112) cubs, (SELECT avg_attendance, official_home_total FROM team_season_model WHERE season = 2025 AND team_id = 145) sox",
+    "columns": [
+     "attendance_diff",
+     "total_diff"
+    ],
+    "rows": [
+     [
+      19187,
+      1572245
+     ]
+    ]
+   },
+   {
+    "n": 2,
+    "kind": "query",
+    "tables": [
+     "team_season_model"
+    ],
+    "query": "SELECT tsm.home_team, tsm.official_home_total, tsm.avg_attendance, tsm.expected_avg_attendance, (tsm.avg_attendance - tsm.expected_avg_attendance) AS expected_difference, tsm.residual_pct FROM team_season_model tsm WHERE tsm.season = 2025 AND tsm.team_id IN (112, 145)",
+    "columns": [
+     "home_team",
+     "official_home_total",
+     "avg_attendance",
+     "expected_avg_attendance",
+     "expected_difference",
+     "residual_pct"
+    ],
+    "rows": [
+     [
+      "Chicago Cubs",
+      3017983,
+      37259,
+      36939.0702756041,
+      319.92972439590085,
+      0.008661011823223763
+     ]
+    ]
+   },
+   {
+    "n": 3,
+    "kind": "query",
+    "tables": [
+     "games_clean"
+    ],
+    "query": "SELECT home_team, avg(fill_pct) as avg_fill_pct FROM games_clean WHERE season = 2025 AND home_team_id IN (112, 145) GROUP BY home_team",
+    "columns": [
+     "home_team",
+     "avg_fill_pct"
+    ],
+    "rows": [
+     [
+      "Chicago Cubs",
+      89.90506329113924
+     ]
+    ]
+   },
+   {
+    "n": 4,
+    "kind": "query",
+    "tables": [
+     "team_tv_summary"
+    ],
+    "query": "SELECT * FROM team_tv_summary WHERE team_id IN (112, 145) AND season = 2025",
+    "columns": [
+     "team_id",
+     "season",
+     "team",
+     "appearances",
+     "single_games",
+     "fox_window_games",
+     "special_event_games",
+     "single_games_with_known_audience",
+     "avg_single_game_viewers",
+     "highest_single_game_viewers",
+     "network_mix"
+    ],
+    "rows": [
+     [
+      112,
+      2025,
+      "Chicago Cubs",
+      15,
+      10,
+      5,
+      2,
+      9,
+      1126444.0,
+      2041000,
+      "ESPN 5, Fox 5, TBS 3, FS1 2"
+     ],
+     [
+      145,
+      2025,
+      "Chicago White Sox",
+      0,
+      0,
+      0,
+      0,
+      0,
+      null,
+      null,
+      null
+     ]
+    ]
+   }
+  ],
+  "data_note": "Data sources: MLB Stats API (statsapi.mlb.com); TV Media Blog MLB viewership archives ([2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database), [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive))."
+ }
+]

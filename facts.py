@@ -265,7 +265,8 @@ def _fit(filled: str, before: str, after: str) -> tuple[str, str]:
     unit = UNIT_AFTER.match(after)
     if unit:
         filled = re.sub(r"\s+(fans|viewers|of (?:listed )?capacity|percentage points)$", "", filled)
-    elif filled.endswith("capacity") and re.search(r"fill|capacity", before[-30:], re.I):
+    elif filled.endswith("capacity") and (re.search(r"fill|capacity", before[-30:], re.I)
+                                          or re.match(r"\s+of\b", after)):  # "of the listed 11,026 capacity"
         filled = re.sub(r" of (?:listed )?capacity$", "", filled)
     return before, filled
 

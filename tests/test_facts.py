@@ -170,5 +170,10 @@ def test_unit_after_more_is_not_doubled():
     assert "6,802 more fans" in out and "fans more fans" not in out, out
 
 
+def test_fill_before_its_own_capacity_is_not_doubled():
+    out = app.fill_report(make_run(), "The Rays drew 8,794 fans, representing {Q1.r1.fill_pct} of the listed 11,026 capacity.")
+    assert "representing 89.9% of the listed 11,026 capacity" in out, out
+
+
 if __name__ == "__main__":
     run_tests(globals())
