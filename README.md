@@ -28,23 +28,7 @@ uv run python scripts/pull_market.py
 
 ## Sample questions
 
-### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
-
-**Expected answer:** Yes, but mostly because of which teams were playing. Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
-
-**Source:** `crowd_tv_headline` (built from `crowd_tv_residual`) and `team_crowd_tv`.
-
-**Agent answer:**
-
-> Yes, games with smaller crowds tended to have smaller national TV audiences, but a crowd that was small for its own park did not clearly mean a smaller audience[1]. Comparing games on the same network, the two moved together (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. After comparing each game with its own park's usual crowd, the link mostly disappears (0.16 in 2025, range -0.05 to 0.37; 0.14 in 2026, range -0.08 to 0.34; both ranges include zero)[1]. Across team-seasons, teams with higher average home attendance also tended to have larger average national TV audiences (correlation 0.51, n = 56, range 0.29 to 0.68)[2]. This is consistent with team-level factors such as popularity and market size, but the data does not show that one causes the other[2].
->
-> *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*
-
-**No-tools baseline:**
-
-> I do not have access to real-time data or statistics for 2025 and 2026. Therefore, I cannot provide information on whether smaller crowd sizes coincided with smaller national TV audiences for games during those years.
-
-### 2. Why did the Mets over-perform on attendance in 2025?
+### 1. Why did the Mets over-perform on attendance in 2025?
 
 **Expected answer:** 39,316 fans a game in 2025 (official), up 33.3% from 29,485 in 2024 and 21.4% above the 32,383 the model predicts. They were 18.6% below prediction in 2024, so part may be a rebound. The rise coincided with signing Juan Soto in December 2024.
 
@@ -58,7 +42,7 @@ uv run python scripts/pull_market.py
 
 > I do not have access to real-time information or events after January 2025, so I cannot provide information on the Mets' 2025 attendance or the reasons for their performance.
 
-### 3. Compare the Cubs and White Sox on attendance and national TV audiences in 2025.
+### 2. Compare the Cubs and White Sox on attendance and national TV audiences in 2025.
 
 **Expected answer:** Cubs 37,259 fans a game (3,017,983 total, 89.9% of capacity); White Sox 18,072 (1,445,738, 45.0%), 19,187 fewer a game. The Cubs had 15 national TV appearances in the 2025 data, and their 9 single games with a known audience averaged 1,126,444 viewers. The White Sox had none in the data, which ends in early September.
 
@@ -77,6 +61,22 @@ The 1,126,444 average covers the 9 single games with a known audience, not all 1
 > Because my knowledge cutoff is in January 2025, actual attendance figures and national TV ratings for the 2025 Major League Baseball season are not yet available. [...] In 2024, the Cubs drew **2,907,591 fans** (averaging 35,896 per game) [...] In 2024, they [the White Sox] drew just **1,380,183 fans** (averaging 17,039 per game) [...] the Cubs are expected to vastly outpace the White Sox in both stadium attendance and national television viewership [...]
 
 The baseline gives no 2025 figures, and its 2024 figures are close to but not the official ones (Cubs 2,909,794 and 35,923; White Sox 1,380,733 and 17,932).
+
+### 3. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
+
+**Expected answer:** Yes, but mostly because of which teams were playing. Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
+
+**Source:** `crowd_tv_headline` (built from `crowd_tv_residual`) and `team_crowd_tv`.
+
+**Agent answer:**
+
+> Yes, games with smaller crowds tended to have smaller national TV audiences, but a crowd that was small for its own park did not clearly mean a smaller audience[1]. Comparing games on the same network, the two moved together (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. After comparing each game with its own park's usual crowd, the link mostly disappears (0.16 in 2025, range -0.05 to 0.37; 0.14 in 2026, range -0.08 to 0.34; both ranges include zero)[1]. Across team-seasons, teams with higher average home attendance also tended to have larger average national TV audiences (correlation 0.51, n = 56, range 0.29 to 0.68)[2]. This is consistent with team-level factors such as popularity and market size, but the data does not show that one causes the other[2].
+>
+> *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*
+
+**No-tools baseline:**
+
+> I do not have access to real-time data or statistics for 2025 and 2026. Therefore, I cannot provide information on whether smaller crowd sizes coincided with smaller national TV audiences for games during those years.
 
 ## Questions the agent can't answer
 
