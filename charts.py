@@ -225,6 +225,7 @@ def pick_chart(report: str, question: str, tool_calls: list[dict], tables: list[
     if NO_ANSWER.search(report[:200]):
         return None
     wants_expected = bool(EXPECTED_QUESTION.search(question))
+    fallback = None
     for call in reversed(tool_calls):
         if call["name"] != "run_sql" or call.get("agent") == "Required facts check":
             continue
@@ -233,8 +234,13 @@ def pick_chart(report: str, question: str, tool_calls: list[dict], tables: list[
             continue
         chart = chart_from_rows(result["columns"], result["rows"], tables_in(call["args"]["query"], tables), wants_expected)
         if chart and len(chart["series"]) == 1 + (chart["type"] == "paired") and relevant(chart, report):
-            return chart  # one line per season is only for a question comparing seasons: see monthly_chart
-    return None
+            # one line per season is only for a question comparing seasons: see monthly_chart
+            if chart["type"] == "paired" or not wants_expected:
+                return chart
+            # A question about expected attendance: results with actual and expected values win over a
+            # later plain chart (such as a fill query that ran after them).
+            fallback = fallback or chart
+    return fallback
 
 
 def monthly_chart(tool_calls: list[dict], tables: list[str], seasons: list[int], kind: str = "attendance") -> dict | None:

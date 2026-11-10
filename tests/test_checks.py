@@ -161,5 +161,31 @@ def test_quota_errors_are_retried_then_raised():
         app.LitellmModel.get_response, app.QUOTA_WAITS = base, waits
 
 
+def test_both_sides_needs_each_teams_own_value():
+    q = "Compare the Cubs and White Sox on attendance in 2025."
+    calls = [{"name": "run_sql", "args": {"query": "select home_team, avg_attendance, attendance_diff from team_season_model"}, "agent": "A",
+              "result": json.dumps({"columns": ["home_team", "avg_attendance", "attendance_diff"],
+                                    "rows": [["Chicago Cubs", 37259, 19187], ["Chicago White Sox", 18072, None]]})}]
+    gap_only = "The Cubs averaged 37,259 fans, 19,187 more per game than the White Sox (table: team_season_model)."
+    problems = [p for p in app.check_report(run_for(gap_only, q, calls), q) if p["check"] == "both_sides"]
+    assert len(problems) == 1 and "18,072" in problems[0]["message"], problems
+    both = "The Cubs averaged 37,259 fans and the White Sox 18,072 (table: team_season_model)."
+    assert "both_sides" not in fired(both, q, calls)
+
+
+def test_paired_chart_wins_over_a_later_bar():
+    import charts
+    teams = ["New York Yankees", "Boston Red Sox", "Toronto Blue Jays", "Baltimore Orioles"]
+    paired = {"name": "run_sql", "args": {"query": "select home_team, avg_attendance, expected_avg_attendance from team_season_model"}, "agent": "A",
+              "result": json.dumps({"columns": ["home_team", "avg_attendance", "expected_avg_attendance"],
+                                    "rows": [[t, 40000 - 5000 * i, 38000 - 5000 * i] for i, t in enumerate(teams)]})}
+    fill = {"name": "run_sql", "args": {"query": "select home_team, avg(fill_pct) as avg_fill_pct from games_clean"}, "agent": "A",
+            "result": json.dumps({"columns": ["home_team", "avg_fill_pct"], "rows": [[t, 90.0 - 10 * i] for i, t in enumerate(teams)]})}
+    report = "The " + ", ".join(teams) + " all drew crowds."
+    q = "Compare actual and expected average attendance for the AL East teams in 2025."
+    assert charts.pick_chart(report, q, [paired, fill], ["team_season_model", "games_clean"])["type"] == "paired"
+    assert charts.pick_chart(report, "Compare AL East fill rates in 2025.", [paired, fill], ["games_clean"])["type"] == "bar"
+
+
 if __name__ == "__main__":
     run_tests(globals())

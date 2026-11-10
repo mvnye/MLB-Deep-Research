@@ -1555,6 +1555,11 @@ def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
             name = club_name(team)
             if not any(name.lower() in s.lower() for s in with_numbers):
                 add("both_sides", None, None, f"The comparison must give the {name}' figures too, from the findings.")
+                continue
+            for measure, values in own_values(run, team).items():
+                if values and not any(v in text for v in values):
+                    add("both_sides", None, None, f"Give the {name}' own {measure} (such as {values[0]}), not only a gap "
+                                                  "between the teams.")
     limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
     if word_count(report) > limit:
         add("length", None, None, f"Shorten to under {limit} words: cut the least important sentences and repeated "
@@ -1578,6 +1583,45 @@ def finding_names(run: Research) -> list[str]:
     text = "\n".join(run.findings)
     clubs = {club_name(team) for _, _, team in data_tools.team_aliases()}
     return [n for n in sorted(clubs) + list(NETWORKS) if mentions(text, n)]
+
+
+MEASURE_KINDS = {"attendance": ("fans", "fill"), "national TV audience": ("viewers",)}
+
+
+def own_values(run: Research, team: str) -> dict[str, list[str]]:
+    """Each measure the question asks about -> the team's own values (as shown) in the query results.
+
+    A row is the team's when one of its text cells names the team. Gaps and season totals are left out:
+    'outdrew them by 1,572,245' is not the White Sox's own figure."""
+    asked = [m for m, words in (("attendance", ATTENDANCE_WORDS), ("national TV audience", VIEWERSHIP_WORDS))
+             if words.search(run.question)]
+    club = club_name(team).lower()
+    found: dict[str, list[str]] = {m: [] for m in asked}
+    for call in run.tool_calls:
+        if call["name"] != "run_sql" or call.get("agent") == "Required facts check":
+            continue
+        try:
+            result = json.loads(call["result"])
+        except (TypeError, ValueError):
+            continue
+        columns = result.get("columns") or []
+        for row in result.get("rows") or []:
+            texts = [str(v).lower() for v in row if isinstance(v, str)]
+            if not any(t == team.lower() or re.search(rf"\b{re.escape(club)}$", t) for t in texts):
+                continue
+            for column, value in zip(columns, row):
+                if CHANGE_OR_TOTAL.search(column):
+                    continue
+                k = facts.kind(column, value)
+                for m in asked:
+                    if k in MEASURE_KINDS[m]:
+                        number = re.match(r"[\d,.]+%?", facts.format_value(column, value))
+                        if number:
+                            found[m].append(number[0].rstrip(".,"))
+    return {m: list(dict.fromkeys(v)) for m, v in found.items()}
+
+
+CHANGE_OR_TOTAL = re.compile(r"diff|gap|delta|change|prev|prior|lag|total|sum|residual|expected|predict", re.I)
 
 
 def drop_failing(run: Research, problems: list[dict]) -> None:
