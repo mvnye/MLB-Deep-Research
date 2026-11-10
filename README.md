@@ -30,7 +30,7 @@ uv run python scripts/pull_market.py
 
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
-**Expected answer:** Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
+**Expected answer:** Yes, but mostly because of which teams were playing. Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
 
 **Source:** `crowd_tv_headline` (built from `crowd_tv_residual`) and `team_crowd_tv`.
 
