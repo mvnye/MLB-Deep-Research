@@ -1178,7 +1178,9 @@ you're given.
    number: code fills in the value with its rounding and unit (fans, viewers, % of capacity,
    a record). Write "The Mets averaged {{Q2.r1.avg_attendance}} a game", not "39,316 fans". For the
    gap between two facts, write {{diff:ID1,ID2}}; for the percent change from the first to the
-   second, write {{change:ID1,ID2}}: code works them out from the values as shown. Filled percents
+   second, write {{change:ID1,ID2}}: code works them out from the values as shown. Small counts
+   (games, appearances, broadcasts) fill as a bare number, so write the noun after the ID, as in
+   "{{Q3.r1.appearances}} national TV appearances". Do not wrap IDs in backticks. Filled percents
    and gaps are positive, so say the direction in words (up, down, above, below, more, fewer) from
    the sign in the findings. Use only IDs the findings give. A number with no ID, such as a small
    count or a Wikipedia fact, is copied exactly. An average of a count, such as appearances per
@@ -1463,11 +1465,7 @@ def clean_report(run: Research, asked: str) -> dict | None:
         run.step("missing_audience_notes", f"{run.report} {note}")
     if team and not asks_total(asked) and first_sentence_gaps(run.report, team):
         run.step("lead_with_team_result", lead_with_team_result(run.report, team))
-        # Logged like any other call: these numbers came from a query, made here by the app.
-        query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
-                 f"and season = {team['season']}")
-        run.tool_calls.append({"name": "run_sql", "args": {"query": query},
-                               "result": json.dumps(team, default=str), "agent": "Required facts check"})
+        log_team_row(run, team)
     # The required-facts check again, after every repair: a total question keeps its total.
     run.step("add_missing_total", add_missing_total(run.report, asked, team))
     for n, what in run.required.items():
@@ -1475,6 +1473,15 @@ def clean_report(run: Research, asked: str) -> dict | None:
             run.removals.append({"step": "final check", "number": n, "reason": f"required fact missing ({what})"})
             logger.warning("required fact %s (%s) is missing after the repairs", n, what)
     return team
+
+
+def log_team_row(run: Research, team: dict) -> None:
+    """Log the team-season row behind a code-written opening, so its numbers have a source."""
+    query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
+             f"and season = {team['season']}")
+    if not any(c["args"].get("query") == query for c in run.tool_calls if c["name"] == "run_sql"):
+        run.tool_calls.append({"name": "run_sql", "args": {"query": query},
+                               "result": json.dumps(team, default=str), "agent": "Required facts check"})
 
 
 def answer_team(run: Research, asked: str) -> dict | None:
@@ -1567,6 +1574,9 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
 
     # 4. Check citations in code, and give the Writer one chance to fix them
     problems = citation_problems(run.report, run.tool_calls, asked)
+    team, gaps = opening_gaps(run.report, asked, run.tool_calls)
+    if gaps:  # the fix message gives the opening's numbers: log the row they come from
+        log_team_row(run, team)
     if problems:
         fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nFix these problems. Correct the "
                "number from the findings, or remove the fact. You may use fact IDs in braces, as before:\n- " + "\n- ".join(problems))

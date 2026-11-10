@@ -135,5 +135,15 @@ def test_plain_text_passes_through_fill_unchanged():
     assert app.fill_report(make_run(), text) == text
 
 
+def test_renamed_columns_keep_their_units():
+    run = app.Research(hooks=None, question="Tigers 2025")
+    result = facts.add_query_id(run, json.dumps({"columns": ["avg_24", "avg_25", "prior_season_avg"], "rows": [[23824, 29796, 23824.0]]}))
+    run.tool_calls.append({"name": "run_sql", "args": {"query": "select t24.avg_attendance as avg_24, t25.avg_attendance as avg_25, "
+                           "t25.prior_season_avg from team_season_model t24 join team_season_model t25 on true"},
+                           "result": result, "agent": "A"})
+    out = app.fill_report(run, "They averaged {Q1.r1.avg_25}, up {change:Q1.r1.prior_season_avg,Q1.r1.avg_25} from `{Q1.r1.avg_24}`.")
+    assert out.startswith("They averaged 29,796 fans, up 25.1% from 23,824 fans"), out
+
+
 if __name__ == "__main__":
     run_tests(globals())

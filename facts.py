@@ -88,8 +88,9 @@ class FactBook:
                 continue
             qid = data.get("query_id")
             if qid and qid not in self.results:
+                query = call["args"].get("query", "")
                 self.results[qid] = {"columns": data["columns"], "rows": data.get("rows", []),
-                                     "query": call["args"].get("query", ""), "agent": call.get("agent", "")}
+                                     "query": query, "agent": call.get("agent", ""), "sources": aliases(query)}
 
     def lookup(self, qid: str, row: int, column: str) -> tuple[object, str, dict] | str:
         """(value, column, row as a dict), or why the ID does not resolve."""
@@ -103,11 +104,26 @@ class FactBook:
         if column.lower() not in names:
             return f"{qid} has no column {column}; its columns are {', '.join(result['columns'])}"
         cells = dict(zip((c.lower() for c in result["columns"]), rows[row - 1]))
-        return rows[row - 1][names[column.lower()]], column.lower(), cells
+        value, name = rows[row - 1][names[column.lower()]], column.lower()
+        # 'avg_attendance AS avg_24' formats as attendance: the alias alone says nothing.
+        source = result["sources"].get(name)
+        if source and kind(name, value) == "number" and kind(source, value) != "number":
+            name = source
+        return value, name, cells
 
     def tables(self, qid: str, known: list[str]) -> list[str]:
         query = self.results.get(qid, {}).get("query", "")
         return [t for t in known if re.search(rf"\b(?:from|join)\s+{t}\b", query, re.I)]
+
+
+def aliases(query: str) -> dict[str, str]:
+    """alias -> the column it renames, for 'x.avg_attendance AS avg_24' and 'avg(attendance) AS a'."""
+    found = {}
+    for m in re.finditer(r"(?:\b(?:\w+\.)?(\w+)\s*\)?|\(\s*(?:\w+\.)?(\w+)\s*\))\s+as\s+(\w+)", query, re.I):
+        source = (m[1] or m[2] or "").lower()
+        if source and source not in ("select", "end", "distinct"):
+            found.setdefault(m[3].lower(), source)
+    return found
 
 
 # --- Formatting ---
@@ -142,7 +158,7 @@ def kind(column: str, value) -> str:
         return "fraction" if abs(value) <= 1.5 else "percent"
     if re.search(r"viewer|audience|window_total", c):
         return "viewers"
-    if re.search(r"attendance|crowd|fans|expected|home_total|home_average|official|^high$|^low$", c):
+    if re.search(r"attendance|crowd|fans|expected|home_total|home_average|official|season_avg|year_avg|^high$|^low$", c):
         return "fans"
     return "number"
 
@@ -214,8 +230,10 @@ def derived(op: str, a: tuple, b: tuple) -> str:
     if sa is None or sb is None:
         return ""
     group = lambda k: "share" if k in ("fill", "percent", "fraction", "fill_points", "coverage") else k
-    if group(ka) != group(kb):
+    if group(ka) != group(kb) and "number" not in (ka, kb):
         return ""
+    if ka == "number":
+        ka = kb  # a plain count takes the unit of the fact it is compared with
     if op == "change":
         if group(ka) == "share" or sa == 0:
             return ""
@@ -263,6 +281,7 @@ class Filled:
 
 def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tuple[str, list[str]]:
     """Fill one sentence's IDs and phrases. Returns the sentence and the query IDs it used."""
+    sentence = re.sub(r"`(" + ANY.pattern + r")`", r"\1", sentence)  # an ID is not code
     used: list[str] = []
     pieces, pos = [], 0
     for m in ANY.finditer(sentence):

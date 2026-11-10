@@ -13,7 +13,7 @@ LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 TABLE_LIST = re.compile(r"tables?:\s*([\w, ]+)")  # 'table: a; table: b' gives one match each
 QUERY_IDS = re.compile(r"query:\s*(Q\d+(?:\s*,\s*Q\d+)*)")  # the exact queries behind filled facts
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
-NO_FOOTNOTE = re.compile(r"^(we cannot|the data cannot|our data|the data has no)", re.I)
+NO_FOOTNOTE = re.compile(r"^(we cannot|the data cannot|our data|the data has no|there is no \d{4} viewership in the data)", re.I)
 MAX_ROWS_SHOWN = 3
 
 ATTENDANCE_TABLES = {"games", "games_clean", "game_model", "team_season_model", "team_season_attendance",
