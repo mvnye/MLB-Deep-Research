@@ -69,15 +69,15 @@ The baseline gives no 2025 figures, and its 2024 figures are close to but not th
 
 ## When the agent can't answer
 
-**Vague questions get one clarifying question.** Asked "Who is doing the best?", the agent does no research and replies (`samples/vague.json`, `"clarify": true`, no tool calls):
+**Vague questions get one clarifying question.** Asked "Who is doing the best?", the agent does no research and replies (`samples/chat_responses/vague.json`, `"clarify": true`, no tool calls):
 
 > Are you asking about MLB attendance or TV viewership, and for which season?
 
-**Questions outside the data get a no-data answer and the closest data.** The A's last season in Oakland was 2024, and national TV viewership covers only 2025 and 2026. Asked "How did the Oakland A's viewership change in their final season before moving?", the agent states the limit and gives the closest data, attendance (`samples/athletics_viewership.json`):
+**Questions outside the data get a no-data answer and the closest data.** The A's last season in Oakland was 2024, and national TV viewership covers only 2025 and 2026. Asked "How did the Oakland A's viewership change in their final season before moving?", the agent states the limit and gives the closest data, attendance (`samples/chat_responses/athletics_viewership.json`):
 
 > There is no 2024 viewership in the data[1]. The Oakland A's averaged 11,529 fans a game and drew 922,286 total fans in 2024, filling 21.1%[2][3]. In 2025, their total home attendance fell by 16.7% to 768,464 fans, and their average attendance fell by 17.7% to 9,487 fans a game, though they filled 70.7% in their new home[2][4]. For national TV exposure, the A's had 0 appearances in the data in 2025[5].
 
-Asking about attendance instead, "How did the Oakland A's attendance do in 2024?", gives a full answer (`samples/athletics_attendance.json`):
+Asking about attendance instead, "How did the Oakland A's attendance do in 2024?", gives a full answer (`samples/chat_responses/athletics_attendance.json`):
 
 > The Oakland A's averaged 11,529 fans a game in 2024, which was 6.1% below the 12,272 fans predicted by their prior crowds, win rate, and market size, though still up 12.2% from the previous season[1]. Total home attendance reached 922,286 fans as the team went 69-93 on the year[2][1]. Oakland's home games drew 21.1% of capacity on average[3].
 
@@ -85,36 +85,7 @@ The agent also says so for postseason games, seasons outside 2024 to 2026, local
 
 ## The /chat endpoint
 
-`POST /chat` takes `{"message": "...", "session_id": "..."}` (omit `session_id` to start a conversation; pass it back for follow-ups). The response has `response` (the answer in markdown, with footnotes), `session_id`, and `tool_calls`: every call made for that message, by every agent, each with `name`, `args`, `result` and `agent`. Researcher calls are included, labeled by researcher. It also returns `chart`, `team_chart`, `tiles`, `box_score`, `title` and `clarify` for the page. A shortened example, from `samples/sample_3.json` (most tool calls and long text cut, marked `...`):
-
-```json
-{
-  "response": "The Chicago Cubs dominated the Chicago White Sox in both ticket sales and media presence in 2025, drawing 1,572,245 more fans at home ... [1]. ...\n\n**Sources**\n\n...",
-  "session_id": "07f3d934-5781-45dd-8195-71503b098a3b",
-  "tool_calls": [
-    {
-      "name": "research",
-      "args": {"task": "Compare the Chicago Cubs (team_id 112) and Chicago White Sox (team_id 145) in the 2025 season on national TV audiences. ...", "role": "viewership"},
-      "result": "- Chicago Cubs 2025 appearances: 15 (table: team_tv_summary)\n- Chicago Cubs 2025 single-game broadcasts: 10 (table: team_tv_summary)\n- Chicago Cubs 2025 average single-game viewers: 1,126,444 {Q1.r1.avg_single_game_viewers} (table: team_tv_summary)\n...",
-      "agent": "Lead"
-    },
-    {
-      "name": "run_sql",
-      "args": {"query": "SELECT team, season, appearances, single_games, avg_single_game_viewers, highest_single_game_viewers FROM team_tv_summary WHERE season = 2025 AND team_id IN (112, 145) ORDER BY team_id"},
-      "result": "{\"query_id\": \"Q1\", \"columns\": [\"team\", \"season\", \"appearances\", \"single_games\", ...], \"row_count\": 2, \"rows\": [[\"Chicago Cubs\", 2025, 15, 10, 1126444.0, 2041000], [\"Chicago White Sox\", 2025, 0, 0, null, null]], ...}",
-      "agent": "Viewership Researcher 2"
-    },
-    {
-      "name": "describe_schema",
-      "args": {"table": "team_season_model"},
-      "result": "{\"table\": \"team_season_model\", \"description\": \"Expected average attendance per team-season. Key: team_id, season.\", ...}",
-      "agent": "Attendance Researcher 1"
-    }
-  ],
-  "title": "...",
-  "clarify": false
-}
-```
+The full `POST /chat` output for each sample question, with `response`, `session_id` and every tool call (`name`, `args`, `result`, `agent`, including the researchers' calls), is in `samples/chat_responses/`.
 
 ## Data sources
 
