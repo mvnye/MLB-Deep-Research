@@ -12,10 +12,6 @@ A multi-agent deep research app for sports media and sponsorship sellers prepari
 - Wikipedia team-season articles, read live through the public MediaWiki API.
 - Metro population, described under Market size data below.
 
-Two defaults to know when querying:
-
-- **Official totals.** Season totals and averages come from `team_season_attendance` (the Stats API's `home_total` and `home_average`), also shown as `official_home_total` in `team_season_model`. Summing `games_clean` for a whole season gives a different number (Yankees 2024: 3,227,098 vs the official 3,309,838), so `run_sql` refuses that query and points to the official table. Sums for part of a season are allowed.
-- **Special events are left out.** The Tokyo Series, Speedway Classic, Little League Classic and Field of Dreams games are flagged and excluded from `games_clean`, `game_tv_lookup` and the team TV averages in `team_tv_summary`. `game_tv_lookup_all` keeps them, for questions about a special event itself.
 
 ## Loading the data and running the app
 
@@ -30,9 +26,7 @@ To rebuild from scratch, run `uv run python scripts/pull_statsapi.py`, then `uv 
 
 ## Sample questions
 
-These are the four sample questions on the app's front page. The expected answer is what the data says, rechecked against `data/mlb.duckdb`. The agent answer is its real output from `POST /chat`, unedited except that the footnote list is left out (the full responses, with sources and every tool call, are in `samples/sample_1.json` to `samples/sample_4.json`). They were run on November 10, 2026 against the app running locally, because the live site sits behind Google sign-in (IAP), which a script cannot pass: samples 2 and 4 on `main` (ded95f7), samples 1 and 3 and the A's viewership question on commit 757ffc5. Wording varies between runs, but the facts should hold. The no-tools baseline is the same model (`gemini-3.5-flash`) with no tools and no system prompt, from `scripts/baselines.py`, saved in `samples/baseline_1.md` to `samples/baseline_4.md`.
-
-To test the agent against 40 questions with required facts, run `uv run python scripts/eval_agent.py`.
+These are the four sample questions on the app's front page. 
 
 ### 1. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
 
@@ -98,7 +92,7 @@ The baseline gives no 2025 figures, and its 2024 figures are close to but not th
 
 The baseline knows about the move but gives no attendance figures, and states causes (heat, ticket prices) that the data does not test.
 
-## When the data can't answer
+## When the agent can't answer
 
 **Vague questions get one clarifying question.** Asked "Who is doing the best?", the agent does no research and replies (`samples/vague.json`, `"clarify": true`, no tool calls):
 
