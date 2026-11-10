@@ -230,3 +230,9 @@ CLAUDE.md
 
 # Git bundles
 *.bundle
+
+# Claude Code local settings
+.claude/
+
+# Eval run output (rewritten on every run)
+evals/latest_results.json

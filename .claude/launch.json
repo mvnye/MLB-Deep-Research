@@ -1,1 +1,0 @@
-{"version": "0.0.1", "configurations": [{"name": "mlb", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "PORT=8080 exec uv run uvicorn app:app --host 0.0.0.0 --port $PORT"], "port": 8080}]}
