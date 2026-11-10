@@ -56,7 +56,7 @@ uv run python scripts/pull_market.py
 
 The 1,126,444 average covers the 9 single games with a known audience, not all 10.
 
-**No-tools baseline** (shortened; full text in `samples/baseline_3.md`):
+**No-tools baseline** (shortened; full text in `samples/baseline_2.md`):
 
 > Because my knowledge cutoff is in January 2025, actual attendance figures and national TV ratings for the 2025 Major League Baseball season are not yet available. [...] In 2024, the Cubs drew **2,907,591 fans** (averaging 35,896 per game) [...] In 2024, they [the White Sox] drew just **1,380,183 fans** (averaging 17,039 per game) [...] the Cubs are expected to vastly outpace the White Sox in both stadium attendance and national television viewership [...]
 

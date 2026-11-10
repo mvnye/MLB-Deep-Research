@@ -16,9 +16,9 @@ import litellm
 MODEL = "vertex_ai/gemini-3.5-flash"
 OUT = Path(__file__).resolve().parent.parent / "samples"
 QUESTIONS = [
-    "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
     "Why did the Mets over-perform on attendance in 2025?",
     "Compare the Cubs and White Sox on attendance and national TV audiences in 2025.",
+    "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
 ]
 
 
