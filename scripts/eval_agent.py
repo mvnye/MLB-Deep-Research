@@ -43,6 +43,13 @@ def ran_in_parallel(run: app.Research) -> bool:
                for i, a in enumerate(sent) for b in sent[i + 1:])
 
 
+def unit_problems(report: str) -> list[str]:
+    """A gap against an expected crowd is a percent change, never percentage points."""
+    return [f"wrong unit: {s[:90]}" for line in report.split("\n") for s in app.sentences(line)
+            if re.search(r"percentage points?", s) and re.search(r"\bexpected|predicted", s)
+            and not re.search(r"fill|capacity", s, re.I)]
+
+
 def check(case: dict, run: app.Research) -> list[str]:
     report, failures = run.report.casefold(), []
     if case.get("clarify", False) != run.needs_clarification:
@@ -74,6 +81,7 @@ def check(case: dict, run: app.Research) -> list[str]:
         failures.append("researchers did not run in parallel")
     failures += app.citation_problems(run.cited, run.tool_calls, case["q"])
     failures += uncited_facts(run)
+    failures += unit_problems(run.report)
     failures += [f"says team factors are ruled out: {m[0]}" for m in app.RULED_OUT.finditer(run.report)]
     failures += [f"first person: {m[0]}" for m in app.FIRST_PERSON.finditer(re.sub(r"\([^()]*\)", "", run.report.split("\n\n*")[0]))]
     if app.word_count(run.report) > app.BROAD_WORD_LIMIT + 60:
@@ -102,7 +110,7 @@ async def run_case(case: dict, gate: asyncio.Semaphore) -> dict:
         result = {"id": case["id"], "q": case["q"], "passed": not failures, "failures": failures,
                   "seconds": round(time.time() - start), "researchers": run.researchers,
                   "retries": run.retries, "errors": run.errors, "chart": run.chart, "team_chart": run.team_chart,
-                  "tiles": run.tiles, "box_score": run.box_score, "title": run.title,
+                  "tiles": run.tiles, "box_score": run.box_score, "title": run.title, "repairs": run.repairs, "cited": run.cited,
                   "report": run.report, "sources": run.sources, "data_note": run.data_note}
         print(f"{'PASS' if not failures else 'FAIL'} {case['id']} ({result['seconds']}s) {failures}", flush=True)
         return result

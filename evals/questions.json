@@ -7,7 +7,7 @@
    "0.47",
    "0.16",
    "0.14",
-   "0.52",
+   "0.51",
    "prove",
    "Yes, games with smaller crowds",
    "did not clearly mean"
@@ -283,7 +283,7 @@
    "Assumed",
    "2025 season",
    "37,259",
-   "17"
+   "15"
   ],
   "must_not": [
    "10 national",
@@ -481,6 +481,63 @@
    "viewers"
   ],
   "team_chart": false,
-  "parallel": true
+  "parallel": true,
+  "must_not": [
+   "1,030,818"
+  ]
+ },
+ {
+  "id": "rays_drop",
+  "q": "Why did Rays attendance drop in 2025?",
+  "must": [
+   "9,713",
+   "41.2%"
+  ],
+  "must_any": [
+   "Steinbrenner",
+   "temporary"
+  ],
+  "context": true,
+  "must_not": [
+   "technical",
+   "Something went wrong"
+  ]
+ },
+ {
+  "id": "uncovered_40k_games",
+  "q": "Which team had the most home games with more than 40,000 fans in 2025?",
+  "must": [
+   "Dodgers",
+   "81"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "uncovered_red_sox_day_night",
+  "q": "Did Red Sox night games draw bigger crowds than day games in 2026?",
+  "must": [
+   "35,445",
+   "34,576"
+  ],
+  "must_not": [
+   "technical"
+  ]
+ },
+ {
+  "id": "uncovered_espn_sundays",
+  "q": "What was the average national TV audience for ESPN's Sunday games in 2025?",
+  "must": [
+   "22"
+  ],
+  "must_any": [
+   "1,786,136",
+   "1.79 million",
+   "1,786,000"
+  ],
+  "must_not": [
+   "technical"
+  ]
  }
 ]

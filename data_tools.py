@@ -38,8 +38,12 @@ TABLE_DOCS = {
     "crowd_tv_residual": "Crowd vs TV correlations per network and season, with n and ranges.",
     "team_crowd_tv": "Team-level link: each team-season's average crowd against its average national "
                      "TV audience, single-game broadcasts, with n and a 95% range.",
-    "game_tv_lookup": "One row per nationally televised game, including Fox windows and special "
-                      "events. Use this first for how many people watched a game.",
+    "game_tv_lookup": "One row per nationally televised regular game, including Fox windows. Special "
+                      "events are left out, as in games_clean. Use this first for how many people "
+                      "watched a game, and for any average or count of broadcasts.",
+    "game_tv_lookup_all": "game_tv_lookup plus the special events (Tokyo Series, Little League Classic, "
+                          "Speedway Classic, Field of Dreams). Use only for a question about a special "
+                          "event itself.",
     "team_tv_summary": "One row per team and season for 2025 and 2026: appearances, single games, Fox "
                        "window games, special events, audiences and network mix. Use this for a "
                        "team's TV picture.",
@@ -74,7 +78,9 @@ RESULT_NOTES = {
     "network_audience": "Copy network_text word for word.",
     "game_tv_lookup": "When can_split is false, the data has no audience for this game alone: report "
                       "window_total as the whole window, and coverage_pct as the share of the country.",
-    "team_tv_summary": "window games have no audience of their own, so they are not in the averages.",
+    "team_tv_summary": "window games have no audience of their own, so they are not in the averages. "
+                       "Special events (such as the Tokyo Series) are counted in special_event_games "
+                       "only, and left out of every other column.",
     "team_season_model": "residual_pct is against the prediction, not a year-over-year change.",
     "model_coefficients": "Report label and effect_pct, never coef. Filter to label is not null.",
 }
@@ -200,10 +206,42 @@ def _empty_result_message(con, query: str) -> str:
     return f"No rows. These filters matched nothing: {'; '.join(failed)}. {' '.join(hints)}".strip()
 
 
+ALL_EVENT_TABLES = ("games", "game_tv_lookup_all", "viewership_games")  # these keep special events
+GAME_TABLES = ("games", "games_clean", "game_tv_lookup", "game_tv_lookup_all", "game_viewership_clean",
+               "viewership_games")
+CLEAN_SUM = re.compile(r"\bsum\s*\(\s*(?:\w+\.)?attendance\s*\)", re.I)
+
+
+def season_total_error(query: str) -> str | None:
+    """games_clean leaves out special events and shared-gate doubleheaders, so its sums undercount."""
+    if CLEAN_SUM.search(query) and _tables_in(query, ["games_clean", "game_viewership_clean"]):
+        return _error("A sum of attendance from games_clean is not a season total: it leaves out special "
+                      "events and some doubleheader games.",
+                      "For a season total, select official_home_total from team_season_model. For part of a "
+                      "season, sum attendance from games.")
+    return None
+
+
+def aggregate_notes(query: str) -> list[str]:
+    """Rules for an average or count over games that no precomputed table has applied."""
+    q = query.lower()
+    if not re.search(r"\b(?:avg|sum|count|median)\s*\(", q) or not _tables_in(query, list(GAME_TABLES)):
+        return []
+    notes = []
+    if _tables_in(query, list(ALL_EVENT_TABLES)) and "special_event" not in q:
+        notes.append("This table keeps special events (such as the Tokyo Series or the Little League "
+                     "Classic). For an average or count of regular games, use games_clean or game_tv_lookup.")
+    if "avg(" in q.replace(" ", "") and "count(" not in q.replace(" ", ""):
+        notes.append("Add count(*) so the answer can say how many games the average covers.")
+    return notes
+
+
 def run_sql(query: str) -> str:
     """Run one read-only SELECT and return JSON with columns, rows and any notes."""
     if not query.strip():
         return _error("The query is empty.", "Send one SELECT statement.")
+    if error := season_total_error(query):
+        return error
     try:
         con = _connect()
     except FileNotFoundError as e:
@@ -235,6 +273,7 @@ def run_sql(query: str) -> str:
 
         notes = [RESULT_NOTES[t] for t in _tables_in(query, list(RESULT_NOTES))]
         notes = list(dict.fromkeys(notes))
+        notes += aggregate_notes(query)
         outside = _years_outside_data(query)
         if rows and outside:
             notes.append(f"{outside} is outside the data. {COVERAGE}")

@@ -84,6 +84,13 @@ class Research:
     sources: list[dict] = field(default_factory=list)  # footnotes, numbered as in the report
     data_note: str = ""
     needs_clarification: bool = False
+    repairs: list[str] = field(default_factory=list)  # each step after the Writer that changed the text
+
+    def step(self, name: str, text: str) -> None:
+        """Take a cleanup step's output, and note the step if it changed anything."""
+        if text != self.report:
+            self.repairs.append(name)
+        self.report = text
 
 
 # --- The researchers: one task each, in a fresh context ---
@@ -101,7 +108,9 @@ To find a team, query team_aliases by alias_key, in lower case with no punctuati
 tables by team_id. Work out every difference and average in SQL, as a column in your query, so the
 exact number is in your result. Report only what the task asks for: no extra games, networks or
 seasons. For a trend or a comparison of several items, get it in one query with one label column,
-such as month, season, team, network or weekday, and the value columns, so it can be charted."""
+such as month, season, team, network or weekday, and the value columns, so it can be charted.
+For which is biggest or smallest, return every candidate ranked, not LIMIT 1, so the answer can
+compare the leader with the next."""
 
 SQL_CITATION = "End every bullet with the tables it came from, e.g. (table: games, game_model)."
 
@@ -155,6 +164,8 @@ Start with describe_schema, then use run_sql. Use at most 6 queries.
 
 {READY_TEXT}
 
+- game_tv_lookup leaves out special events. Only for a question about a special event itself (such
+  as the Tokyo Series or the Little League Classic), use game_tv_lookup_all.
 - How many people watched a game: from game_tv_lookup, report network, broadcast, audience_status,
   audience_note, viewers_total, viewers_main, window_total, coverage_pct, window_games and can_split.
   When audience_note is set, report it: it says why the audience is not a plain total.
@@ -212,7 +223,7 @@ ROLES = {
 
 
 VIEWERSHIP_TABLES = {"viewership_games", "game_viewership_clean", "fox_windows", "fox_window_games",
-                     "crowd_tv_residual", "crowd_tv_headline", "game_tv_lookup", "team_tv_summary",
+                     "crowd_tv_residual", "crowd_tv_headline", "game_tv_lookup", "game_tv_lookup_all", "team_tv_summary",
                      "team_crowd_tv", "network_audience"}
 
 
@@ -364,9 +375,17 @@ def drop_stated_causes(report: str) -> str:
 def fix_units(report: str) -> str:
     """A gap between fill rates is percentage points, and coverage is a whole percent."""
     report = re.sub(r"(\d+)\.0%( of the country)", r"\1%\2", report)
-    report = re.sub(r"(fill.{0,70}?\b)(\d+(?:\.\d+)?)%( higher| lower| more| less)", r"\1\2 percentage points\3",
-                    report, flags=re.I)
-    return re.sub(r"(fill.{0,90}?difference of )(\d+(?:\.\d+)?)%", r"\1\2 percentage points", report, flags=re.I)
+
+    def edit(sentence: str) -> str:
+        # One sentence at a time: "drew 89.9% of capacity. Crowds were 0.9% higher than expected" is two
+        # facts, and the second is a relative change. A gap against a prediction is a percent too.
+        if re.search(r"\b(?:expected|predict|model)", sentence, re.I):
+            return sentence
+        sentence = re.sub(r"(fill.{0,70}?\b)(\d+(?:\.\d+)?)%( higher| lower| more| less)",
+                          r"\1\2 percentage points\3", sentence, flags=re.I)
+        return re.sub(r"(fill.{0,90}?difference of )(\d+(?:\.\d+)?)%", r"\1\2 percentage points",
+                      sentence, flags=re.I)
+    return edit_sentences(report, edit)
 
 
 def capacity_wording(report: str) -> str:
@@ -516,8 +535,8 @@ def gaps_from_shown(report: str) -> str:
 def absent_in_data(report: str) -> str:
     """'no national TV appearances' -> 'no national TV appearances in the data': the 2025 tables end early."""
     def edit(sentence: str) -> str:
-        if "in the data" in sentence.lower():
-            return sentence  # already said
+        if re.search(r"\bin (?:the|this|our)? ?(?:\d{4} |\d{4} and \d{4} )?(?:data|tables?)\b", sentence, re.I):
+            return sentence  # already said, e.g. "in the 2025 data"
         sentence = re.sub(r"\b((?:no|zero|0) (?:national TV |national |single-game )?(?:appearances|broadcasts))\b",
                           r"\1 in the data", sentence, count=1)
         return re.sub(r"\b((?:appearances|broadcasts)\b[^.]{0,60}\b(?:had|with) none)\b(?! in the data)",
@@ -845,6 +864,8 @@ def first_sentence_gaps(report: str, t: dict) -> list[str]:
 def opening_gaps(report: str, question: str, tool_calls: list[dict]) -> tuple[dict | None, list[str]]:
     """The team-season the answer is about, and which key facts its first sentence lacks."""
     t = answer_team_season(report, question) if "team_season_model" in tables_queried(tool_calls) else None
+    if t and re.search(r"\btotal\b", question, re.I):
+        return t, []  # a total question opens with the official total, not the average
     return (t, first_sentence_gaps(report, t)) if t else (None, [])
 
 
@@ -857,7 +878,9 @@ def lead_with_team_result(report: str, t: dict) -> str:
     def edit(sentence: str) -> str | None:
         return None if "http" not in sentence and any(n in sentence for n in numbers) else sentence
 
-    return f"{team_opening(t)} {edit_sentences(report, edit)}".strip()
+    rest = edit_sentences(report, edit)
+    # An answer that starts with a heading needs the opening as its own paragraph above it.
+    return f"{team_opening(t)}{chr(10) * 2 if rest.lstrip().startswith('#') else ' '}{rest}".strip()
 
 
 def season_assumption(question: str, today: date) -> tuple[str, int] | None:
@@ -1310,6 +1333,8 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
             problems.append(f"The link {url} was not read in this research.")
     for group in re.findall(r"\(tables?: ([^)]+)\)", report):
         for table in re.split(r"[,;]\s*(?:tables?:\s*)?", group.strip()):
+            if table.startswith("[") or "http" in table:
+                continue  # a link in the same citation: checked with the links above
             if table not in queried:
                 problems.append(f"The table {table} was not queried in this research.")
     team, gaps = opening_gaps(report, question, tool_calls)
@@ -1319,6 +1344,56 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
             + model_wording_problems(report, tool_calls) + missing
             + (["A park holds tens of thousands: remove the season seat total and compare capacities."]
                if derived_seats(report) else []))
+
+
+def clean_report(run: Research, asked: str) -> dict | None:
+    """Every code step after the Writer, in order. Returns the team-season the answer is about, if any.
+
+    Each step goes through run.step, so run.repairs says which steps changed this answer.
+    """
+    run.step("strip_quoted_phrases", strip_quoted_phrases(run.report).replace("—", ", ").replace("READY:", "").strip())
+    run.step("fix_citation_format", fix_citation_format(run.report))
+    # Before cleanup can remove the opening. If a check already has, the findings still name the team.
+    team = (opening_gaps(run.report, asked, run.tool_calls)[0]
+            or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
+    run.step("trim_to_headline", trim_to_headline(run.report, run.question))
+    run.step("limit_capped_line", limit_capped_line(run.report, run.question))
+    run.step("drop_unasked", drop_unasked(run.report, run.question))
+    run.step("drop_stated_causes", drop_stated_causes(run.report))
+    run.step("add_thousands", add_thousands(run.report))
+    run.step("fix_units", fix_units(run.report))
+    run.step("capacity_wording", capacity_wording(run.report))
+    run.step("neutral_voice", neutral_voice(run.report))
+    run.step("association_wording", association_wording(run.report, run.tool_calls))
+    run.step("official_season_figures", official_season_figures(run.report, run.tool_calls))
+    run.step("fix_window_coverage", fix_window_coverage(run.report, asked, run.tool_calls))
+    run.step("drop_repeated_limits", drop_repeated_limits(run.report))
+    run.step("gaps_from_shown", gaps_from_shown(run.report))
+    run.step("absent_in_data", absent_in_data(run.report))
+    run.step("records_not_rates", records_not_rates(run.report))
+    run.step("drop_derived_seats", drop_derived_seats(run.report))
+    run.step("drop_repeated_numbers", drop_repeated_numbers(run.report))
+    run.step("nielsen_inline", nielsen_inline(run.report, run.tool_calls))
+    mix = network_mix_note(run.report, asked, run.tool_calls)
+    if mix:
+        run.step("network_mix_note", f"{run.report} {mix}")
+    run.step("fix_team_level", fix_team_level(run.report))
+    if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):
+        fact = data_tools.team_crowd_tv_fact()
+        run.step("team_level_sentence", f"{run.report} {team_level_sentence(fact)}")
+        run.tool_calls.append({"name": "run_sql", "args": {"query": "select * from team_crowd_tv where scope = '2025 and 2026'"},
+                               "result": json.dumps(fact), "agent": "Required facts check"})
+    run.step("require_no_proof_note", require_no_proof_note(run.report))
+    for note in missing_audience_notes(run.report, run.tool_calls):
+        run.step("missing_audience_notes", f"{run.report} {note}")
+    if team and first_sentence_gaps(run.report, team):
+        run.step("lead_with_team_result", lead_with_team_result(run.report, team))
+        # Logged like any other call: these numbers came from a query, made here by the app.
+        query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
+                 f"and season = {team['season']}")
+        run.tool_calls.append({"name": "run_sql", "args": {"query": query},
+                               "result": json.dumps(team, default=str), "agent": "Required facts check"})
+    return team
 
 
 async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
@@ -1362,14 +1437,14 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
         fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nFix these problems. Correct the "
                "number from the findings, or remove the fact:\n- " + "\n- ".join(problems))
         result = await Runner.run(writer, fix, context=run, hooks=hooks)
-        run.report = str(result.final_output)
+        run.step("writer_fix_pass", str(result.final_output))
         bad = unverified_numbers(first_sentence(run.report), run.tool_calls)
         if bad:  # deleting the opening would leave an answer with no conclusion: rewrite it instead
             fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite only the first sentence, using "
                    "numbers from the findings, and keep the rest as it is:\n- " + "\n- ".join(bad))
             result = await Runner.run(writer, fix, context=run, hooks=hooks)
-            run.report = str(result.final_output)
-        run.report = drop_unsourced(run.report, run.tool_calls)
+            run.step("first_sentence_rewrite", str(result.final_output))
+        run.step("drop_unsourced", drop_unsourced(run.report, run.tool_calls))
     # 5. Enforce the length in code: one pass, kept only if the citations survive it
     limit = BROAD_WORD_LIMIT if run.researchers >= BROAD_RESEARCHERS else WORD_LIMIT
     if word_count(run.report) > limit:
@@ -1379,40 +1454,9 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
         result = await Runner.run(writer, shorten, context=run, hooks=hooks)
         shorter = str(result.final_output)
         if not citation_problems(shorter, run.tool_calls, asked) and word_count(shorter) < word_count(run.report):
-            run.report = shorter
+            run.step("shorten_pass", shorter)
 
-    run.report = strip_quoted_phrases(run.report).replace("—", ", ").replace("READY:", "").strip()
-    run.report = fix_citation_format(run.report)
-    # Before cleanup can remove the opening. If a check already has, the findings still name the team.
-    team = (opening_gaps(run.report, asked, run.tool_calls)[0]
-            or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
-    run.report = limit_capped_line(trim_to_headline(run.report, run.question), run.question)
-    run.report = capacity_wording(fix_units(add_thousands(drop_stated_causes(drop_unasked(run.report, run.question)))))
-    run.report = association_wording(neutral_voice(run.report), run.tool_calls)
-    run.report = official_season_figures(run.report, run.tool_calls)
-    run.report = fix_window_coverage(run.report, asked, run.tool_calls)
-    run.report = drop_repeated_limits(run.report)
-    run.report = drop_repeated_numbers(drop_derived_seats(records_not_rates(absent_in_data(gaps_from_shown(run.report)))))
-    run.report = nielsen_inline(run.report, run.tool_calls)
-    mix = network_mix_note(run.report, asked, run.tool_calls)
-    if mix:
-        run.report += f" {mix}"
-    run.report = fix_team_level(run.report)
-    if HEADLINE_END in run.report and "team_crowd_tv" not in run.report and not NETWORK_NAMES.search(run.question):
-        fact = data_tools.team_crowd_tv_fact()
-        run.report += f" {team_level_sentence(fact)}"
-        run.tool_calls.append({"name": "run_sql", "args": {"query": "select * from team_crowd_tv where scope = '2025 and 2026'"},
-                               "result": json.dumps(fact), "agent": "Required facts check"})
-    run.report = require_no_proof_note(run.report)
-    for note in missing_audience_notes(run.report, run.tool_calls):
-        run.report += f" {note}"
-    if team and first_sentence_gaps(run.report, team):
-        run.report = lead_with_team_result(run.report, team)
-        # Logged like any other call: these numbers came from a query, made here by the app.
-        query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
-                 f"and season = {team['season']}")
-        run.tool_calls.append({"name": "run_sql", "args": {"query": query},
-                               "result": json.dumps(team, default=str), "agent": "Required facts check"})
+    team = clean_report(run, asked)
     add_charts(run, asked, team)
     run.cited = run.report
     run.report, run.sources, run.data_note = citations.apply(

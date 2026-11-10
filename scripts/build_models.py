@@ -542,28 +542,34 @@ def tv_lookup_table(con) -> pd.DataFrame:
 
 TEAM_TV_SUMMARY_SQL = """
 CREATE OR REPLACE TABLE team_tv_summary AS
+-- Special events (Tokyo Series, Speedway Classic, and the like) are counted in special_event_games
+-- only: they are left out of every other column, so the averages compare regular-season games.
 WITH apps AS (
     SELECT home_team_id AS team_id, season, game_pk, network, broadcast, viewers_total, special_event
-    FROM game_tv_lookup
+    FROM game_tv_lookup_all
     UNION ALL
     SELECT away_team_id, season, game_pk, network, broadcast, viewers_total, special_event
-    FROM game_tv_lookup),
+    FROM game_tv_lookup_all),
+regular AS (SELECT * FROM apps WHERE special_event IS NULL),
 mix AS (
     SELECT team_id, season, string_agg(network || ' ' || games, ', ' ORDER BY games DESC, network) AS network_mix
-    FROM (SELECT team_id, season, network, count(*) AS games FROM apps GROUP BY 1, 2, 3)
-    GROUP BY 1, 2)
+    FROM (SELECT team_id, season, network, count(*) AS games FROM regular GROUP BY 1, 2, 3)
+    GROUP BY 1, 2),
+special AS (SELECT team_id, season, count(*) AS special_event_games FROM apps
+            WHERE special_event IS NOT NULL GROUP BY 1, 2)
 SELECT t.team_id, t.season, t.name AS team,
        count(a.game_pk) AS appearances,
        count(*) FILTER (a.broadcast = 'single game') AS single_games,
        count(*) FILTER (a.broadcast = 'regional window') AS fox_window_games,
-       count(a.special_event) AS special_event_games,
+       coalesce(any_value(sp.special_event_games), 0) AS special_event_games,
        count(a.viewers_total) AS single_games_with_known_audience,
        round(avg(a.viewers_total)) AS avg_single_game_viewers,
        max(a.viewers_total) AS highest_single_game_viewers,
        any_value(m.network_mix) AS network_mix
 FROM teams t
-LEFT JOIN apps a USING (team_id, season)
+LEFT JOIN regular a USING (team_id, season)
 LEFT JOIN mix m USING (team_id, season)
+LEFT JOIN special sp USING (team_id, season)
 WHERE t.season IN (2025, 2026)
 GROUP BY 1, 2, 3
 """
@@ -650,10 +656,15 @@ def main() -> None:
     table = crowd_tv_table(con)
     write_table("crowd_tv_residual", table)
     write_table("crowd_tv_headline", crowd_tv_headline(table))
-    write_table("game_tv_lookup", tv_lookup_table(con))
+    # Every national broadcast, special events included. The default, game_tv_lookup, leaves the
+    # special events out (like games_clean), so an average over it compares regular games only.
+    write_table("game_tv_lookup_all", tv_lookup_table(con))
     for column, kind in (("viewers_total", "BIGINT"), ("viewers_main", "BIGINT"),
                          ("window_total", "BIGINT"), ("coverage_pct", "INTEGER"), ("official_date", "DATE")):
-        con.execute(f"ALTER TABLE game_tv_lookup ALTER {column} TYPE {kind}")
+        con.execute(f"ALTER TABLE game_tv_lookup_all ALTER {column} TYPE {kind}")
+    con.execute("DROP TABLE IF EXISTS game_tv_lookup")
+    con.execute("CREATE OR REPLACE VIEW game_tv_lookup AS "
+                "SELECT * FROM game_tv_lookup_all WHERE special_event IS NULL")
     con.execute(TEAM_TV_SUMMARY_SQL)
     write_table("team_crowd_tv", team_crowd_tv_table(con))
     write_table("network_audience", network_audience_table(con))
