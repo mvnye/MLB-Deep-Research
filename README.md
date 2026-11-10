@@ -13,7 +13,7 @@ uv sync
 uv run uvicorn app:app --port 8080
 ```
 
-To rebuild from scratch, run `uv run python scripts/pull_statsapi.py`, then `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`. `build_all.py` alone rebuilds `data/mlb.duckdb` from the raw files.
+To rebuild from scratch, run `uv run python scripts/pull_statsapi.py`, then `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`. `build_all.py` rebuilds `data/mlb.duckdb` from the raw files.
 
 ## Sample questions
 
