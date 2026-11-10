@@ -3,9 +3,11 @@
 Each question goes to the model as a single user message. Answers are saved to samples/ for
 comparison with the agent's answers.
 
-Usage: uv run python scripts/baselines.py
+Usage: uv run python scripts/baselines.py [numbers]
+    With numbers (e.g. 3 4), only those questions are asked again.
 """
 
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -16,13 +18,17 @@ OUT = Path(__file__).resolve().parent.parent / "samples"
 QUESTIONS = [
     "Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?",
     "Why did the Mets over-perform on attendance in 2025?",
-    "How many people watched the Yankees vs Red Sox game on Fox on June 7, 2025?",
+    "Compare the Cubs and White Sox on attendance and national TV audiences in 2025.",
+    "Why did Rays attendance drop in 2025?",
 ]
 
 
 def main() -> None:
     OUT.mkdir(exist_ok=True)
+    wanted = {int(n) for n in sys.argv[1:]}
     for number, question in enumerate(QUESTIONS, 1):
+        if wanted and number not in wanted:
+            continue
         response = litellm.completion(
             model=MODEL,
             messages=[{"role": "user", "content": question}],

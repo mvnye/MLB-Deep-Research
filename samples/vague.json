@@ -1,0 +1,11 @@
+{
+ "response": "Are you asking about MLB attendance or TV viewership, and for which season?",
+ "session_id": "a8827bc3-39d3-4729-8cc3-32e2025fad05",
+ "tool_calls": [],
+ "chart": null,
+ "team_chart": null,
+ "tiles": [],
+ "box_score": null,
+ "title": "",
+ "clarify": true
+}
