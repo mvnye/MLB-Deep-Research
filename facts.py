@@ -104,6 +104,9 @@ class FactBook:
         names = {c.lower(): i for i, c in enumerate(result["columns"])}
         if column.lower() not in names:
             return f"{qid} has no column {column}; its columns are {', '.join(result['columns'])}"
+        if column.lower().endswith("_text"):
+            return (f"{column} is a finished sentence, not a value: copy that sentence word for word as its own "
+                    "sentence, or use the number columns")
         cells = dict(zip((c.lower() for c in result["columns"]), rows[row - 1]))
         value, name = rows[row - 1][names[column.lower()]], column.lower()
         # 'avg_attendance AS avg_24' formats as attendance: the alias alone says nothing.

@@ -175,5 +175,13 @@ def test_fill_before_its_own_capacity_is_not_doubled():
     assert "representing 89.9% of the listed 11,026 capacity" in out, out
 
 
+def test_finished_sentence_columns_are_not_values():
+    run = app.Research(hooks=None, question="networks")
+    result = facts.add_query_id(run, json.dumps({"columns": ["network", "network_text"], "rows": [["Fox", "Fox averaged 2,343,875 viewers."]]}))
+    run.tool_calls.append({"name": "run_sql", "args": {"query": "select network, network_text from network_audience"}, "result": result, "agent": "A"})
+    out = app.fill_report(run, "{Q1.r1.network_text} led all networks.")
+    assert "{Q1.r1.network_text}" in out and "finished sentence" in run.fact_stats["unresolved"][0], out
+
+
 if __name__ == "__main__":
     run_tests(globals())

@@ -56,7 +56,7 @@ New file `facts.py`, small changes in `tools.py`, `app.py`, `citations.py`, eval
   uses the same text.
 - **Fix found on the way:** when the fix message gives a team opening's numbers, the
   team-season row is now logged as a query, so those numbers have a source (stage 1 `held_tigers`).
-- **Tests:** `tests/test_facts.py` (19 tests). The three existing test files pass unchanged,
+- **Tests:** `tests/test_facts.py` (20 tests). The three existing test files pass unchanged,
   including all "good text stays unchanged" cases.
 - **Eval output** now has a `facts` entry per question: values filled, gaps derived, phrases,
   raw numbers the Writer typed, and unresolved IDs.
@@ -95,11 +95,18 @@ Combined, compared with stage 1:
 - Fact use: 286 values filled from IDs, 5 gaps derived, 8 phrases, 0 unresolved, and 57 numbers
   the Writer still typed itself (about 17%; many are the fixed crowds vs TV headline numbers,
   which come from a READY sentence).
-- `held_network` (open issue): the answer now names every network with its average, not only Fox.
+- `held_network` (open issue): the answer now names every network with its average, not only Fox
+  (but see the garbled-text note below).
 
-Caveat: the 40 of 40 is a combined result. 19 questions were rerun after fixes; the other 21 come
-from the full run before the last three fix commits. Those later fixes are small and covered by
+Caveat: the 40 of 40 is a combined result. 11 questions come from reruns after the full run; the
+other 29 come from the full run, before the last fix commits. Those fixes are small and covered by
 fast tests, but no single run has all 40 on the final commit.
+
+Found after the runs: the full-run `held_network` answer passed its checks but reads garbled
+("...in 2026[1]. led all national networks..."). The Writer used an ID for `network_text`, a
+column holding a finished sentence, so a whole sentence was pasted mid-sentence. Fixed in the last
+commit: a `_text` column cannot be filled as a value, and the fix pass is told to copy the sentence
+word for word. Not rerun with a model (no partial reruns left); covered by a fast test.
 
 ## 4. Decisions made on my own
 
@@ -140,7 +147,8 @@ fast tests, but no single run has all 40 on the final commit.
 
 - **Stage 1** (`compute-write-check`, 27705b7): yes. Baseline 37 of 40; the empty Red Sox answer
   and the Tigers sourcing failure are real stage 1 bugs worth knowing about before merging it alone.
-- **Stage 2** (`stage2-facts`, a6f5a3f): yes. Restart the local app first (it does not reload).
+- **Stage 2** (`stage2-facts`, latest commit): yes. Look at `held_network` ("Which network had the
+  biggest national TV audiences in 2026?") first, since its fix was not rerun with a model. Restart the local app first (it does not reload).
   Worth checking in the browser: the crowds vs TV chip (new team-level wording), Cubs vs White
   Sox, the Rays drop chip, and one "how many people watched" game question, looking at footnotes
   and the "Show the agents' work" panel.
