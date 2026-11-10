@@ -93,22 +93,20 @@ The full `POST /chat` output for each sample question, with `response`, `session
 ## Data sources
 
 - [MLB Stats API](https://statsapi.mlb.com): 2024 to 2026 regular season games (`/api/v1/schedule?sportId=1&gameType=R`), per-game attendance, weather, venue and capacity (`/api/v1.1/game/{gamePk}/feed/live`), and official season totals (`/api/v1/attendance`), back to 2022 for the model's prior years. Postseason is out of scope.
-- TV Media Blog viewership archives: [2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database) and [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive), saved as CSVs in `data/raw/`. The 2025 tables end in early September.
+- TV Media Blog viewership archives: [2025](https://tvmediablog.substack.com/p/2025-mlb-season-viewership-database) and [2026](https://tvmediablog.substack.com/p/2026-mlb-viewership-archive), saved as CSVs in `data/raw/`. 
 - Wikipedia team-season articles, read live through the public MediaWiki API.
 - Metro population, described under Market size data.
 
 
 ### Viewership figures
 
-Viewership figures are publicly reported average audience (P2+), compiled by TV Media Blog from network press releases and trade coverage (Sports Business Journal, Sports Media Watch). They may differ from official Nielsen data. `viewers_total` is the national TV audience, excluding streaming add-ons (Peacock/Adobe, HBO Max): the main network plus TV simulcasts (Deportes, ESPN2, truTV). Netflix games are streaming-only. Nielsen changed its method in September 2025, so 2025 and 2026 figures are not like-for-like.
+Viewership figures are publicly reported average audience (P2+), compiled by TV Media Blog from network press releases and trade coverage (Sports Business Journal, Sports Media Watch). They may differ from official Nielsen data. `viewers_total` is the national TV audience, excluding streaming add-ons (Peacock/Adobe, HBO Max): the main network plus TV simulcasts (Deportes, ESPN2, truTV). Netflix games are streaming-only. 
 
 ### Market size data
 
 Team market size uses metro population, one figure per team and season:
 
 - US teams: [US Census Bureau Vintage 2025 metro population estimates](https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv).
-- Blue Jays: [Statistics Canada table 17-10-0148-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710014801), because the US Census does not cover Toronto.
-
-Estimates end at 2025, so 2026 uses the 2025 figure. Two-team metros are not split between teams. The Athletics use San Francisco-Oakland for 2024 and Sacramento for 2025 and 2026.
+- Blue Jays: [Statistics Canada table 17-10-0148-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710014801).
 
 To load it, run `uv run python scripts/pull_market.py`, then `uv run python scripts/build_all.py`.
