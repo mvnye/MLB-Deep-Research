@@ -314,30 +314,6 @@
   "chart": null
  },
  {
-  "id": "new_as",
-  "q": "How did the Oakland A's viewership change in their final season before moving?",
-  "must": [
-   "2025"
-  ],
-  "must_any": [
-   "not in our data",
-   "does not cover",
-   "doesn't cover",
-   "starts in 2025",
-   "begins in 2025",
-   "only covers",
-   "no 2024 viewership",
-   "not in the data"
-  ],
-  "must_not": [
-   "no national tv broadcasts recorded",
-   "no broadcasts",
-   "technical"
-  ],
-  "chart": null,
-  "team_chart": false
- },
- {
   "id": "plain_lookup",
   "q": "What was the attendance for Dodgers at Padres on August 23, 2025?",
   "must": [
@@ -458,19 +434,25 @@
  {
   "id": "as_viewership_change",
   "q": "How did the Oakland A's viewership change in their final season before moving?",
+  "must": [
+   "2024",
+   "11,529"
+  ],
   "must_any": [
-   "cannot",
-   "not cover",
-   "does not",
+   "not in the data",
    "no 2024 viewership",
-   "not in the data"
+   "does not cover",
+   "doesn't cover",
+   "only covers",
+   "starts in 2025",
+   "begins in 2025",
+   "no national TV audience data for 2024"
   ],
   "must_not": [
-   "Something went wrong"
+   "Something went wrong",
+   "technical"
   ],
-  "must": [
-   "FS1"
-  ]
+  "team_chart": false
  },
  {
   "id": "cubs_white_sox",

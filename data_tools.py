@@ -26,7 +26,7 @@ COVERAGE_FACTS = {
 }
 
 # Kept for audit, not listed for researchers: games_clean holds what answers need.
-HIDDEN_TABLES = {"game_model", "game_model_raw", "team_season_attendance"}
+HIDDEN_TABLES = {"game_model", "game_model_raw"}
 
 TABLE_DOCS = {
     "games_clean": "Default for attendance work. Every played game except special events and "
@@ -55,7 +55,9 @@ TABLE_DOCS = {
     "games": "One row per played regular-season game, 2024 to 2026. Key: game_pk. NULL attendance "
              "means unknown. Includes special events: use games_clean unless asked about them.",
     "teams": "One row per team per season, with league and division. Key: team_id, season.",
-    "team_season_attendance": "MLB season attendance totals per team. Key: team_id, season.",
+    "team_season_attendance": "The official season totals: MLB Stats API home_total and home_average per "
+                              "team and season. Key: team_id, season. Every season total comes from here "
+                              "(also in team_season_model as official_home_total), never from a sum of games.",
     "viewership_games": "One row per single-game national broadcast, 2025 and 2026, including "
                         "single-game Fox windows. Join to games on game_pk. Use for game-level "
                         "crowd vs TV comparisons.",
@@ -212,13 +214,24 @@ GAME_TABLES = ("games", "games_clean", "game_tv_lookup", "game_tv_lookup_all", "
 CLEAN_SUM = re.compile(r"\bsum\s*\(\s*(?:\w+\.)?attendance\s*\)", re.I)
 
 
+# A filter or grouping that limits a sum to part of a season: a series, a month, a homestand, an opponent.
+PART_OF_SEASON = re.compile(r"official_date|game_date|\bmonth\s*\(|date_trunc|strftime|dayname|\bweek|weekday|"
+                            r"day_night|series|away_team|opponent|game_pk|\bbetween\b", re.I)
+
+
 def season_total_error(query: str) -> str | None:
-    """games_clean leaves out special events and shared-gate doubleheaders, so its sums undercount."""
-    if CLEAN_SUM.search(query) and _tables_in(query, ["games_clean", "game_viewership_clean"]):
-        return _error("A sum of attendance from games_clean is not a season total: it leaves out special "
-                      "events and some doubleheader games.",
-                      "For a season total, select official_home_total from team_season_model. For part of a "
-                      "season, sum attendance from games.")
+    """A whole-season sum from games_clean undercounts: it leaves out special events and some doubleheaders.
+
+    A sum over part of a season (a series, month or homestand) is allowed.
+    """
+    if (CLEAN_SUM.search(query) and _tables_in(query, ["games_clean", "game_viewership_clean"])
+            and not PART_OF_SEASON.search(query)):
+        return _error("A season total cannot come from a sum of games_clean: it leaves out special events and "
+                      "some doubleheader games, so it undercounts.",
+                      "Season totals come from the official totals table: select home_total from "
+                      "team_season_attendance where team_id = ... and season = ... (the same figure is "
+                      "official_home_total in team_season_model). For part of a season (a "
+                      "series, month or homestand), filter by official_date and sum attendance.")
     return None
 
 

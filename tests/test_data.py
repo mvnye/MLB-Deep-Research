@@ -74,15 +74,33 @@ def test_default_tv_table_has_no_special_events():
                   where season = 2025 and network = 'ESPN' and dayname(official_date) = 'Sunday'""") == (22, 1786136)
 
 
-def test_clean_game_sums_are_refused():
-    """Yankees 2024: games_clean sums to 3,227,098, the official total is 3,309,838."""
+def sql(query: str) -> dict:
     import json
-    result = json.loads(data_tools.run_sql(
-        "select sum(attendance) from games_clean where home_team_id = 147 and season = 2024"))
-    assert "official_home_total" in result.get("hint", ""), result
-    ok = json.loads(data_tools.run_sql(
-        "select sum(attendance) from games where home_team_id = 147 and season = 2024"))
-    assert ok["rows"] == [[3309838]], ok
+    return json.loads(data_tools.run_sql(query))
+
+
+def test_whole_season_sum_of_clean_games_is_refused():
+    """Yankees 2024: games_clean sums to 3,227,098, the official total is 3,309,838."""
+    for query in ("select sum(attendance) from games_clean where home_team_id = 147 and season = 2024",
+                  "select home_team, sum(attendance) from games_clean where season = 2024 group by 1"):
+        result = sql(query)
+        assert "team_season_attendance" in result.get("hint", ""), result
+    assert sql("select home_total from team_season_attendance where team_id = 147 and season = 2024")["rows"] == [[3309838]]
+
+
+def test_part_of_season_sums_are_allowed():
+    month = sql("select month(official_date) as m, sum(attendance) from games_clean "
+                "where home_team_id = 147 and season = 2024 group by 1 order by 1")
+    series = sql("select sum(attendance) from games_clean where home_team_id = 147 and "
+                 "away_team = 'Boston Red Sox' and official_date between '2024-07-05' and '2024-07-07'")
+    homestand = sql("select sum(attendance) from games_clean where home_team_id = 147 "
+                    "and official_date between '2024-06-04' and '2024-06-13'")
+    for result in (month, series, homestand):
+        assert "error" not in result and result["rows"], result
+
+
+def test_official_totals_table_is_listed():
+    assert "team_season_attendance" in data_tools.describe_schema("")
 
 
 if __name__ == "__main__":

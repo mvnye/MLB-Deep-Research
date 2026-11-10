@@ -85,11 +85,31 @@ class Research:
     data_note: str = ""
     needs_clarification: bool = False
     repairs: list[str] = field(default_factory=list)  # each step after the Writer that changed the text
+    required: dict[str, str] = field(default_factory=dict)  # number as shown -> what it is; must survive
+    removals: list[dict] = field(default_factory=list)  # each number a step removed, and why
 
     def step(self, name: str, text: str) -> None:
-        """Take a cleanup step's output, and note the step if it changed anything."""
-        if text != self.report:
-            self.repairs.append(name)
+        """Take a step's output, unless it removes the last copy of a required fact.
+
+        A step may drop a number only if it is a repeat that still appears, or it is not a required
+        fact. Every removal is logged with its reason, and so is a step that was undone.
+        """
+        if text == self.report:
+            return
+        before, after = shown_numbers(self.report), shown_numbers(text)
+        lost = [n for n in dict.fromkeys(before) if before.count(n) > after.count(n)]
+        blocked = [n for n in lost if n not in after and n in self.required]
+        if blocked:
+            for n in blocked:
+                self.removals.append({"step": name, "number": n, "reason": f"kept: required fact ({self.required[n]}); step undone"})
+            logger.info("step %s undone: it removed required facts %s", name, blocked)
+            return
+        for n in lost:
+            reason = "repeat: still appears" if n in after else "not a required fact"
+            self.removals.append({"step": name, "number": n, "reason": reason})
+        if lost:
+            logger.info("step %s removed %s", name, [(r["number"], r["reason"]) for r in self.removals if r["step"] == name])
+        self.repairs.append(name)
         self.report = text
 
 
@@ -864,7 +884,7 @@ def first_sentence_gaps(report: str, t: dict) -> list[str]:
 def opening_gaps(report: str, question: str, tool_calls: list[dict]) -> tuple[dict | None, list[str]]:
     """The team-season the answer is about, and which key facts its first sentence lacks."""
     t = answer_team_season(report, question) if "team_season_model" in tables_queried(tool_calls) else None
-    if t and re.search(r"\btotal\b", question, re.I):
+    if t and asks_total(question):
         return t, []  # a total question opens with the official total, not the average
     return (t, first_sentence_gaps(report, t)) if t else (None, [])
 
@@ -1106,7 +1126,9 @@ relate to national TV audiences in 2025 and 2026.
 1. Call describe_schema to see what the data covers.
 2. Split the question into independent tasks: 1 for a simple lookup, 2 to 4 for anything broader.
    For a comparison, ask for the difference to be worked out in SQL, and for fill rates.
-   If the data cannot cover what was asked, send no context researcher. A simple lookup gets one
+   If the data cannot cover what was asked, send no context researcher. If the question asks about
+   national TV audiences in a season the TV data does not cover (2024), also send an attendance
+   researcher for that team and season: its crowds are the closest data. A simple lookup gets one
    researcher. Do not re-verify an answer: send another only to retry a failed researcher.
    Call research once per task, all in the same turn, so the researchers work in parallel. Each
    task must name the teams, seasons and comparison it needs. Use the attendance role for crowds
@@ -1165,9 +1187,10 @@ you're given.
    context facts, the ones most tied to crowds or viewership, dated before or during the season
    asked about.
 10. If the data cannot answer something the question asks, state the limit once, plainly, with the
-    reason, then give the closest data that does exist: "There is no 2024 viewership in the data. In
-    the data, the A's had no national TV appearances in 2025 and one in 2026, on FS1, with the
-    audience unknown." Never make the same point twice in different words. The data
+    reason, then give the closest data that does exist: "There is no 2024 viewership in the data.
+    The closest data is attendance: the A's averaged <their 2024 average from the findings> fans a
+    game in 2024. In the data, the A's had no national TV appearances in 2025 and one in 2026, on
+    FS1, with the audience unknown." Never make the same point twice in different words. The data
     covers attendance for 2024 to 2026 and viewership from 2025. Mention only limits the question touches,
     with no citation for them. A researcher failing is a technical problem, not a limit of the data.
 11. Write for a seller: everyday words, no column names or game IDs, and no mention of research,
@@ -1212,6 +1235,42 @@ How the numbers work:
     model=MODEL,
     model_settings=STEADY_SETTINGS,
 )
+
+
+def shown_numbers(text: str) -> list[str]:
+    """Every number of 100 or more as written (e.g. '3,309,838', '41.2%'), citations and links left out."""
+    text = re.sub(r"\((?:tables?|source): [^)]*\)|\(https?://[^)]*\)", "", text)
+    found = re.findall(r"(?<![\w.,])\d+(?:,\d{3})*(?:\.\d+)?%?", text)
+    return [n for n in found if "%" in n or "." in n or float(n.replace(",", "")) >= 100 and not 1900 <= float(n.replace(",", "")) <= 2100]
+
+
+def required_facts(question: str, team: dict | None) -> dict[str, str]:
+    """The numbers an answer must keep once it has them: a team-season's result, and a total if asked."""
+    if not team:
+        return {}
+    if asks_total(question):
+        return {f"{team['official_home_total']:,}": "official season total"} if team.get("official_home_total") else {}
+    facts = {f"{team['avg_attendance']:,.0f}": "average attendance",
+             f"{abs(team['yoy_change_pct']):.1%}": "change from the season before"}
+    if team["residual_pct"] is not None:
+        facts[f"{abs(team['residual_pct']):.1%}"] = "gap from expected"
+    return facts
+
+
+def asks_total(question: str) -> bool:
+    """A question about a season total, which opens with the official total instead of the average."""
+    return bool(re.search(r"\btotal\b", question, re.I))
+
+
+def add_missing_total(report: str, question: str, team: dict | None) -> str:
+    """A total question gets the official total, even if the Writer left it out."""
+    if not team or not asks_total(question) or not team.get("official_home_total"):
+        return report
+    total = f"{team['official_home_total']:,}"
+    if total in report:
+        return report
+    return (f"The {team['home_team']} drew {total} fans at home in {team['season']}, the official season "
+            f"total (table: team_season_model). {report}")
 
 
 NUMBER = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?:\s?(million|M\b|K\b))?", re.IGNORECASE)
@@ -1354,8 +1413,8 @@ def clean_report(run: Research, asked: str) -> dict | None:
     run.step("strip_quoted_phrases", strip_quoted_phrases(run.report).replace("—", ", ").replace("READY:", "").strip())
     run.step("fix_citation_format", fix_citation_format(run.report))
     # Before cleanup can remove the opening. If a check already has, the findings still name the team.
-    team = (opening_gaps(run.report, asked, run.tool_calls)[0]
-            or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
+    team = answer_team(run, asked)
+    run.required = run.required or required_facts(asked, team)
     run.step("trim_to_headline", trim_to_headline(run.report, run.question))
     run.step("limit_capped_line", limit_capped_line(run.report, run.question))
     run.step("drop_unasked", drop_unasked(run.report, run.question))
@@ -1386,14 +1445,26 @@ def clean_report(run: Research, asked: str) -> dict | None:
     run.step("require_no_proof_note", require_no_proof_note(run.report))
     for note in missing_audience_notes(run.report, run.tool_calls):
         run.step("missing_audience_notes", f"{run.report} {note}")
-    if team and first_sentence_gaps(run.report, team):
+    if team and not asks_total(asked) and first_sentence_gaps(run.report, team):
         run.step("lead_with_team_result", lead_with_team_result(run.report, team))
         # Logged like any other call: these numbers came from a query, made here by the app.
         query = (f"select * from team_season_model where home_team = '{team['home_team']}' "
                  f"and season = {team['season']}")
         run.tool_calls.append({"name": "run_sql", "args": {"query": query},
                                "result": json.dumps(team, default=str), "agent": "Required facts check"})
+    # The required-facts check again, after every repair: a total question keeps its total.
+    run.step("add_missing_total", add_missing_total(run.report, asked, team))
+    for n, what in run.required.items():
+        if n not in run.report:
+            run.removals.append({"step": "final check", "number": n, "reason": f"required fact missing ({what})"})
+            logger.warning("required fact %s (%s) is missing after the repairs", n, what)
     return team
+
+
+def answer_team(run: Research, asked: str) -> dict | None:
+    """The team-season the answer is about, from the report, or from the findings if a step removed it."""
+    return (opening_gaps(run.report, asked, run.tool_calls)[0]
+            or opening_gaps("\n".join(f.split("\n\n", 1)[-1] for f in run.findings), asked, run.tool_calls)[0])
 
 
 async def deep_research(run: Research, may_clarify: bool = True, history: str = "") -> Research:
@@ -1430,6 +1501,7 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     prompt = f"Question: {question}\n\nFindings:\n\n{findings}"
     result = await Runner.run(writer, prompt, context=run, hooks=hooks)
     run.report = str(result.final_output)
+    run.required = required_facts(asked, answer_team(run, asked))
 
     # 4. Check citations in code, and give the Writer one chance to fix them
     problems = citation_problems(run.report, run.tool_calls, asked)

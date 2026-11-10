@@ -79,5 +79,50 @@ def test_opening_before_a_heading_stays_its_own_paragraph():
     assert "\n### Attendance" in out and ". ### " not in out, out
 
 
+YANKEES_Q = "What was the Yankees' total home attendance in 2024?"
+YANKEES_CALLS = [{"name": "run_sql", "agent": "Attendance Researcher",
+                  "args": {"query": "select * from team_season_model where team_id = 147 and season = 2024"},
+                  "result": '{"rows": [[3309838, 41897, 0.0253, -0.0461, 40863, 43920]]}'}]
+
+
+def yankees_run(report: str) -> app.Research:
+    run = app.Research(hooks=None, question=YANKEES_Q, report=report, tool_calls=list(YANKEES_CALLS))
+    team = app.answer_team(run, YANKEES_Q)
+    run.required = app.required_facts(YANKEES_Q, team)
+    return run
+
+
+def test_yankees_total_survives_cleanup():
+    run = yankees_run("The Yankees drew 3,309,838 fans at home in 2024, an average of 41,897 a game "
+                      "(table: team_season_model).")
+    assert "3,309,838" in run.required, run.required
+    app.clean_report(run, YANKEES_Q)
+    assert "3,309,838" in run.report, (run.report, run.removals)
+    assert not [r for r in run.removals if r["step"] == "final check"], run.removals
+
+
+def test_step_that_drops_a_required_fact_is_undone():
+    run = yankees_run("The Yankees drew 3,309,838 fans at home in 2024 (table: team_season_model). "
+                      "They averaged 41,897 a game (table: team_season_model).")
+    before = run.report
+    run.step("bad_step", "They averaged 41,897 a game (table: team_season_model).")
+    assert run.report == before
+    assert run.removals[-1]["number"] == "3,309,838" and "required" in run.removals[-1]["reason"], run.removals
+
+
+def test_repeat_may_be_dropped_and_is_logged():
+    run = yankees_run("The Yankees drew 3,309,838 fans at home in 2024 (table: team_season_model). "
+                      "That total, 3,309,838, led the league (table: team_season_model).")
+    run.step("drop_repeated_numbers", "The Yankees drew 3,309,838 fans at home in 2024 (table: team_season_model).")
+    assert run.report.count("3,309,838") == 1
+    assert run.removals == [{"step": "drop_repeated_numbers", "number": "3,309,838", "reason": "repeat: still appears"}]
+
+
+def test_missing_total_is_added_back():
+    run = yankees_run("The Yankees averaged 41,897 fans a game in 2024 (table: team_season_model).")
+    app.clean_report(run, YANKEES_Q)
+    assert "3,309,838" in run.report, run.report
+
+
 if __name__ == "__main__":
     run_tests(globals())

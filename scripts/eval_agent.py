@@ -82,6 +82,7 @@ def check(case: dict, run: app.Research) -> list[str]:
     failures += app.citation_problems(run.cited, run.tool_calls, case["q"])
     failures += uncited_facts(run)
     failures += unit_problems(run.report)
+    failures += [f"required fact lost: {r['number']} ({r['reason']})" for r in run.removals if r["step"] == "final check"]
     failures += [f"says team factors are ruled out: {m[0]}" for m in app.RULED_OUT.finditer(run.report)]
     failures += [f"first person: {m[0]}" for m in app.FIRST_PERSON.finditer(re.sub(r"\([^()]*\)", "", run.report.split("\n\n*")[0]))]
     if app.word_count(run.report) > app.BROAD_WORD_LIMIT + 60:
@@ -110,7 +111,7 @@ async def run_case(case: dict, gate: asyncio.Semaphore) -> dict:
         result = {"id": case["id"], "q": case["q"], "passed": not failures, "failures": failures,
                   "seconds": round(time.time() - start), "researchers": run.researchers,
                   "retries": run.retries, "errors": run.errors, "chart": run.chart, "team_chart": run.team_chart,
-                  "tiles": run.tiles, "box_score": run.box_score, "title": run.title, "repairs": run.repairs, "cited": run.cited,
+                  "tiles": run.tiles, "box_score": run.box_score, "title": run.title, "repairs": run.repairs, "removals": run.removals, "cited": run.cited,
                   "report": run.report, "sources": run.sources, "data_note": run.data_note}
         print(f"{'PASS' if not failures else 'FAIL'} {case['id']} ({result['seconds']}s) {failures}", flush=True)
         return result
