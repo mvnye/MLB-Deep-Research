@@ -167,12 +167,15 @@ def kind(column: str, value) -> str:
     return "number"
 
 
+FILL_FRACTION_MAX = 2.0  # no park fills to 2% of capacity, so a fill this small is a fraction
+
+
 def shown(k: str, value) -> float | None:
     """The value as the reader sees it, rounded, for working out gaps between shown values."""
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return None
     v = abs(value) if k in ("fraction", "percent", "fill_points") or k in ("fans", "viewers", "number") else value
-    if k == "fraction":
+    if k == "fraction" or (k == "fill" and abs(v) <= FILL_FRACTION_MAX):  # attendance / capacity, not yet x100
         return round(v * 100, 1)
     if k in ("percent", "fill", "fill_points"):
         return round(v, 1)

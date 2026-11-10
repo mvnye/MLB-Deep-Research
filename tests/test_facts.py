@@ -39,6 +39,8 @@ def test_formats_by_column():
     assert facts.format_value("yoy_change_pct", -0.4119) == "41.2%"
     assert facts.format_value("fill_pct", 89.94) == "89.9% of capacity"
     assert facts.format_value("avg_fill_pct", 102.7) == "102.7% of listed capacity"
+    assert facts.format_value("fill_rate", 1.027) == "102.7% of listed capacity"
+    assert facts.format_value("fill_rate", 0.956) == "95.6% of capacity"
     assert facts.format_value("coverage_pct", 96) == "96%"
     assert facts.format_value("corr_team_crowd_tv", 0.512) == "0.51"
     assert facts.format_value("win_pct", 0.58, {"record": "94-68"}) == "94-68"
