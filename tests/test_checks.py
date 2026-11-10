@@ -187,5 +187,12 @@ def test_paired_chart_wins_over_a_later_bar():
     assert charts.pick_chart(report, "Compare AL East fill rates in 2025.", [paired, fill], ["games_clean"])["type"] == "bar"
 
 
+def test_parts_must_add_up_to_the_total():
+    bad = "The Cubs had 15 national TV appearances, including 10 single games, 5 Fox window games, and 2 special event games."
+    good = "The Cubs had 15 national TV appearances, including 10 single games and 5 Fox window games."
+    assert "parts_sum" in fired(bad), fired(bad)
+    assert "parts_sum" not in fired(good), fired(good)
+
+
 if __name__ == "__main__":
     run_tests(globals())

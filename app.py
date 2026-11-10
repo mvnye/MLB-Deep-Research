@@ -37,7 +37,9 @@ logger = logging.getLogger(__name__)
 set_tracing_disabled(True)
 
 QUOTA_TRIES = 3
-QUOTA_WAITS = (10, 30)  # seconds before the 2nd and 3rd try: Vertex quotas refill per minute
+# Seconds before the 2nd and 3rd try. The 429s name no project quota: they are Vertex shared capacity
+# for the model being busy, which can last longer than a few seconds.
+QUOTA_WAITS = (20, 60)
 
 
 def is_quota_error(error: Exception) -> bool:
@@ -65,11 +67,12 @@ class QuotaRetryModel(LitellmModel):
 MODEL = QuotaRetryModel(model="vertex_ai/gemini-3.5-flash", api_key="unused")
 # Researchers only query and take notes: the cheaper model is enough.
 RESEARCHER_MODEL = QuotaRetryModel(model="vertex_ai/gemini-3.5-flash-lite", api_key="unused")
-# A stalled model call would hang the page: give up after 90 s, and retry twice.
+# A stalled model call would hang the page: give up after 150 s, and retry once. When shared capacity is
+# busy, a reply can take over 90 s (one took 145 s), and three 90 s timeouts failed the whole answer.
 # vertex_project is set so calls never depend on the machine's default quota project.
 SETTINGS = ModelSettings(extra_args={
     "vertex_location": "global", "vertex_project": "agenticai-509716",
-    "timeout": 90, "num_retries": 2,
+    "timeout": 150, "num_retries": 1,
 })
 
 # Lead and Writer run cooler, so plans and reports vary less between runs.
@@ -1436,7 +1439,10 @@ IN_THE_DATA = re.compile(r"\bin (?:the |this )?(?:\d{4} )?data\b", re.I)
 FILL_GAP_PERCENT = re.compile(r"fill.{0,70}?\b\d+(?:\.\d+)?%(?: higher| lower| more| less)|fill.{0,90}?difference of \d+(?:\.\d+)?%", re.I)
 # Sentence-level checks: a sentence that still fails after the retry is dropped (unless it holds a required fact).
 SENTENCE_CHECKS = ("first_person", "stated_cause", "repeated_numbers", "repeated_point", "untraced",
-                   "derived_seats", "units", "official_total")
+                   "derived_seats", "units", "official_total", "parts_sum")
+# "15 appearances, including 10 single games, 5 window games, and 2 special events": the parts must add up.
+PARTS_OF = re.compile(r"(?<![\d,.])(\d{1,3})(?![\d,.%])[^.;]*?\bincluding\b([^.;]*)", re.I)
+SMALL_COUNT = re.compile(r"(?<![\d,.$])(\d{1,3})(?![\d,.%])")
 
 
 def fixed_patterns(tool_calls: list[dict]) -> list[re.Pattern]:
@@ -1544,6 +1550,12 @@ def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
             wrong = [n for n in re.findall(r"(?<![\d,.])\d{1,3}(?:,\d{3})+(?![\d,]*\.\d)", free) if n in swaps]
             if wrong:
                 add("official_total", i, s, f"{wrong[0]} is a sum of cleaned games, not MLB's official season figure.")
+        whole = PARTS_OF.search(free)
+        if whole:
+            parts = [int(n) for n in SMALL_COUNT.findall(whole[2])]
+            if len(parts) >= 2 and sum(parts) != int(whole[1]):
+                add("parts_sum", i, s, f"The counts after 'including' add up to {sum(parts)}, not {whole[1]}: one of them "
+                                       "is counted separately in the findings, so do not list it as part of the total.")
         if len(IN_THE_DATA.findall(free)) >= 2:
             add("double_in_data", None, s, "Say 'in the data' once in this sentence.")
 

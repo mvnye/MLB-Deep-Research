@@ -185,5 +185,18 @@ def test_finished_sentence_columns_are_not_values():
     assert "{Q1.r1.network_text}" in out and "finished sentence" in run.fact_stats["unresolved"][0], out
 
 
+def test_sentence_phrase_is_never_mid_sentence():
+    out = app.fill_report(make_run(), "The Oakland Athletics have {no_viewership:2024}, but the closest data shows "
+                                      "they averaged {Q1.r1.avg_attendance} (table: team_season_model).")
+    assert out.startswith("There is no 2024 viewership in the data. The closest data shows they averaged 9,713 fans"), out
+    assert "have There" not in out, out
+
+
+def test_unit_after_one_word_is_not_doubled():
+    out = app.fill_report(make_run(), "The Rays drew {Q1.r1.avg_attendance} total fans and {Q1.r2.avg_attendance} home fans.")
+    assert "9,713 total fans" in out and "16,515 home fans" in out and "fans total fans" not in out, out
+    assert "9,713 fans than" in app.fill_report(make_run(), "They drew {Q1.r1.avg_attendance} than before.")  # 'than' is not a unit word
+
+
 if __name__ == "__main__":
     run_tests(globals())

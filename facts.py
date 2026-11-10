@@ -21,7 +21,9 @@ MINUS = re.compile(rf"\{{\s*({REF})\s*-\s*({REF})\s*\}}")  # {A - B} is read as 
 PHRASE = re.compile(r"\{([a-z][a-z0-9_]*)(?::(\d{4}))?\}")
 ANY = re.compile(r"\{[A-Za-z_][^{}\n]{0,80}\}")
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
-UNIT_AFTER = re.compile(r"^\s+(?:(?:more|fewer|less|additional|extra)\s+)?(fans|viewers|people|of capacity|of listed capacity|percentage points?)\b")
+# The unit already follows the ID, maybe after one word: "{ID} more fans", "{ID} total fans", "{ID} home fans".
+UNIT_AFTER = re.compile(r"^\s+(?:(?!(?:than|and|or|of|to|per|a|an|the|in|for|from|at|on|with)\s)[a-z][a-z-]*\s+)?"
+                        r"(fans|viewers|people|of capacity|of listed capacity|percentage points?)\b")
 SHOWN_BEFORE = re.compile(r"(\d[\d,]*(?:\.\d+)?%?)(?:\s+(?:fans|viewers))?\s*$")
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
           "October", "November", "December"]
@@ -288,9 +290,41 @@ class Filled:
         self.computed: list[dict] = []  # each gap or change worked out here, for the tool log
 
 
+SENTENCE_PHRASES = {k for k, (text, _) in PHRASES.items() if text[0].isupper()} | {"team_crowd_tv"}
+LEAD_OK = re.compile(r"^[-*>#\s]*$|[:.!?]\s*$")  # nothing before it, a label such as "TV:", or a finished sentence
+JOINER = re.compile(r"^[\s,;:]*(?:(?:but|and|so|while|although|though|because|as|yet)\b\s*)?", re.I)
+TRAILER = re.compile(r"[\s,;:]*(?:\b(?:but|and|so|while|although|though|because|as|yet)\s*)?$", re.I)
+ONLY_END = re.compile(r"^\s*[.!?]?\s*(?:\(tables?:[^)]*\)\s*)?[.!?]?\s*$")
+
+
+def phrase_alone(sentence: str) -> str:
+    """A ready-made phrase that is a whole sentence ('There is no 2024 viewership in the data') stands
+    alone: never after other words or before more of the sentence. Words before it are kept as their own
+    sentence only if they hold a number ('The Athletics have' is dropped); words after it become the
+    next sentence."""
+    for m in PHRASE.finditer(sentence):
+        if m[1] not in SENTENCE_PHRASES:
+            continue
+        before, after = sentence[:m.start()], sentence[m.end():]
+        lead_ok = bool(LEAD_OK.search(before))
+        end_ok = bool(ONLY_END.match(after) or re.match(r"\s*[.!?]\s+\S", after))
+        if lead_ok and end_ok:
+            continue
+        lead = "" if lead_ok else TRAILER.sub("", before).strip()
+        lead = (lead.rstrip(".") + ". ") if re.search(r"\d", lead) else ("" if not lead_ok else before)
+        if end_ok:
+            tail = after
+        else:
+            rest = JOINER.sub("", after, count=1)
+            tail = ". " + rest[:1].upper() + rest[1:]
+        return phrase_alone(lead + m[0] + tail)
+    return sentence
+
+
 def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tuple[str, list[str]]:
     """Fill one sentence's IDs and phrases. Returns the sentence and the query IDs it used."""
     sentence = re.sub(r"`(" + ANY.pattern + r")`", r"\1", sentence)  # an ID is not code
+    sentence = phrase_alone(sentence)
     used: list[str] = []
     pieces, pos = [], 0
     for m in ANY.finditer(sentence):
