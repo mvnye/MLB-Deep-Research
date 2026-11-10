@@ -78,7 +78,7 @@ The 1,126,444 average covers the 9 single games with a known audience, not all 1
 
 The baseline gives no 2025 figures, and its 2024 figures are close to but not the official ones (Cubs 2,909,794 and 35,923; White Sox 1,380,733 and 17,932).
 
-## When the agent can't answer
+## Questions the agent can't answer
 
 **Vague questions** get one clarifying question. "Who is doing the best?" gets: "Are you asking about MLB attendance or TV viewership, and for which season?" (`samples/chat_responses/vague.json`)
 
