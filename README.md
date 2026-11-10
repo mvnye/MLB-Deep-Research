@@ -69,19 +69,11 @@ The baseline gives no 2025 figures, and its 2024 figures are close to but not th
 
 ## When the agent can't answer
 
-**Vague questions get one clarifying question.** Asked "Who is doing the best?", the agent does no research and replies (`samples/chat_responses/vague.json`, `"clarify": true`, no tool calls):
+**Vague questions** get one clarifying question. "Who is doing the best?" gets: "Are you asking about MLB attendance or TV viewership, and for which season?" (`samples/chat_responses/vague.json`)
 
-> Are you asking about MLB attendance or TV viewership, and for which season?
+**Questions outside the data** get a no-data answer and the closest data. National TV viewership covers only 2025 and 2026, so "How did the Oakland A's viewership change in their final season before moving?" gets "There is no 2024 viewership in the data," followed by the A's 2024 attendance (`samples/chat_responses/athletics_viewership.json`).
 
-**Questions outside the data get a no-data answer and the closest data.** The A's last season in Oakland was 2024, and national TV viewership covers only 2025 and 2026. Asked "How did the Oakland A's viewership change in their final season before moving?", the agent states the limit and gives the closest data, attendance (`samples/chat_responses/athletics_viewership.json`):
-
-> There is no 2024 viewership in the data[1]. The Oakland A's averaged 11,529 fans a game and drew 922,286 total fans in 2024, filling 21.1%[2][3]. In 2025, their total home attendance fell by 16.7% to 768,464 fans, and their average attendance fell by 17.7% to 9,487 fans a game, though they filled 70.7% in their new home[2][4]. For national TV exposure, the A's had 0 appearances in the data in 2025[5].
-
-Asking about attendance instead, "How did the Oakland A's attendance do in 2024?", gives a full answer (`samples/chat_responses/athletics_attendance.json`):
-
-> The Oakland A's averaged 11,529 fans a game in 2024, which was 6.1% below the 12,272 fans predicted by their prior crowds, win rate, and market size, though still up 12.2% from the previous season[1]. Total home attendance reached 922,286 fans as the team went 69-93 on the year[2][1]. Oakland's home games drew 21.1% of capacity on average[3].
-
-The agent also says so for postseason games, seasons outside 2024 to 2026, local RSN viewership, Peacock-only games, late-September 2025 games, and a game in a multi-game Fox window (it gives the window total and the game's coverage instead).
+The agent also flags postseason games, seasons outside 2024 to 2026, local RSN viewership, Peacock-only games, late-September 2025 games, and single games inside a multi-game Fox window.
 
 ## The /chat endpoint
 
