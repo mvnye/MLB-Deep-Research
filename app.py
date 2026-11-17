@@ -1465,7 +1465,9 @@ IN_THE_DATA = re.compile(r"\bin (?:the |this )?(?:\d{4} )?data\b", re.I)
 FILL_GAP_PERCENT = re.compile(r"fill.{0,70}?\b\d+(?:\.\d+)?%(?: higher| lower| more| less)|fill.{0,90}?difference of \d+(?:\.\d+)?%", re.I)
 # Sentence-level checks: a sentence that still fails after the retry is dropped (unless it holds a required fact).
 SENTENCE_CHECKS = ("first_person", "stated_cause", "repeated_numbers", "repeated_point", "untraced",
-                   "derived_seats", "units", "official_total", "parts_sum")
+                   "derived_seats", "units", "official_total", "parts_sum", "internal_id")
+# "The Detroit Tigers (ID: 116)": a database key copied from the findings.
+INTERNAL_ID = re.compile(r"\b(?:team[ _]id|game[ _]?pk|venue[ _]id|ID)\b\s*(?:#|:|=|no\.?)?\s*\d+")
 # "15 appearances, including 10 single games, 5 window games, and 2 special events": the parts must add up.
 PARTS_OF = re.compile(r"(?<![\d,.])(\d{1,3})(?![\d,.%])[^.;]*?\bincluding\b([^.;]*)", re.I)
 SMALL_COUNT = re.compile(r"(?<![\d,.$])(\d{1,3})(?![\d,.%])")
@@ -1568,6 +1570,8 @@ def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
         reason = unsourced_reason(s, read, sources, calls)
         if reason:
             add("untraced", i, s, reason)
+        if INTERNAL_ID.search(free):
+            add("internal_id", i, s, f"Remove '{INTERNAL_ID.search(free)[0]}': a database ID means nothing to a reader. Name the team or game only.")
         if derived_seats(free):
             add("derived_seats", i, s, "A park holds tens of thousands: remove the season seat total and compare capacities.")
         if not re.search(r"\b(?:expected|predict|model)", free, re.I) and FILL_GAP_PERCENT.search(free):
@@ -1782,21 +1786,54 @@ def phrase_for(run: Research):
     return text
 
 
+TEAM_COLUMN = re.compile(r"(?:^|_)team(?:_name)?$|^(?:name|club)$")
+
+
+def row_teams(cells: dict) -> set[str]:
+    """The teams a result row is about, from its team-name columns (a game row has two)."""
+    return {t for c, v in cells.items() if TEAM_COLUMN.search(c) and isinstance(v, str)
+            for t in teams_named(v).values()}
+
+
+def wrong_row_check(book: facts.FactBook, subject: set[str]):
+    """A fact must come from the row of a team the sentence is about. A researcher citing row 1, 2, 3
+    of an unsorted 30-team result gave the Tigers the Blue Jays' fill rate."""
+    def check(qid: str, row: int, column: str, cells: dict) -> str | None:
+        teams = row_teams(cells)
+        if not subject or not teams or teams & subject:
+            return None
+        about = " and ".join(sorted(subject))
+        token = f"{{{qid}.r{row}.{column}}}"
+        result = book.results[qid]
+        names = [c.lower() for c in result["columns"]]
+        right = next(((r, row_teams(dict(zip(names, values))) & subject) for r, values in enumerate(result["rows"], 1)
+                      if row_teams(dict(zip(names, values))) & subject), None)
+        fix = (f"use {{{qid}.r{right[0]}.{column}}}, the {' and '.join(sorted(right[1]))} row" if right
+               else f"{qid} has no {about} row: use another fact or remove the number")
+        return f"{token} is the {' and '.join(sorted(teams))} row, but the sentence is about the {about}: {fix}."
+    return check
+
+
 def fill_report(run: Research, text: str) -> str:
     """Fill the Writer's fact IDs and phrases with values code formats, and name each sentence's
-    exact queries in its citation. Unknown IDs stay in braces, for the checks to report."""
+    exact queries in its citation. Unknown IDs stay in braces, for the checks to report. A fact from
+    another team's row than the sentence (or its section heading) names also stays in braces."""
     book = facts.FactBook(run.tool_calls)
     out = facts.Filled()
     raw = facts.raw_numbers(text)
     known = list(data_tools.TABLE_DOCS)
     phrase = phrase_for(run)
-    lines = []
+    lines, section = [], set()
     for line in text.split("\n"):
+        if line.lstrip().startswith("#"):
+            section = set(teams_in(line).values())
         parts = []
         for sentence in sentences(line):
-            filled, used = facts.fill_sentence(sentence, book, phrase, out)
+            subject = set(teams_in(sentence).values()) or section
+            filled, used = facts.fill_sentence(sentence, book, phrase, out, wrong_row_check(book, subject))
             parts.append(facts.cite(filled, used, book, known))
         lines.append(" ".join(parts))
+    run.fact_stats["wrong_rows"] = out.wrong_rows  # this draft's only: the retry fixes these
     # A gap or change worked out from two facts is logged, so the checks find its number in a tool result.
     for c in out.computed:
         run.tool_calls.append({"name": "compute_fact", "args": {"op": c["op"], "facts": c["facts"]},
@@ -1857,8 +1894,11 @@ async def deep_research(run: Research, may_clarify: bool = True, history: str = 
     checks = check_report(run, asked)
     listed = {p["message"] for p in checks if p["check"] == "untraced"} | {
         "A park holds tens of thousands: remove the season seat total and compare capacities."}
-    problems = list(dict.fromkeys(citation_problems(run.report, run.tool_calls, asked)
-                                  + [problem_text(p) for p in checks if p["message"] not in listed]))
+    wrong_rows = run.fact_stats.get("wrong_rows", [])
+    problems = list(dict.fromkeys(wrong_rows + [
+        p for p in citation_problems(run.report, run.tool_calls, asked) + [
+            problem_text(p) for p in checks if p["message"] not in listed]
+        if not any(w.split(" ", 1)[0] in p for w in wrong_rows)]))  # one message per wrong fact
     if problems:
         fix = (f"{prompt}\n\nYour draft:\n\n{run.report}\n\nRewrite the draft to fix these problems, and keep "
                "everything else as it is. Correct a number from the findings, or remove the fact. You may use "

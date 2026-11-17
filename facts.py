@@ -77,6 +77,12 @@ def add_query_id(run, result: str) -> str:
     return json.dumps({"query_id": qid, "cite_as": f"{{{qid}.r<row from 1>.<column>}}", **data}, default=str)
 
 
+def is_id_column(column: str) -> bool:
+    """team_id, game_pk, window_id: database keys a reader never needs."""
+    c = column.lower()
+    return c in ("id", "game_pk") or c.endswith("_id")
+
+
 class FactBook:
     """The run's query results by ID, for looking up and formatting facts."""
 
@@ -106,6 +112,8 @@ class FactBook:
         names = {c.lower(): i for i, c in enumerate(result["columns"])}
         if column.lower() not in names:
             return f"{qid} has no column {column}; its columns are {', '.join(result['columns'])}"
+        if is_id_column(column):
+            return f"{column} is an internal ID, not for the answer: name the team or game instead"
         if column.lower().endswith("_text"):
             return (f"{column} is a finished sentence, not a value: copy that sentence word for word as its own "
                     "sentence, or use the number columns")
@@ -288,6 +296,7 @@ class Filled:
         self.unresolved: list[str] = []
         self.queries: list[str] = []  # the query IDs used, in order
         self.computed: list[dict] = []  # each gap or change worked out here, for the tool log
+        self.wrong_rows: list[str] = []  # facts from another team's row than the sentence is about
 
 
 SENTENCE_PHRASES = {k for k, (text, _) in PHRASES.items() if text[0].isupper()} | {"team_crowd_tv"}
@@ -321,8 +330,11 @@ def phrase_alone(sentence: str) -> str:
     return sentence
 
 
-def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tuple[str, list[str]]:
-    """Fill one sentence's IDs and phrases. Returns the sentence and the query IDs it used."""
+def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled,
+                  row_check=None) -> tuple[str, list[str]]:
+    """Fill one sentence's IDs and phrases. Returns the sentence and the query IDs it used.
+    row_check(qid, row, column, cells) returns why a fact's row does not fit this sentence, or None;
+    such a fact stays unfilled, for the Writer to fix."""
     sentence = re.sub(r"`(" + ANY.pattern + r")`", r"\1", sentence)  # an ID is not code
     sentence = phrase_alone(sentence)
     used: list[str] = []
@@ -332,8 +344,12 @@ def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled) -> tu
         value = None
         if fm := FACT.fullmatch(token):
             found = book.lookup(fm[1], int(fm[2]), fm[3])
+            wrong = None if isinstance(found, str) or not row_check else row_check(fm[1], int(fm[2]), fm[3], found[2])
             if isinstance(found, str):
                 out.unresolved.append(f"{token}: {found}")
+            elif wrong:
+                out.unresolved.append(wrong)
+                out.wrong_rows.append(wrong)
             else:
                 value = format_value(found[1], found[0], found[2])
                 used.append(fm[1])
@@ -418,6 +434,8 @@ def tag_findings(findings: str, tool_calls: list[dict], agent: str) -> str:
     for qid, result in book.results.items():
         for r, row in enumerate(result["rows"], 1):
             for column, value in zip(result["columns"], row):
+                if is_id_column(column):
+                    continue  # never tag a number as a database key
                 for v in _cell_numbers(value):
                     cells.append((abs(v), f"{{{qid}.r{r}.{column}}}"))
 
