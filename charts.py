@@ -186,7 +186,7 @@ def expected_pairs(rows: list[list], source: list[str]) -> dict | None:
     rows = [r for r in rows if r[1] is not None and r[2] is not None]
     if len(rows) < 2:
         return None
-    rows = sorted(rows, key=lambda r: r[2] - r[1])  # the team furthest above its expected crowd first
+    rows = sorted(rows, key=lambda r: -(r[1] - r[2]) / r[2])  # furthest above expected, in percent, first
     return build("paired", ["team", "avg_attendance", "expected_avg_attendance"], rows, 0, [1, 2], source)
 
 
