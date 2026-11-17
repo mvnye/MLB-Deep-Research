@@ -62,28 +62,19 @@ The 1,126,444 average covers the 9 single games with a known audience, not all 1
 
 The baseline gives no 2025 figures, and its 2024 figures are close to but not the official ones (Cubs 2,909,794 and 35,923; White Sox 1,380,733 and 17,932).
 
-### 3. Which teams outdrew their expected attendance the most in 2025, and what was behind it?
+### 3. Which three teams outdrew their expected attendance the most in 2025?
 
-**Expected answer:** The Detroit Tigers (29,796 fans a game, 21.9% above the 24,433 the model predicts), New York Mets (39,316, 21.4% above 32,383) and Colorado Rockies (30,058, 17.4% above 25,611). Context from Wikipedia: the Tigers reached the postseason again, the Mets signed Juan Soto, and the Rockies drew above expectations despite going 43-119. These events coincided with the crowds; the data does not show that they caused them.
+**Expected answer:** The Detroit Tigers (29,796 fans a game, 21.9% above the 24,433 the model predicts), New York Mets (39,316, 21.4% above 32,383) and Colorado Rockies (30,058, 17.4% above 25,611). The answer may add context from Wikipedia, such as the Tigers reaching the postseason, the Mets signing Juan Soto, or the Rockies going 43-119. These events coincided with the crowds; the data does not show that they caused them.
 
-**Source:** `team_season_model` (`SELECT home_team, avg_attendance, expected_avg_attendance, residual_pct, record FROM team_season_model WHERE season = 2025 ORDER BY residual_pct DESC`), and the Wikipedia articles [2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season), [2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season) and [2025 Colorado Rockies season](https://en.wikipedia.org/wiki/2025_Colorado_Rockies_season).
+**Source:** `team_season_model` (`SELECT home_team, avg_attendance, expected_avg_attendance, residual_pct, record FROM team_season_model WHERE season = 2025 ORDER BY residual_pct DESC LIMIT 3`), fill rates from `games_clean`, and the Wikipedia articles [2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season), [2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season) and [2025 Colorado Rockies season](https://en.wikipedia.org/wiki/2025_Colorado_Rockies_season).
 
 **Agent answer:**
 
-> The Detroit Tigers, New York Mets, and Colorado Rockies outdrew their expected 2025 attendance the most, coinciding with postseason runs, major roster additions, and resilient fanbases[1].
->
-> ### Detroit Tigers
-> The Detroit Tigers averaged 29,796 fans a game in 2025, which was 21.9% above what the prior two years of crowds, win rate, and market would predict, representing a 25.1% increase from the season before[2][1]. Comerica Park drew 72.5% of capacity[2]. On the field, the Tigers went 87-75, secured a postseason berth for the second consecutive season, and reached the American League Division Series[3]. Prior to the season, they signed pitchers Alex Cobb, Tommy Kahnle, Jack Flaherty, and John Brebbia, along with infielder Gleyber Torres[3].
->
-> ### New York Mets
-> The New York Mets averaged 39,316 fans a game, which was 21.4% above what the prior two years of crowds, win rate, and market would predict, a 33.3% increase from the season before, and part of this may be a rebound[2][1]. Citi Field drew 94.9% of capacity[2]. The Mets finished 83-79 after signing outfielder Juan Soto to a 15-year, $765 million contract, adding starting pitchers Frankie Montas and Griffin Canning, and re-signing Sean Manaea[4]. They also retired David Wright's number 5 on July 19, 2025[4].
->
-> ### Colorado Rockies
-> The Colorado Rockies averaged 30,058 fans a game, which was 17.4% above what the prior two years of crowds, win rate, and market would predict, despite a 4.2% decline from the season before[2][1]. Coors Field drew 59.7% of capacity[2]. The Rockies endured a historic 43-119 season, setting a franchise record for losses, and fired manager Bud Black on May 11[5]. They also played their first season since 2010 without retired outfielder Charlie Blackmon[5].
+> The Detroit Tigers, New York Mets, and Colorado Rockies topped Major League Baseball by outdrawing their expected 2025 home attendance by 21.9%, 21.4%, and 17.4% respectively[1]. The Tigers averaged 29,796 fans per game, which was 5,363 fans above their expected 24,433 fans average and drew 72.5% of capacity[1]. This surge coincided with Detroit securing a postseason berth for the second consecutive season[2]. The Mets drew 39,316 fans a game, outperforming expectations by 6,933 fans against an expected 32,383 fans average while drawing 94.9% of capacity[1]. New York's strong turnout coincided with signing marquee outfielder Juan Soto to a 15-year contract[3]. The Rockies averaged 30,058 fans, which was 4,447 fans above their expected 25,611 fans average and drew 59.7% of capacity[1]. This high attendance occurred even though Colorado suffered a franchise-worst 119-loss season[4].
 
 **No-tools baseline:**
 
-> I do not have access to complete or real-time attendance data for 2025, as it extends beyond my knowledge cutoff of January 2025. Consequently, I cannot provide information on which teams outdrew their expected attendance for this year or the factors behind those trends.
+> I do not have access to real-time data or completed statistics for the 2025 sports seasons. Because of this, I cannot provide information on which teams outdrew their expected attendance for 2025.
 
 ## Questions the agent can't answer
 
