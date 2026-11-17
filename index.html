@@ -573,6 +573,15 @@
                         if (wide) el("text", v < 0 ? { x: left - 5, y: center + 4, "text-anchor": "end" } : { x: left + width + 5, y: center + 4 }, svg, `${v > 0 ? "+" : ""}${v.toFixed(1)}%`);
                         else if (!pair) el("text", { x: left + width + 5, y: center + 4 }, svg, short(v) + (c.unit === "%" ? "%" : ""));
                     });
+                    // Actual vs expected: label each team with how far actual was above or below expected,
+                    // worked out from the two bars shown, so the order of the bars is explained on the chart.
+                    if (pair && c.type === "paired" && c.series[0].name === "Actual" && c.series[1].name === "Expected") {
+                        const a = c.series[0].values[i], e = c.series[1].values[i];
+                        if (a != null && e) {
+                            const pct = ((a - e) / e) * 100;
+                            el("text", { x: x(Math.max(a, e, 0)) + 6, y: center + 4, class: "pct" }, svg, `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`);
+                        }
+                    }
                 });
                 axisTitles(svg, c.x_label, c.y_label, W, H, false);
             }
