@@ -166,6 +166,30 @@ def build(kind: str, columns: list[str], rows: list[list], label: int, measures:
     }
 
 
+TEAM_COLUMN = re.compile(r"(^|_)team$|^team(_name)?$", re.I)
+
+
+def duplicate_team_rows(columns: list[str], rows: list[list], measures: list[int]) -> bool:
+    """A team that appears in two rows with the same values: the rows repeat, they do not split."""
+    for t in [i for i, c in enumerate(columns) if TEAM_COLUMN.search(c)]:
+        seen: dict[str, tuple] = {}
+        for r in rows:
+            values = tuple(r[m] for m in measures)
+            if str(r[t]) in seen and seen[str(r[t])] == values:
+                return True
+            seen[str(r[t])] = values
+    return False
+
+
+def expected_pairs(rows: list[list], source: list[str]) -> dict | None:
+    """Actual vs expected average attendance, one bar pair per team: rows are (team, actual, expected)."""
+    rows = [r for r in rows if r[1] is not None and r[2] is not None]
+    if len(rows) < 2:
+        return None
+    rows = sorted(rows, key=lambda r: r[2] - r[1])  # the team furthest above its expected crowd first
+    return build("paired", ["team", "avg_attendance", "expected_avg_attendance"], rows, 0, [1, 2], source)
+
+
 def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wants_expected: bool = True) -> dict | None:
     if not MIN_PAIRED_ITEMS <= len(rows) <= MAX_ITEMS:
         return None
@@ -174,6 +198,8 @@ def chart_from_rows(columns: list[str], rows: list[list], source: list[str], wan
     if any(re.search(r"(^|_)date$", c, re.I) for c in columns):
         return None  # one row per game: a box score shows these, not a chart
     labels, measures = split_columns(columns, rows)
+    if duplicate_team_rows(columns, rows, measures):
+        return None  # a join (such as to team_aliases) repeated each team: the bars would repeat too
     lines = season_lines(columns, rows, labels, measures, source)
     if lines:
         return lines

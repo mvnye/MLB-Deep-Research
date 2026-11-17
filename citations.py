@@ -7,8 +7,10 @@ sentences. A citation to a table or article the run did not use gets no number.
 
 import json
 import re
+from urllib.parse import unquote
 
-CITATION = re.compile(r"\s*\((?=\s*(?:\[|tables?:))(?:[^()]|\([^()]*\))*\)")
+CITATION = re.compile(r"\s*\((?=\s*(?:\[|tables?:|sources?:|wikipedia:))(?:[^()]|\([^()]*\))*\)", re.I)
+LINK_OR_TITLE = re.compile(r"\[([^\]]+)\](?:\((https?://[^)\s]+)\))?")
 LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 TABLE_LIST = re.compile(r"tables?:\s*([\w, ]+)")  # 'table: a; table: b' gives one match each
 QUERY_IDS = re.compile(r"query:\s*(Q\d+(?:\s*,\s*Q\d+)*)")  # the exact queries behind filled facts
@@ -78,6 +80,7 @@ class Footnotes:
     def __init__(self, tool_calls: list[dict], read_urls: set[str], known_tables: list[str]):
         self.calls = query_calls(tool_calls)
         self.read_urls = read_urls
+        self.articles = read_articles(tool_calls)
         self.known = known_tables
         self.index: dict[str, int] = {}
         self.sources: list[dict] = []
@@ -96,6 +99,14 @@ class Footnotes:
                     "columns": columns, "rows": rows}
         return self.number("q:" + call["args"]["query"], make)
 
+    def article(self, title: str, url: str | None) -> int | None:
+        """The footnote for an article the run read, matched by its url or, failing that, its title."""
+        key = url and unquote(url).split("#")[0]
+        if key and key in self.read_urls:
+            return self.for_article(title, key)
+        found = self.articles.get(article_key(title)) or (key and self.articles.get(article_key(key.rsplit("/", 1)[-1])))
+        return self.for_article(*found) if found else None
+
     def for_article(self, title: str, url: str) -> int:
         return self.number("a:" + url, lambda: {"kind": "article", "title": title, "url": url})
 
@@ -110,9 +121,10 @@ class Footnotes:
 
     def citation_markers(self, citation: str, numbers: set[str]) -> list[int]:
         found = []
-        for title, url in LINK.findall(citation):
-            if url.split("#")[0] in self.read_urls:
-                found.append(self.for_article(title, url))
+        for title, url in LINK_OR_TITLE.findall(citation):
+            n = self.article(title, url or None)
+            if n:
+                found.append(n)
         exact = [call for group in QUERY_IDS.findall(citation) for q in re.split(r"\s*,\s*", group)
                  if (call := self.by_id(q))]
         if exact:  # the facts name their queries: no guessing from the numbers
@@ -123,6 +135,48 @@ class Footnotes:
                 if call:
                     found.append(self.for_query(call, numbers))
         return found
+
+
+def article_key(title: str) -> str:
+    return re.sub(r"[\s_]+", " ", unquote(title)).strip().lower()
+
+
+def was_read(url: str, read_urls: set[str]) -> bool:
+    """A link the run read, allowing for encoding, underscores and a #section."""
+    key = article_key(unquote(url).split("#")[0].rsplit("/", 1)[-1])
+    return unquote(url).split("#")[0] in read_urls or any(article_key(u.rsplit("/", 1)[-1]) == key for u in read_urls)
+
+
+def read_articles(tool_calls: list[dict]) -> dict[str, tuple[str, str]]:
+    """Each article read_wikipedia returned: title key -> (title, url)."""
+    found = {}
+    for call in tool_calls:
+        if call["name"] != "read_wikipedia":
+            continue
+        try:
+            result = json.loads(call["result"])
+        except ValueError:
+            continue
+        if isinstance(result, dict) and result.get("url") and result.get("title"):
+            found[article_key(result["title"])] = (result["title"], unquote(result["url"]))
+    return found
+
+
+def outside_refs(text: str, notes: "Footnotes") -> tuple[str, list[int]]:
+    """An article named outside a citation, as '[Title](url)' or '[Title]', becomes a footnote. At the end
+    of the sentence the reference goes; inside it, its title stays as words."""
+    markers = []
+
+    def swap(m: re.Match) -> str:
+        n = notes.article(m[1], m[2])
+        if n:
+            markers.append(n)
+        at_end = not re.search(r"[A-Za-z0-9]", text[m.end():])
+        return "" if at_end and (n or not m[2]) else m[1]
+
+    text = LINK_OR_TITLE.sub(swap, text)
+    text = re.sub(r"\s+([.!?,;])", r"\1", text).rstrip()
+    return text, markers
 
 
 def place(sentence: str, markers: list[int]) -> str:
@@ -148,7 +202,8 @@ def apply(report: str, tool_calls: list[dict], read_urls: set[str], known_tables
             markers = [m for c in cited for m in notes.citation_markers(c[0], numbers)]
             if cited and not markers:
                 continue  # its only citations were to sources this run never used
-            text = LINK.sub(lambda m: m[1], CITATION.sub("", sentence))
+            text, refs = outside_refs(CITATION.sub("", sentence), notes)
+            markers += refs
             if not markers and numbers:  # an uncited fact still gets the query that holds its numbers
                 call = best_query(notes.calls, None, numbers)
                 if call:

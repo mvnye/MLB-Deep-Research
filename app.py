@@ -833,6 +833,29 @@ def key_tiles(text: str, question: str, team: tuple[int, str] | None, years: set
     return scoreboard.sentence_tiles(sentences(text.strip().split("\n")[0])[0])[:scoreboard.MAX_TILES]
 
 
+def teams_in(text: str) -> dict[int, str]:
+    """The teams a text names, by any alias of 4+ letters (so 'sea' and 'min' do not count)."""
+    return teams_named(citations.CITATION.sub("", text))
+
+
+def expected_chart(run: Research, asked: str) -> dict | None:
+    """Actual vs expected attendance for the season asked and every team in the answer, one pair each.
+    Queried here, from team_season_model, so a researcher's joined or lagged rows never shape it."""
+    years = sorted({int(y) for y in re.findall(r"\b(20\d\d)\b", asked)} & set(ALL_SEASONS))
+    teams = teams_in(run.report)
+    if len(years) != 1 or len(teams) < 2:
+        return None
+    query = (f"select home_team as team, avg_attendance, expected_avg_attendance from team_season_model "
+             f"where season = {years[0]} and team_id in ({', '.join(str(t) for t in sorted(teams))})")
+    result = data_tools.run_sql(query)
+    run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "result": result, "agent": "Required facts check"})
+    rows = json.loads(result).get("rows") or []
+    chart = charts.expected_pairs(rows, ["team_season_model"])
+    if chart:
+        chart["title"] += f", {years[0]}"
+    return chart
+
+
 def add_charts(run: Research, asked: str, answered: dict | None) -> None:
     """Choose this answer's charts. A team compared across seasons gets one line per season, using
     the researcher's rows, or a query made here if the researcher did not pull them."""
@@ -852,6 +875,9 @@ def add_charts(run: Research, asked: str, answered: dict | None) -> None:
             run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "result": data_tools.run_sql(query),
                                    "agent": "Required facts check"})
             run.chart = charts.monthly_chart(run.tool_calls, tables, wanted, "viewers" if tv_seasons else "attendance")
+    pairs = expected_chart(run, asked) if charts.EXPECTED_QUESTION.search(asked) and not seasons else None
+    if pairs:
+        run.chart = pairs
     if DRIVER_QUESTION.search(asked):
         query, rows = data_tools.game_drivers()
         run.tool_calls.append({"name": "run_sql", "args": {"query": query}, "agent": "Required facts check",
@@ -1413,7 +1439,7 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
     queried = tables_queried(tool_calls)
     problems = []
     for url in re.findall(r"https?://[^\s)\]>]+", report):
-        if unquote(url).split("#")[0] not in read:
+        if not citations.was_read(url, read):
             problems.append(f"The link {url} was not read in this research.")
     for group in re.findall(r"\(tables?: ([^)]+)\)", report):
         for table in re.split(r"[,;]\s*(?:tables?:\s*)?", group.strip()):
@@ -1484,7 +1510,7 @@ def each_sentence(report: str):
 def unsourced_reason(sentence: str, read: set[str], sources: list[float], tool_calls: list[dict]) -> str | None:
     """Why a sentence has no source, or None: an unread link, a number no tool returned, an unfilled ID."""
     links = [unquote(u).split("#")[0] for u in re.findall(r"https?://[^\s)\]>]+", sentence)]
-    if any(u not in read for u in links):
+    if any(not citations.was_read(u, read) for u in links):
         return "It cites a link that was not read."
     bad = unverified_numbers(sentence, tool_calls, sources)
     if bad:
@@ -1869,6 +1895,8 @@ follow-up, use the conversation so far to name what it is about: after a questio
 attendance, "What about TV?" becomes "Yankees national TV audience, 2025 vs 2026". Name only seasons
 the data has: attendance covers 2024 to 2026, and national TV audiences cover 2025 and 2026 only.
 Never reuse a title already used in this conversation: make it say what is different.
+When the answer covers three or more teams, do not name some of them: name the group or topic, such
+as "Teams above expected attendance, 2025".
 Reply with the title only, with no quotation marks and no ending period.""",
     model=RESEARCHER_MODEL,
     model_settings=SETTINGS,
@@ -1878,18 +1906,45 @@ MAX_TITLE_CHARS = 80
 TITLE_ANSWER_CHARS = 700
 
 
+MAX_TITLE_TEAMS = 2  # past this, a title names the group, not each team
+
+
+def title_misses_teams(title: str, covered: list[str]) -> str:
+    """Why a title does not cover the answer's teams, or ''. Naming some of three or more teams leaves the
+    rest out; naming one of two does too."""
+    named = set(teams_in(title).values())
+    if not named or not covered:
+        return ""
+    if len(covered) > MAX_TITLE_TEAMS:
+        return "name the group or topic (such as 'Teams above expected attendance, 2025'), not some of the teams."
+    missing = [t for t in covered if t not in named]
+    return f"also name {', '.join(missing)}." if missing else ""
+
+
 async def make_title(question: str, history: str, answer: str = "", used: tuple[str, ...] = ()) -> str:
     """A short title from the answer, never one already used, or the question if the model fails."""
     prompt = (f"Conversation so far:\n{history}\n\n" if history else "") + f"Question: {question}"
     if answer:
         prompt += f"\n\nAnswer:\n{citations.CITATION.sub('', answer)[:TITLE_ANSWER_CHARS]}"
+    # A question about one team keeps its title on that team, even when the answer names opponents.
+    covered = list(teams_in(answer).values()) if answer and len(teams_named(question)) != 1 else []
+    if len(covered) >= 2:  # the excerpt above may stop before some of them
+        prompt += f"\n\nThe whole answer covers these teams: {', '.join(covered)}."
     if used:
         prompt += "\n\nTitles already used: " + "; ".join(used)
-    try:
-        result = await asyncio.wait_for(Runner.run(titler, prompt), TITLE_SECONDS)
-        title = str(result.final_output).strip().strip('"').rstrip(".").replace("—", ", ").split("\n")[0]
-    except Exception:
-        logger.exception("Title failed for %r", question)
+    title = ""
+    for _ in range(2):  # one more try if the title names only some of the teams
+        try:
+            result = await asyncio.wait_for(Runner.run(titler, prompt), TITLE_SECONDS)
+            title = str(result.final_output).strip().strip('"').rstrip(".").replace("—", ", ").split("\n")[0]
+        except Exception:
+            logger.exception("Title failed for %r", question)
+            title = ""
+        partial = title_misses_teams(title, covered)
+        if not partial:
+            break
+        prompt += f"\n\nThe title '{title}' names only some of the teams: {partial}"
+    else:
         title = ""
     title = title if 0 < len(title) <= MAX_TITLE_CHARS else question
     n = 2
