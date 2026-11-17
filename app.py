@@ -1458,7 +1458,8 @@ def citation_problems(report: str, tool_calls: list[dict], question: str = "") -
 
 # --- Checks: detect only. They never change the text: the Writer retries, then a failing sentence goes ---
 
-CAUSE_WORDS = re.compile(r"\b(?:driv(?:e|es|ing|en)|drove|caus(?:e|es|ed|ing)|because|due to|thanks to)\b", re.I)
+CAUSE_WORDS = re.compile(r"\b(?:driv(?:e|es|ing|en)|drove|caus(?:e|es|ed|ing)|because|due to|thanks to|"
+                         r"prov(?:e|es|ed|en|ing)|fuel(?:s|ed|led|ing)?|le(?:d|ads?) to)\b", re.I)
 TOPIC_WORDS = re.compile(rf"{ATTENDANCE_WORDS.pattern}|{VIEWERSHIP_WORDS.pattern}", re.I)
 DATA_REASON = re.compile(r"\b(?:because|due to|since)\b[^.;]*?\b(?:data|source|tables?|figures?|reported|Nielsen)\b[^.;]*", re.I)
 IN_THE_DATA = re.compile(r"\bin (?:the |this )?(?:\d{4} )?data\b", re.I)

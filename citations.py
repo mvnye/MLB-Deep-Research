@@ -10,6 +10,8 @@ import re
 from urllib.parse import unquote
 
 CITATION = re.compile(r"\s*\((?=\s*(?:\[|tables?:|sources?:|wikipedia:))(?:[^()]|\([^()]*\))*\)", re.I)
+# "(21.9% above expectations; table: team_season_model)": words, then a citation, in one parenthesis.
+INLINE = re.compile(r"\((?!\s*(?:\[|tables?:|sources?:|wikipedia:))([^()]*?[^\s;,])\s*[;,]\s*((?:tables?|sources?|wikipedia):[^()]*)\)", re.I)
 LINK_OR_TITLE = re.compile(r"\[([^\]]+)\](?:\((https?://[^)\s]+)\))?")
 LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
 TABLE_LIST = re.compile(r"tables?:\s*([\w, ]+)")  # 'table: a; table: b' gives one match each
@@ -197,6 +199,7 @@ def apply(report: str, tool_calls: list[dict], read_urls: set[str], known_tables
             continue
         parts: list[tuple[str, list[int]]] = []
         for sentence in split_sentences(line):
+            sentence = INLINE.sub(r"(\1) (\2)", sentence)  # the citation part becomes its own, for a footnote
             numbers = numbers_in(CITATION.sub("", sentence))
             cited = list(CITATION.finditer(sentence))
             markers = [m for c in cited for m in notes.citation_markers(c[0], numbers)]
