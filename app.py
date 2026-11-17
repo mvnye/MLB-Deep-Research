@@ -1466,7 +1466,17 @@ IN_THE_DATA = re.compile(r"\bin (?:the |this )?(?:\d{4} )?data\b", re.I)
 FILL_GAP_PERCENT = re.compile(r"fill.{0,70}?\b\d+(?:\.\d+)?%(?: higher| lower| more| less)|fill.{0,90}?difference of \d+(?:\.\d+)?%", re.I)
 # Sentence-level checks: a sentence that still fails after the retry is dropped (unless it holds a required fact).
 SENTENCE_CHECKS = ("first_person", "stated_cause", "repeated_numbers", "repeated_point", "untraced",
-                   "derived_seats", "units", "official_total", "parts_sum", "internal_id")
+                   "derived_seats", "units", "official_total", "parts_sum", "internal_id", "down_year",
+                   "no_explanation")
+# "the Rockies' surge" for a team whose attendance fell: the gap from expected is not a rise.
+RISE_WORDS = re.compile(r"\b(?:surg(?:e|es|ed|ing)|jump(?:s|ed)?|soar(?:s|ed|ing)?|boom(?:s|ed|ing)?|spik(?:e|es|ed)|"
+                        r"climb(?:s|ed)?|rose|grew|growth|increas(?:e|es|ed))\b", re.I)
+# "Wikipedia offered no explanation": a source that was read and cited is not empty.
+NO_EXPLANATION = re.compile(r"\b(?:offer(?:s|ed)?|gives?|gave|provides?|provided|records?|recorded|has|had|contains?|lists?)"
+                            r"\s+no\s+(?:specific\s+|clear\s+|public\s+)?(?:explanations?|reasons?|events?|information|details?)"
+                            r"|\b(?:does|did)(?:n't| not)\s+(?:explain|record|mention|give|say|list)"
+                            r"|\bno public information\b|\bnot explain(?:ed)?\b", re.I)
+SOURCE_WORDS = re.compile(r"\b(?:Wikipedia|article|source|season page|public information)\b", re.I)
 # "The Detroit Tigers (ID: 116)": a database key copied from the findings.
 INTERNAL_ID = re.compile(r"\b(?:team[ _]id|game[ _]?pk|venue[ _]id|ID)\b\s*(?:#|:|=|no\.?)?\s*\d+")
 # "15 appearances, including 10 single games, 5 window games, and 2 special events": the parts must add up.
@@ -1480,6 +1490,8 @@ def fixed_patterns(tool_calls: list[dict]) -> list[re.Pattern]:
     pats = [re.compile(re.escape(text).replace(re.escape("{season}"), r"\d{4}"), re.I) for text, _ in facts.PHRASES.values()]
     pats.append(re.compile(r"Across team-seasons, teams with higher average home attendance.*?" + re.escape(facts.TEAM_CROWD_TV_END)))
     pats.append(re.compile(re.escape(NIELSEN_CLAUSE.lstrip(", "))))
+    pats.append(re.compile(r"The [A-Z][\w .']+? drew [\d.]+% above expected attendance even though attendance "
+                           r"fell [\d.]+% from the year before"))
     texts = set()
     for call in tool_calls:
         try:
@@ -1540,8 +1552,16 @@ def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
     def add(check, i, s, message):
         problems.append({"check": check, "index": i, "sentence": s, "message": message})
 
+    years = sorted({int(y) for y in re.findall(r"\b(20(?:24|25|26))\b", asked)})
+    down = down_teams(years[0]) if len(years) == 1 else {}
+    cited_read = [u for u in re.findall(r"https?://[^\s)\]>]+", report) if citations.was_read(u, read)]
+    section, subject = set(), set()
     for i, s in each_sentence(report):
-        if not s.strip() or s.lstrip().startswith("#"):
+        if s.lstrip().startswith("#"):
+            section = subject = set(teams_in(s).values())
+            continue
+        if not s.strip():
+            subject = section
             continue
         plain = citations.CITATION.sub("", s)
         free = strip_fixed(plain, pats)
@@ -1571,6 +1591,15 @@ def check_report(run: Research, asked: str, final: bool = False) -> list[dict]:
         reason = unsourced_reason(s, read, sources, calls)
         if reason:
             add("untraced", i, s, reason)
+        subject = set(teams_in(s).values()) or subject or section  # "This was not a rebound" follows its team
+        fell = sorted(t for t in subject if t in down)
+        if fell and len(fell) == len(subject) and RISE_WORDS.search(free):
+            t = fell[0]
+            add("down_year", i, s, f"{t} attendance fell {-down[t] * 100:.1f}% from the year before: no rise or "
+                f"'surge' words for it. Write {{above_but_down:{t}:{years[0]}}} as its own sentence instead.")
+        if cited_read and NO_EXPLANATION.search(free) and SOURCE_WORDS.search(free):
+            add("no_explanation", i, s, "That source was read and cited: never say it explains nothing or records no "
+                "events. Give up to three facts from it that coincide with the crowds, or leave the source out.")
         if INTERNAL_ID.search(free):
             add("internal_id", i, s, f"Remove '{INTERNAL_ID.search(free)[0]}': a database ID means nothing to a reader. Name the team or game only.")
         if derived_seats(free):
@@ -1771,7 +1800,9 @@ def answer_team(run: Research, asked: str) -> dict | None:
 
 def phrase_for(run: Research):
     """The ready-made phrase for a key, or None. The team-level phrase logs the query behind it."""
-    def text(key: str, season: str | None) -> str | None:
+    def text(key: str, season: str | None, team: str | None = None) -> str | None:
+        if key == "above_but_down":
+            return above_but_down(run, team or "", int(season))
         if key == "team_crowd_tv":
             fact = data_tools.team_crowd_tv_fact()
             if not any(c["name"] == "run_sql" and "team_crowd_tv" in c["args"]["query"] for c in run.tool_calls):
@@ -1785,6 +1816,33 @@ def phrase_for(run: Research):
             return None
         return phrase.format(season=season)
     return text
+
+
+def above_but_down(run: Research, team: str, season: int) -> str | None:
+    """'The Colorado Rockies drew 17.4% above expected attendance even though attendance fell 4.2% from
+    the year before', or None when the team was not both above expected and down. Logs its query."""
+    named = teams_named(team)
+    if len(named) != 1:
+        return None
+    team_id, name = next(iter(named.items()))
+    query = (f"select home_team, season, residual_pct, yoy_change_pct from team_season_model "
+             f"where team_id = {team_id} and season = {season}")
+    columns, rows = data_tools._query(query)
+    if not rows:
+        return None
+    row = dict(zip(columns, rows[0]))
+    if not (row["residual_pct"] or 0) > 0 or not (row["yoy_change_pct"] or 0) < 0:
+        return None
+    run.tool_calls.append({"name": "run_sql", "args": {"query": query},
+                           "result": json.dumps({"columns": columns, "rows": rows}, default=str),
+                           "agent": "Required facts check"})
+    return facts.above_but_down_text(name, row["residual_pct"], row["yoy_change_pct"]) + " (table: team_season_model)"
+
+
+def down_teams(season: int) -> dict[str, float]:
+    """Teams whose average attendance fell from the year before, in this season: name -> change."""
+    return {f["home_team"]: f["yoy_change_pct"] for f in data_tools.team_season_facts()
+            if f["season"] == season and (f["yoy_change_pct"] or 0) < 0}
 
 
 TEAM_COLUMN = re.compile(r"(?:^|_)team(?:_name)?$|^(?:name|club)$")

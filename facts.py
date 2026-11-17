@@ -56,7 +56,17 @@ PHRASES = {
 }
 PHRASE_HELP = "\n".join(
     f"  {{{k}{':<season>' if needs else ''}}} -> \"{text.replace('{season}', '<season>')}\""
-    for k, (text, needs) in PHRASES.items())
+    for k, (text, needs) in PHRASES.items()) + (
+    "\n  {above_but_down:<team>:<season>} -> \"The <team> drew <x>% above expected attendance even though "
+    "attendance fell <y>% from the year before\" (its own sentence, for a team above expected whose "
+    "attendance fell)")
+# A team-season phrase: code checks the team was above expected and down from the year before.
+TEAM_PHRASE = re.compile(r"\{(above_but_down):\s*([^{}:]+?)\s*:\s*(\d{4})\}")
+
+
+def above_but_down_text(team: str, residual_pct: float, yoy_change_pct: float) -> str:
+    return (f"The {team} drew {residual_pct * 100:.1f}% above expected attendance even though attendance "
+            f"fell {-yoy_change_pct * 100:.1f}% from the year before")
 
 
 # --- Query IDs ---
@@ -354,9 +364,15 @@ def fill_sentence(sentence: str, book: FactBook, phrase_text, out: Filled,
                 value = format_value(found[1], found[0], found[2])
                 used.append(fm[1])
                 out.facts += 1
+        elif tm := TEAM_PHRASE.fullmatch(token):
+            value = phrase_text(tm[1], tm[3], tm[2])
+            if value is None:
+                out.unresolved.append(f"{token}: only for a team above expected whose attendance fell from the year before")
+            else:
+                out.phrases += 1
         elif mm := MINUS.fullmatch(token):
             token = f"{{diff:{mm[1]},{mm[2]}}}"
-        if value is not None or FACT.fullmatch(token):
+        if value is not None or FACT.fullmatch(token) or TEAM_PHRASE.fullmatch(token):
             pass
         elif dm := DERIVED.fullmatch(token):
             parts = [FACT.fullmatch("{" + r + "}") for r in (dm[2], dm[3])]
