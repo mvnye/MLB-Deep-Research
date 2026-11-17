@@ -589,6 +589,11 @@
                         key.style.borderTopStyle = s.style === "solid" ? "solid" : s.style;
                     } else if (s.style === "hatch") {
                         key.style.background = "repeating-linear-gradient(45deg, #8a8f98 0 3px, #dfe2e6 3px 6px)";
+                    } else if (s.colors && s.colors.length > 1) {
+                        // one stripe per team color on the chart, so every bar matches part of the key
+                        const step = 100 / s.colors.length;
+                        key.style.background = `linear-gradient(90deg, ${s.colors.map((c, n) => `${c} ${n * step}% ${(n + 1) * step}%`).join(", ")})`;
+                        key.style.width = `${Math.max(1.1, 0.55 * s.colors.length)}rem`;
                     } else {
                         key.style.background = s.color;
                     }
@@ -605,7 +610,8 @@
                 title.textContent = c.title;
                 wrap.appendChild(title);
                 if (c.series.length > 1) {
-                    const names = c.item_colors ? c.series.map((s, k) => (k ? s : { ...s, name: `${s.name} (team colors)` })) : c.series;
+                    const colors = c.item_colors ? [...new Set(c.item_colors)] : null;
+                    const names = colors ? c.series.map((s, k) => (k ? s : { ...s, colors, color: colors[0] })) : c.series;
                     wrap.appendChild(legend(names, c.type === "line"));
                 }
                 for (const callout of c.callouts || []) {
