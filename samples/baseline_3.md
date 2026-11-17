@@ -1,5 +1,5 @@
 Model: vertex_ai/gemini-3.5-flash
-Date: 2026-11-05
-Question: Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
+Date: 2026-11-17
+Question: Which teams outdrew their expected attendance the most in 2025, and what was behind it?
 
-I do not have access to real-time data or statistics for 2025 and 2026. Therefore, I cannot provide information on whether smaller crowd sizes coincided with smaller national TV audiences for games during those years.
+I do not have access to complete or real-time attendance data for 2025, as it extends beyond my knowledge cutoff of January 2025. Consequently, I cannot provide information on which teams outdrew their expected attendance for this year or the factors behind those trends.

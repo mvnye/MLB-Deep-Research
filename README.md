@@ -62,21 +62,28 @@ The 1,126,444 average covers the 9 single games with a known audience, not all 1
 
 The baseline gives no 2025 figures, and its 2024 figures are close to but not the official ones (Cubs 2,909,794 and 35,923; White Sox 1,380,733 and 17,932).
 
-### 3. Did games with smaller crowds coincide with smaller national TV audiences in 2025 and 2026?
+### 3. Which teams outdrew their expected attendance the most in 2025, and what was behind it?
 
-**Expected answer:** Yes, but mostly because of which teams were playing. Comparing games on the same network, the correlation was 0.34 in 2025 (n = 82) and 0.47 in 2026 (n = 83). After comparing each game with its own park's usual crowd, it falls to 0.16 and 0.14, and both ranges include zero. Across team-seasons the correlation is 0.51 (n = 56), consistent with popularity and market size, but the data does not show cause.
+**Expected answer:** The Detroit Tigers (29,796 fans a game, 21.9% above the 24,433 the model predicts), New York Mets (39,316, 21.4% above 32,383) and Colorado Rockies (30,058, 17.4% above 25,611). Context from Wikipedia: the Tigers reached the postseason again, the Mets signed Juan Soto, and the Rockies drew above expectations despite going 43-119. These events coincided with the crowds; the data does not show that they caused them.
 
-**Source:** `crowd_tv_headline` (built from `crowd_tv_residual`) and `team_crowd_tv`.
+**Source:** `team_season_model` (`SELECT home_team, avg_attendance, expected_avg_attendance, residual_pct, record FROM team_season_model WHERE season = 2025 ORDER BY residual_pct DESC`), and the Wikipedia articles [2025 Detroit Tigers season](https://en.wikipedia.org/wiki/2025_Detroit_Tigers_season), [2025 New York Mets season](https://en.wikipedia.org/wiki/2025_New_York_Mets_season) and [2025 Colorado Rockies season](https://en.wikipedia.org/wiki/2025_Colorado_Rockies_season).
 
 **Agent answer:**
 
-> Yes, games with smaller crowds tended to have smaller national TV audiences, but a crowd that was small for its own park did not clearly mean a smaller audience[1]. Comparing games on the same network, the two moved together (correlation 0.34 in 2025, n = 82, range 0.14 to 0.52; 0.47 in 2026, n = 83, range 0.29 to 0.62)[1]. After comparing each game with its own park's usual crowd, the link mostly disappears (0.16 in 2025, range -0.05 to 0.37; 0.14 in 2026, range -0.08 to 0.34; both ranges include zero)[1]. Across team-seasons, teams with higher average home attendance also tended to have larger average national TV audiences (correlation 0.51, n = 56, range 0.29 to 0.68)[2]. This is consistent with team-level factors such as popularity and market size, but the data does not show that one causes the other[2].
+> The Detroit Tigers, New York Mets, and Colorado Rockies outdrew their expected 2025 attendance the most, coinciding with postseason runs, major roster additions, and resilient fanbases[1].
 >
-> *Viewership figures are publicly reported and may differ from official Nielsen data. They are the national TV audience, excluding streaming add-ons. Nielsen changed its method on September 1, 2025, so 2025 and 2026 figures are not like-for-like.*
+> ### Detroit Tigers
+> The Detroit Tigers averaged 29,796 fans a game in 2025, which was 21.9% above what the prior two years of crowds, win rate, and market would predict, representing a 25.1% increase from the season before[2][1]. Comerica Park drew 72.5% of capacity[2]. On the field, the Tigers went 87-75, secured a postseason berth for the second consecutive season, and reached the American League Division Series[3]. Prior to the season, they signed pitchers Alex Cobb, Tommy Kahnle, Jack Flaherty, and John Brebbia, along with infielder Gleyber Torres[3].
+>
+> ### New York Mets
+> The New York Mets averaged 39,316 fans a game, which was 21.4% above what the prior two years of crowds, win rate, and market would predict, a 33.3% increase from the season before, and part of this may be a rebound[2][1]. Citi Field drew 94.9% of capacity[2]. The Mets finished 83-79 after signing outfielder Juan Soto to a 15-year, $765 million contract, adding starting pitchers Frankie Montas and Griffin Canning, and re-signing Sean Manaea[4]. They also retired David Wright's number 5 on July 19, 2025[4].
+>
+> ### Colorado Rockies
+> The Colorado Rockies averaged 30,058 fans a game, which was 17.4% above what the prior two years of crowds, win rate, and market would predict, despite a 4.2% decline from the season before[2][1]. Coors Field drew 59.7% of capacity[2]. The Rockies endured a historic 43-119 season, setting a franchise record for losses, and fired manager Bud Black on May 11[5]. They also played their first season since 2010 without retired outfielder Charlie Blackmon[5].
 
 **No-tools baseline:**
 
-> I do not have access to real-time data or statistics for 2025 and 2026. Therefore, I cannot provide information on whether smaller crowd sizes coincided with smaller national TV audiences for games during those years.
+> I do not have access to complete or real-time attendance data for 2025, as it extends beyond my knowledge cutoff of January 2025. Consequently, I cannot provide information on which teams outdrew their expected attendance for this year or the factors behind those trends.
 
 ## Questions the agent can't answer
 
